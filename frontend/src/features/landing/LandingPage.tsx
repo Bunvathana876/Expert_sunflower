@@ -15,7 +15,7 @@ import {
 import { useDiseases } from "@/features/diseases/hooks";
 import { DiseaseCard } from "@/features/diseases/components/DiseaseCard";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { api } from "@/api/client";
+import { apiFetch } from "@/api/client";
 
 interface SystemStats {
   total_diseases: number;
@@ -24,8 +24,7 @@ interface SystemStats {
 }
 
 async function fetchSystemStats(): Promise<SystemStats> {
-  const response = await api("/public/stats");
-  return response.json();
+  return apiFetch<SystemStats>("/public/stats");
 }
 
 export function LandingPage(): React.JSX.Element {
