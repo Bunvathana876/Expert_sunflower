@@ -27,10 +27,17 @@ log = structlog.get_logger(__name__)
 
 _settings = get_settings()
 
+# Configure engine with connection arguments for Supabase pooling compatibility
+connect_args = {}
+if "pooler.supabase.com" in _settings.DATABASE_URL:
+    # Disable prepared statements for Supabase transaction pooling
+    connect_args["statement_cache_size"] = 0
+
 engine: AsyncEngine = create_async_engine(
     _settings.DATABASE_URL,
     pool_pre_ping=True,
     echo=not _settings.is_production,
+    connect_args=connect_args,
 )
 
 async_session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
