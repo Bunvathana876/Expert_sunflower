@@ -101,14 +101,14 @@ async def update_disease(
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Soft-delete disease",
+    summary="Permanently delete disease",
 )
 async def delete_disease(
     id: int,
     current_user: Annotated[User, Depends(require_permission("disease:delete"))],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> None:
-    """Soft delete a disease by setting is_published = False."""
+    """Permanently delete a disease from the database."""
     service = DiseaseService(db)
     await service.delete_disease(disease_id=id, user=current_user)
 

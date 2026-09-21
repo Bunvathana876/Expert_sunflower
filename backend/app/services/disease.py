@@ -269,22 +269,23 @@ class DiseaseService:
         return await self.get_disease(disease.slug, locale="en")
 
     async def delete_disease(self, disease_id: int, user: User) -> None:
-        """Soft-delete a disease setting is_published = False."""
+        """Permanently delete a disease from the database."""
         disease = await self.repository.get_by_id(disease_id)
         if not disease:
             raise NotFoundError(detail=f"Disease with ID {disease_id} not found")
 
-        disease.is_published = False
-        disease.updated_by_id = user.id
-        await self.session.flush()
-
+        # Record audit before deletion
         await self.audit.record(
             actor_id=user.id,
             action="delete",
             entity_type="disease",
             entity_id=disease.id,
-            diff={"is_published": False},
+            diff={"deleted": True, "name": disease.slug},
         )
+
+        # Delete the disease record
+        await self.session.delete(disease)
+        await self.session.flush()
 
     async def replace_symptoms(
         self,

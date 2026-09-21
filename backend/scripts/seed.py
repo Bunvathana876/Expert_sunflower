@@ -32,7 +32,7 @@ PERMISSION_DEFS: list[tuple[str, str]] = [
     ("disease:read", "Read published diseases and symptom weights"),
     ("disease:create", "Create new disease entries"),
     ("disease:update", "Update disease details, weights, and translations"),
-    ("disease:delete", "Soft delete diseases (set is_published=false)"),
+    ("disease:delete", "Permanently delete diseases from the database"),
     ("disease:publish", "Publish or unpublish diseases"),
     # Symptom
     ("symptom:read", "Read symptoms and categories"),
