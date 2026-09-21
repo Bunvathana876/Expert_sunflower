@@ -1,6 +1,7 @@
 import type React from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import {
   Stethoscope,
   BookOpen,
@@ -14,6 +15,18 @@ import {
 import { useDiseases } from "@/features/diseases/hooks";
 import { DiseaseCard } from "@/features/diseases/components/DiseaseCard";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { api } from "@/api/client";
+
+interface SystemStats {
+  total_diseases: number;
+  total_symptoms: number;
+  published_diseases: number;
+}
+
+async function fetchSystemStats(): Promise<SystemStats> {
+  const response = await api("/public/stats");
+  return response.json();
+}
 
 export function LandingPage(): React.JSX.Element {
   const { t } = useTranslation();
@@ -21,6 +34,12 @@ export function LandingPage(): React.JSX.Element {
     page: 1,
     size: 3,
     published: true,
+  });
+
+  const { data: stats } = useQuery({
+    queryKey: ["system-stats"],
+    queryFn: fetchSystemStats,
+    staleTime: 60000, // Cache for 1 minute
   });
 
   return (
@@ -72,7 +91,7 @@ export function LandingPage(): React.JSX.Element {
         <div className="grid grid-cols-3 max-w-lg mx-auto pt-6 border-t border-slate-200/60 dark:border-slate-800/80 gap-3 text-center">
           <div>
             <div className="text-lg sm:text-2xl font-bold font-mono text-slate-900 dark:text-slate-100">
-              26
+              {stats ? stats.published_diseases : "—"}
             </div>
             <div className="text-[0.68rem] text-slate-500 uppercase tracking-wider font-semibold">
               Crop Pathogens
@@ -80,7 +99,7 @@ export function LandingPage(): React.JSX.Element {
           </div>
           <div>
             <div className="text-lg sm:text-2xl font-bold font-mono text-slate-900 dark:text-slate-100">
-              218
+              {stats ? stats.total_symptoms : "—"}
             </div>
             <div className="text-[0.68rem] text-slate-500 uppercase tracking-wider font-semibold">
               Symptom Indicators
