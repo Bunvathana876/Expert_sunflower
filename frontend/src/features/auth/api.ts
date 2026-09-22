@@ -32,3 +32,11 @@ export async function getMeApi(): Promise<User> {
     method: "GET",
   });
 }
+
+export async function updateMeApi(credentials: import("./types").UpdateMeCredentials): Promise<User> {
+  return apiFetch<User>("/users/me", {
+    method: "PATCH",
+    body: JSON.stringify(credentials),
+  });
+}
+

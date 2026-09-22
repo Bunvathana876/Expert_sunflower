@@ -69,7 +69,7 @@ async def test_image_analysis(image_path: str | None = None):
         
         print(f"\n📷 Image quality: {obs.image_quality}")
         
-        print(f"\n📝 Full Analysis:")
+        print("\n📝 Full Analysis:")
         print("-" * 60)
         print(result.analysis_text)
         

@@ -12,7 +12,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import async_session_factory
 from app.models.auth import Role, User
 
-
 USERS = [
     {
         "email": "expert@example.com",

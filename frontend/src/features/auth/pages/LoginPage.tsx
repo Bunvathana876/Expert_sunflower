@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router";
+import { LogIn, User, Lock, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "../context";
 import { loginSchema, type LoginFormData } from "../schemas";
 
@@ -11,6 +12,7 @@ export function LoginPage(): React.JSX.Element {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -36,47 +38,22 @@ export function LoginPage(): React.JSX.Element {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100dvh",
-        padding: "1.5rem",
-        backgroundColor: "var(--color-bg)",
-        fontFamily: "var(--font-sans)",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "28rem",
-          backgroundColor: "var(--color-surface)",
-          borderRadius: "var(--radius-lg)",
-          boxShadow: "var(--shadow-md)",
-          padding: "2rem",
-          border: "1px solid var(--color-border)",
-        }}
-      >
-        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-          <span style={{ fontSize: "2.5rem" }}>🌻</span>
-          <h1
-            style={{
-              fontSize: "1.5rem",
-              fontWeight: 700,
-              color: "var(--color-text)",
-              marginTop: "0.5rem",
-            }}
-          >
+    <div className="min-h-[85vh] flex items-center justify-center py-10 px-4">
+      <div className="sf-glass-card max-w-md w-full p-6 sm:p-8 space-y-6 shadow-xl border border-[var(--color-border)] dark:border-[var(--color-border)] relative overflow-hidden">
+        {/* Subtle glowing ambient aura */}
+        <div
+          className="absolute -top-16 left-1/2 -translate-x-1/2 w-56 h-56 rounded-full bg-amber-400/15 dark:bg-amber-400/10 blur-2xl pointer-events-none"
+          aria-hidden="true"
+        />
+
+        <div className="text-center space-y-2 relative">
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/15 dark:bg-amber-400/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto text-2xl shadow-inner border border-amber-500/25">
+            🌻
+          </div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
             {t("auth.login_title")}
           </h1>
-          <p
-            style={{
-              color: "var(--color-text-muted)",
-              fontSize: "0.875rem",
-              marginTop: "0.25rem",
-            }}
-          >
+          <p className="text-xs sm:text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)]">
             {t("auth.login_subtitle")}
           </p>
         </div>
@@ -84,104 +61,73 @@ export function LoginPage(): React.JSX.Element {
         {serverError && (
           <div
             role="alert"
-            style={{
-              padding: "0.75rem 1rem",
-              marginBottom: "1rem",
-              backgroundColor: "hsl(4 80% 95%)",
-              color: "var(--color-error)",
-              borderRadius: "var(--radius-md)",
-              fontSize: "0.875rem",
-              border: "1px solid hsl(4 80% 85%)",
-            }}
+            className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 flex items-start gap-2.5 text-xs text-rose-700 dark:text-rose-300 font-medium animate-in fade-in duration-200"
           >
-            {serverError}
+            <AlertCircle size={16} className="shrink-0 text-rose-500 mt-0.5" />
+            <span>{serverError}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <div style={{ marginBottom: "1rem" }}>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+          <div className="space-y-1.5">
             <label
               htmlFor="identifier"
-              style={{
-                display: "block",
-                marginBottom: "0.375rem",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                color: "var(--color-text)",
-              }}
+              className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)] dark:text-[var(--color-text-secondary)]"
             >
               {t("auth.identifier_label")}
             </label>
-            <input
-              id="identifier"
-              type="text"
-              autoComplete="username"
-              placeholder={t("auth.identifier_placeholder")}
-              {...register("identifier")}
-              style={{
-                width: "100%",
-                padding: "0.625rem 0.75rem",
-                borderRadius: "var(--radius-md)",
-                border: "1px solid var(--color-border)",
-                backgroundColor: "var(--color-surface)",
-                color: "var(--color-text)",
-                fontSize: "0.9375rem",
-                outline: "none",
-              }}
-            />
+            <div className="relative">
+              <User
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                id="identifier"
+                type="text"
+                autoComplete="username"
+                placeholder={t("auth.identifier_placeholder")}
+                {...register("identifier")}
+                className="w-full pl-10 pr-3.5 py-2.5 text-sm rounded-xl bg-[var(--color-surface)] dark:bg-[var(--color-surface)] border border-[var(--color-border)] dark:border-[var(--color-border)] focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all"
+              />
+            </div>
             {errors.identifier?.message && (
-              <p
-                role="alert"
-                style={{
-                  color: "var(--color-error)",
-                  fontSize: "0.8125rem",
-                  marginTop: "0.25rem",
-                }}
-              >
+              <p role="alert" className="text-xs text-rose-500 font-medium pt-0.5">
                 {t(errors.identifier.message)}
               </p>
             )}
           </div>
 
-          <div style={{ marginBottom: "1.5rem" }}>
+          <div className="space-y-1.5">
             <label
               htmlFor="password"
-              style={{
-                display: "block",
-                marginBottom: "0.375rem",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                color: "var(--color-text)",
-              }}
+              className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)] dark:text-[var(--color-text-secondary)]"
             >
               {t("auth.password_label")}
             </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder={t("auth.password_placeholder")}
-              {...register("password")}
-              style={{
-                width: "100%",
-                padding: "0.625rem 0.75rem",
-                borderRadius: "var(--radius-md)",
-                border: "1px solid var(--color-border)",
-                backgroundColor: "var(--color-surface)",
-                color: "var(--color-text)",
-                fontSize: "0.9375rem",
-                outline: "none",
-              }}
-            />
-            {errors.password?.message && (
-              <p
-                role="alert"
-                style={{
-                  color: "var(--color-error)",
-                  fontSize: "0.8125rem",
-                  marginTop: "0.25rem",
-                }}
+            <div className="relative">
+              <Lock
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                placeholder={t("auth.password_placeholder")}
+                {...register("password")}
+                className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl bg-[var(--color-surface)] dark:bg-[var(--color-surface)] border border-[var(--color-border)] dark:border-[var(--color-border)] focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[var(--color-text-muted)] dark:hover:text-[var(--color-text)]"
+                aria-label={showPassword ? "Hide input text" : "Show input text"}
               >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            {errors.password?.message && (
+              <p role="alert" className="text-xs text-rose-500 font-medium pt-0.5">
                 {t(errors.password.message)}
               </p>
             )}
@@ -190,40 +136,22 @@ export function LoginPage(): React.JSX.Element {
           <button
             type="submit"
             disabled={isSubmitting}
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              borderRadius: "var(--radius-md)",
-              backgroundColor: "var(--color-primary)",
-              color: "hsl(220, 20%, 14%)",
-              fontWeight: 700,
-              fontSize: "1rem",
-              border: "none",
-              cursor: isSubmitting ? "not-allowed" : "pointer",
-              opacity: isSubmitting ? 0.7 : 1,
-              transition: "background-color var(--transition-fast)",
-            }}
+            className="w-full py-2.5 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-2"
           >
-            {isSubmitting ? t("common.loading") : t("auth.sign_in_btn")}
+            {isSubmitting ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <LogIn size={16} />
+            )}
+            <span>{isSubmitting ? t("common.loading") : t("auth.sign_in_btn")}</span>
           </button>
         </form>
 
-        <p
-          style={{
-            textAlign: "center",
-            marginTop: "1.25rem",
-            fontSize: "0.875rem",
-            color: "var(--color-text-muted)",
-          }}
-        >
+        <p className="text-center text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)] pt-2 border-t border-slate-100 dark:border-slate-800">
           {t("auth.no_account")}{" "}
           <Link
             to="/register"
-            style={{
-              color: "var(--color-secondary)",
-              fontWeight: 600,
-              textDecoration: "underline",
-            }}
+            className="text-amber-600 dark:text-amber-400 font-bold hover:underline"
           >
             {t("auth.register_link")}
           </Link>

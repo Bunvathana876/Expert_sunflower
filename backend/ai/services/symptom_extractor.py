@@ -7,7 +7,6 @@ symptom data that can be mapped to the existing expert system.
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,7 +17,7 @@ from ai.schemas.ai_schemas import (
     SymptomExtractionRequest,
     SymptomExtractionResponse,
 )
-from ai.services.json_parser import extract_json_from_response, safe_json_parse
+from ai.services.json_parser import extract_json_from_response
 from ai.services.ollama_service import OllamaService, get_ollama_service
 from ai.services.prompt_loader import load_prompt
 from app.models.symptom import Symptom

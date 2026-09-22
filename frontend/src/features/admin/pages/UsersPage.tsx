@@ -1,6 +1,19 @@
 import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  Users,
+  Shield,
+  UserCheck,
+  UserX,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  AlertCircle,
+  Loader2,
+  Calendar,
+  Mail,
+} from "lucide-react";
 import { useAdminUsers, useAdminRoles, useUpdateAdminUser } from "../hooks";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { AdminUserItem } from "@/types/api";
@@ -73,111 +86,168 @@ export function UsersPage(): React.JSX.Element {
   const roles = rolesData?.items ?? [];
 
   return (
-    <div className="sf-admin-page">
-      <div className="sf-admin-page__header">
+    <div className="sf-admin-page max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="sf-admin-page__header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="sf-admin-page__title">{t("admin.users_title")}</h1>
-          <p className="sf-admin-page__desc">{t("admin.users_subtitle")}</p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 dark:bg-amber-400/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
+              <Users className="w-5 h-5" />
+            </div>
+            <h1 className="sf-admin-page__title text-2xl font-bold tracking-tight">
+              {t("admin.users_title")}
+            </h1>
+            {usersData && (
+              <span className="sf-badge sf-badge--neutral text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                {usersData.total} {t("admin.users_total", { defaultValue: "users" })}
+              </span>
+            )}
+          </div>
+          <p className="sf-admin-page__desc text-sm text-[var(--color-text-muted)] mt-1">
+            {t("admin.users_subtitle")}
+          </p>
         </div>
       </div>
 
       {errorMessage && (
-        <div className="sf-alert sf-alert--danger" style={{ marginBottom: "1.5rem" }} role="alert">
-          {errorMessage}
+        <div className="sf-alert sf-alert--danger flex items-center gap-2 mb-6" role="alert">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span>{errorMessage}</span>
         </div>
       )}
 
       {isLoadingUsers || isLoadingRoles ? (
-        <div className="sf-loading-state" style={{ padding: "3rem", textAlign: "center" }}>
-          <span className="sf-spinner" aria-hidden="true" />
-          <p style={{ marginTop: "1rem", color: "var(--color-text-muted)" }}>
+        <div className="sf-card flex flex-col items-center justify-center py-16 text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-amber-600 dark:text-amber-400" />
+          <p className="mt-3 text-sm font-medium text-[var(--color-text-muted)]">
             {t("common.loading")}
           </p>
         </div>
       ) : isUsersError || !usersData ? (
-        <div className="sf-alert sf-alert--danger" role="alert">
-          {t("admin.users_load_error")}
+        <div className="sf-alert sf-alert--danger flex items-center gap-2" role="alert">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span>{t("admin.users_load_error")}</span>
         </div>
       ) : (
-        <div className="sf-card" style={{ padding: "0", overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}>
-            <table className="sf-table">
+        <div className="sf-card p-0 overflow-hidden shadow-sm border border-[var(--color-border)]">
+          <div className="overflow-x-auto">
+            <table className="sf-table w-full">
               <thead>
                 <tr>
-                  <th>{t("admin.users_col_username")}</th>
-                  <th>{t("admin.users_col_email")}</th>
-                  <th>{t("admin.users_col_role")}</th>
-                  <th>{t("admin.users_col_status")}</th>
-                  <th>{t("admin.users_col_created")}</th>
-                  <th style={{ textAlign: "right" }}>{t("admin.users_col_actions")}</th>
+                  <th className="font-semibold text-xs uppercase tracking-wider text-[var(--color-text-muted)] py-3.5 px-4">
+                    {t("admin.users_col_username")}
+                  </th>
+                  <th className="font-semibold text-xs uppercase tracking-wider text-[var(--color-text-muted)] py-3.5 px-4">
+                    {t("admin.users_col_email")}
+                  </th>
+                  <th className="font-semibold text-xs uppercase tracking-wider text-[var(--color-text-muted)] py-3.5 px-4">
+                    {t("admin.users_col_role")}
+                  </th>
+                  <th className="font-semibold text-xs uppercase tracking-wider text-[var(--color-text-muted)] py-3.5 px-4">
+                    {t("admin.users_col_status")}
+                  </th>
+                  <th className="font-semibold text-xs uppercase tracking-wider text-[var(--color-text-muted)] py-3.5 px-4">
+                    {t("admin.users_col_created")}
+                  </th>
+                  <th className="font-semibold text-xs uppercase tracking-wider text-[var(--color-text-muted)] py-3.5 px-4 text-right">
+                    {t("admin.users_col_actions")}
+                  </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[var(--color-border-subtle)]">
                 {usersData.items.length === 0 ? (
                   <tr>
                     <td
                       colSpan={6}
-                      style={{
-                        textAlign: "center",
-                        padding: "2rem",
-                        color: "var(--color-text-muted)",
-                      }}
+                      className="text-center py-12 text-[var(--color-text-muted)] text-sm"
                     >
                       {t("admin.users_none_found")}
                     </td>
                   </tr>
                 ) : (
                   usersData.items.map((u) => (
-                    <tr key={u.id}>
-                      <td style={{ fontWeight: 600 }}>{u.username}</td>
-                      <td style={{ color: "var(--color-text-muted)" }}>{u.email}</td>
-                      <td>
-                        <select
-                          className="sf-form-control"
-                          style={{
-                            padding: "0.25rem 0.5rem",
-                            fontSize: "0.875rem",
-                            width: "auto",
-                            display: "inline-block",
-                          }}
-                          value={u.role_id}
-                          disabled={updateUserMutation.isPending}
-                          onChange={(e) => void handleRoleChange(u, Number(e.target.value))}
-                          aria-label={t("admin.users_change_role_label", { username: u.username })}
-                        >
-                          {roles.map((r) => (
-                            <option key={r.id} value={r.id}>
-                              {r.name}
-                            </option>
-                          ))}
-                        </select>
+                    <tr key={u.id} className="transition-colors hover:bg-[var(--color-bg-subtle)]">
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-amber-500/10 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xs uppercase">
+                            {u.username.slice(0, 2)}
+                          </div>
+                          <span className="font-semibold text-sm text-[var(--color-text)]">
+                            {u.username}
+                          </span>
+                        </div>
                       </td>
-                      <td>
+                      <td className="py-3.5 px-4 text-sm text-[var(--color-text-muted)]">
+                        <div className="flex items-center gap-1.5">
+                          <Mail className="w-3.5 h-3.5 opacity-60" />
+                          <span>{u.email}</span>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="relative inline-flex items-center">
+                          <Shield className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 absolute left-2.5 pointer-events-none z-10" />
+                          <select
+                            className="appearance-none text-xs font-semibold pl-8 pr-8 py-1.5 rounded-full bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-700/80 text-stone-800 dark:text-stone-200 cursor-pointer hover:border-amber-500/80 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 shadow-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            value={u.role_id}
+                            disabled={updateUserMutation.isPending}
+                            onChange={(e) => void handleRoleChange(u, Number(e.target.value))}
+                            aria-label={t("admin.users_change_role_label", { username: u.username })}
+                          >
+                            {roles.map((r) => (
+                              <option
+                                key={r.id}
+                                value={r.id}
+                                className="bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100"
+                              >
+                                {r.name}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 absolute right-2.5 pointer-events-none" />
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4">
                         <span
-                          className={`sf-badge ${
-                            u.is_active ? "sf-badge--success" : "sf-badge--neutral"
+                          className={`sf-badge inline-flex items-center gap-1 text-xs px-2.5 py-0.5 font-medium rounded-full ${
+                            u.is_active
+                              ? "sf-badge--success bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                              : "sf-badge--neutral bg-slate-500/10 text-slate-500"
                           }`}
                         >
+                          <span className={`w-1.5 h-1.5 rounded-full ${u.is_active ? "bg-amber-500" : "bg-slate-400"}`} />
                           {u.is_active
                             ? t("admin.users_status_active")
                             : t("admin.users_status_inactive")}
                         </span>
                       </td>
-                      <td style={{ fontSize: "0.875rem", color: "var(--color-text-muted)" }}>
-                        {new Date(u.created_at).toLocaleDateString()}
+                      <td className="py-3.5 px-4 text-xs text-[var(--color-text-muted)] whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 opacity-60" />
+                          <span>{new Date(u.created_at).toLocaleDateString()}</span>
+                        </div>
                       </td>
-                      <td style={{ textAlign: "right" }}>
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <button
                           type="button"
-                          className={`sf-btn sf-btn--sm ${
-                            u.is_active ? "sf-btn--outline-danger" : "sf-btn--outline"
+                          className={`sf-btn sf-btn--sm inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium transition-all ${
+                            u.is_active
+                              ? "text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50"
+                              : "text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50"
                           }`}
                           disabled={updateUserMutation.isPending}
                           onClick={() => void handleToggleActive(u)}
                         >
-                          {u.is_active
-                            ? t("admin.users_btn_deactivate")
-                            : t("admin.users_btn_activate")}
+                          {u.is_active ? (
+                            <>
+                              <UserX className="w-3.5 h-3.5" />
+                              <span>{t("admin.users_btn_deactivate")}</span>
+                            </>
+                          ) : (
+                            <>
+                              <UserCheck className="w-3.5 h-3.5" />
+                              <span>{t("admin.users_btn_activate")}</span>
+                            </>
+                          )}
                         </button>
                       </td>
                     </tr>
@@ -189,34 +259,28 @@ export function UsersPage(): React.JSX.Element {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "1rem 1.5rem",
-                borderTop: "1px solid var(--color-border)",
-              }}
-            >
-              <span style={{ fontSize: "0.875rem", color: "var(--color-text-muted)" }}>
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 border-t border-[var(--color-border)] bg-[var(--color-bg-subtle)]">
+              <span className="text-xs text-[var(--color-text-muted)]">
                 {t("admin.pagination_showing_pages", { page, totalPages, total: usersData.total })}
               </span>
-              <div style={{ display: "flex", gap: "0.5rem" }}>
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="sf-btn sf-btn--outline sf-btn--sm"
+                  className="sf-btn sf-btn--outline sf-btn--sm inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg"
                   disabled={page <= 1 || updateUserMutation.isPending}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                 >
-                  {t("admin.pagination_prev")}
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span>{t("admin.pagination_prev")}</span>
                 </button>
                 <button
                   type="button"
-                  className="sf-btn sf-btn--outline sf-btn--sm"
+                  className="sf-btn sf-btn--outline sf-btn--sm inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg"
                   disabled={page >= totalPages || updateUserMutation.isPending}
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 >
-                  {t("admin.pagination_next")}
+                  <span>{t("admin.pagination_next")}</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -241,3 +305,4 @@ export function UsersPage(): React.JSX.Element {
     </div>
   );
 }
+

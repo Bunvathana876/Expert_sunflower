@@ -12,6 +12,9 @@ Validates:
 
 from __future__ import annotations
 
+import hashlib
+import json
+import sqlite3
 from pathlib import Path
 
 import pytest
@@ -29,8 +32,210 @@ from app.models.symptom import Symptom, SymptomCategory
 from app.models.translation import Translation
 from scripts.migrate_legacy import LegacyMigrator
 
-FIXTURE_DB_PATH = str(Path(__file__).parent.parent / "fixtures" / "legacy_sample.db")
+FIXTURE_DB_PATH = "/tmp/sunflower_legacy_sample.db"
 TEMP_REVIEW_CSV = "/tmp/test_weights_to_review.csv"
+
+
+@pytest.fixture(autouse=True)
+def _create_legacy_fixture() -> None:
+    """Create the small legacy SQLite database required by migration tests."""
+    password_salt = "legacy-test-salt"
+    password_digest = hashlib.scrypt(
+        b"secretPassword123",
+        salt=password_salt.encode(),
+        n=32768,
+        r=8,
+        p=1,
+        maxmem=128 * 1024 * 1024,
+    ).hex()
+    password_hash = f"scrypt:32768:8:1${password_salt}${password_digest}"
+
+    connection = sqlite3.connect(FIXTURE_DB_PATH)
+    try:
+        connection.executescript(
+            """
+            DROP TABLE IF EXISTS feedback;
+            DROP TABLE IF EXISTS symptom_check_results;
+            DROP TABLE IF EXISTS symptom_check_symptoms;
+            DROP TABLE IF EXISTS symptom_checks;
+            DROP TABLE IF EXISTS symptom_catalog;
+            DROP TABLE IF EXISTS diseases;
+            DROP TABLE IF EXISTS users;
+
+            CREATE TABLE users (
+                id INTEGER PRIMARY KEY,
+                username TEXT NOT NULL,
+                email TEXT NOT NULL,
+                password_hash TEXT NOT NULL,
+                role TEXT NOT NULL,
+                created_at TEXT
+            );
+
+            CREATE TABLE diseases (
+                id INTEGER PRIMARY KEY,
+                slug TEXT NOT NULL,
+                name TEXT NOT NULL,
+                symptoms TEXT,
+                cause TEXT,
+                treatment TEXT,
+                prevention TEXT,
+                image_filename TEXT,
+                name_km TEXT,
+                symptoms_km TEXT,
+                cause_km TEXT,
+                treatment_km TEXT,
+                prevention_km TEXT,
+                symptom_checklist_json TEXT,
+                created_at TEXT
+            );
+
+            CREATE TABLE symptom_catalog (
+                id INTEGER PRIMARY KEY,
+                label TEXT NOT NULL,
+                category TEXT,
+                label_km TEXT
+            );
+
+            CREATE TABLE symptom_checks (
+                id INTEGER PRIMARY KEY,
+                user_id INTEGER,
+                created_at TEXT,
+                selected_count INTEGER,
+                top_disease_slug TEXT,
+                top_disease_name TEXT,
+                top_score REAL,
+                top_percent REAL
+            );
+
+            CREATE TABLE symptom_check_symptoms (
+                check_id INTEGER,
+                symptom_label TEXT
+            );
+
+            CREATE TABLE symptom_check_results (
+                check_id INTEGER,
+                rank INTEGER,
+                disease_key TEXT,
+                disease_name TEXT,
+                score REAL,
+                percent REAL,
+                matched_json TEXT
+            );
+
+            CREATE TABLE feedback (
+                id INTEGER PRIMARY KEY,
+                user_id INTEGER,
+                subject TEXT,
+                message TEXT,
+                status TEXT,
+                created_at TEXT,
+                symptom_check_id INTEGER,
+                photo_filename TEXT
+            );
+            """
+        )
+
+        connection.executemany(
+            "INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)",
+            [
+                (1, "grower1", "grower1@example.com", password_hash, "user", "2026-01-01T00:00:00"),
+                (2, "expert1", "expert1@example.com", password_hash, "doctor", "2026-01-01T00:00:00"),
+                (3, "legacy_admin", "legacy-admin@example.com", password_hash, "admin", "2026-01-01T00:00:00"),
+            ],
+        )
+
+        checklist = lambda items: json.dumps(items, ensure_ascii=False)
+        connection.executemany(
+            "INSERT INTO diseases VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+                (
+                    1,
+                    "downy-mildew",
+                    "Downy Mildew",
+                    "Wilting or drooping; Yellowing leaves",
+                    "Plasmopara halstedii",
+                    "Apply fungicide",
+                    "Use resistant varieties",
+                    None,
+                    "ជំងឺរោគផ្សិតទន់",
+                    "ស្លឹកក្រៀម; ស្លឹកលឿង",
+                    "Plasmopara halstedii",
+                    "បាញ់ថ្នាំសម្លាប់ផ្សិត",
+                    "ប្រើពូជធន់នឹងជំងឺ",
+                    checklist(
+                        [
+                            {"label": "Wilting or drooping", "category": "leaf", "label_km": "ស្លឹកក្រៀម"},
+                            {"label": "Yellowing leaves", "category": "leaf", "label_km": "ស្លឹកលឿង"},
+                        ]
+                    ),
+                    "2026-01-01T00:00:00",
+                ),
+                (
+                    2,
+                    "bacterial-blight",
+                    "Bacterial Blight",
+                    "Wilting or drooping; Stem lesions",
+                    "Bacteria",
+                    "Remove affected plants",
+                    "Improve sanitation",
+                    None,
+                    "ជំងឺបាក់តេរី",
+                    "ស្លឹកក្រៀម; ដំបៅដើម",
+                    "បាក់តេរី",
+                    "ដករុក្ខជាតិដែលឆ្លង",
+                    "រក្សាអនាម័យ",
+                    checklist(
+                        [
+                            {"label": "Wilting or drooping", "category": "leaf", "label_km": "ស្លឹកក្រៀម"},
+                            {"label": "Stem lesions", "category": "stem", "label_km": "ដំបៅដើម"},
+                        ]
+                    ),
+                    "2026-01-01T00:00:00",
+                ),
+                (
+                    3,
+                    "mosaic-virus",
+                    "Mosaic Virus",
+                    "Mottled leaves",
+                    "Virus",
+                    "Remove infected plants",
+                    "Control vectors",
+                    None,
+                    "ជំងឺវីរុសម៉ូសាអ៊ីក",
+                    "ស្លឹកមានស្នាម",
+                    "វីរុស",
+                    "ដករុក្ខជាតិឆ្លង",
+                    "គ្រប់គ្រងសត្វល្អិត",
+                    checklist(
+                        [{"label": "Mottled leaves", "category": "leaf", "label_km": "ស្លឹកមានស្នាម"}]
+                    ),
+                    "2026-01-01T00:00:00",
+                ),
+            ],
+        )
+        connection.execute(
+            "INSERT INTO symptom_catalog VALUES (?, ?, ?, ?)",
+            (1, "Unreferenced root decay", "root", "រលួយឫស"),
+        )
+        connection.execute(
+            "INSERT INTO symptom_checks VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (1, 1, "2026-01-02T00:00:00", 2, "downy-mildew", "Downy Mildew", 0.8, 80.0),
+        )
+        connection.executemany(
+            "INSERT INTO symptom_check_symptoms VALUES (?, ?)",
+            [(1, "Wilting or drooping"), (1, "Yellowing leaves")],
+        )
+        connection.execute(
+            "INSERT INTO symptom_check_results VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (1, 1, "downy-mildew", "Downy Mildew", 0.8, 80.0, '["Wilting or drooping"]'),
+        )
+        connection.execute(
+            "INSERT INTO feedback VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (1, 1, "Downy mildew question", "How can I treat it?", "open", "2026-01-02T00:00:00", 1, None),
+        )
+        connection.commit()
+    finally:
+        connection.close()
 
 
 async def ensure_prerequisites(session: AsyncSession) -> None:

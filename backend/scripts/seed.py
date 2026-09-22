@@ -229,7 +229,7 @@ async def seed_ruleset(session: AsyncSession) -> None:
 
 
 async def seed_admin(session: AsyncSession, admin_role: Role) -> None:
-    """Create default admin user if not existing. Refuses if ADMIN_PASSWORD is empty."""
+    """Create default admin user if not existing or reset its password and role. Refuses if ADMIN_PASSWORD is empty."""
     settings = get_settings()
     if not settings.ADMIN_PASSWORD:
         raise RuntimeError("ADMIN_PASSWORD environment variable is empty. Refusing to seed admin.")
@@ -241,9 +241,10 @@ async def seed_admin(session: AsyncSession, admin_role: Role) -> None:
     )
     admin_user = result.scalar_one_or_none()
 
+    ph = PasswordHasher()
+    hashed = ph.hash(settings.ADMIN_PASSWORD)
+
     if admin_user is None:
-        ph = PasswordHasher()
-        hashed = ph.hash(settings.ADMIN_PASSWORD)
         admin_user = User(
             email=settings.ADMIN_EMAIL,
             username=settings.ADMIN_USERNAME,
@@ -253,6 +254,9 @@ async def seed_admin(session: AsyncSession, admin_role: Role) -> None:
         )
         session.add(admin_user)
     else:
+        admin_user.email = settings.ADMIN_EMAIL
+        admin_user.username = settings.ADMIN_USERNAME
+        admin_user.password_hash = hashed
         admin_user.role_id = admin_role.id
         admin_user.is_active = True
 

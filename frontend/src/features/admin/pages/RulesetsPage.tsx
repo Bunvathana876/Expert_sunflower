@@ -1,6 +1,15 @@
 import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  Sliders,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  Loader2,
+  History,
+  Zap,
+} from "lucide-react";
 import { useRulesets, useActivateRuleset } from "../hooks";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { RulesetItem } from "@/types/api";
@@ -33,109 +42,123 @@ export function RulesetsPage(): React.JSX.Element {
   };
 
   return (
-    <div className="sf-admin-page">
-      <div className="sf-admin-page__header">
+    <div className="sf-admin-page max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="sf-admin-page__header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="sf-admin-page__title">{t("admin.rulesets_title")}</h1>
-          <p className="sf-admin-page__desc">{t("admin.rulesets_subtitle")}</p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 dark:bg-amber-400/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
+              <Sliders className="w-5 h-5" />
+            </div>
+            <h1 className="sf-admin-page__title text-2xl font-bold tracking-tight">
+              {t("admin.rulesets_title")}
+            </h1>
+          </div>
+          <p className="sf-admin-page__desc text-sm text-[var(--color-text-muted)] mt-1">
+            {t("admin.rulesets_subtitle")}
+          </p>
         </div>
       </div>
 
       {errorMessage && (
-        <div className="sf-alert sf-alert--danger" style={{ marginBottom: "1.5rem" }} role="alert">
-          {errorMessage}
+        <div className="sf-alert sf-alert--danger flex items-center gap-2 mb-6" role="alert">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span>{errorMessage}</span>
         </div>
       )}
 
       {isLoading ? (
-        <div className="sf-loading-state" style={{ padding: "3rem", textAlign: "center" }}>
-          <span className="sf-spinner" aria-hidden="true" />
-          <p style={{ marginTop: "1rem", color: "var(--color-text-muted)" }}>
+        <div className="sf-card flex flex-col items-center justify-center py-16 text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-amber-600 dark:text-amber-400" />
+          <p className="mt-3 text-sm font-medium text-[var(--color-text-muted)]">
             {t("common.loading")}
           </p>
         </div>
       ) : isError ? (
-        <div className="sf-alert sf-alert--danger" role="alert">
-          {t("admin.rulesets_load_error")}
+        <div className="sf-alert sf-alert--danger flex items-center gap-2" role="alert">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span>{t("admin.rulesets_load_error")}</span>
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "1.5rem",
-            alignItems: "start",
-          }}
-        >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Ruleset List */}
-          <div className="sf-card" style={{ padding: 0, overflow: "hidden" }}>
-            <div
-              style={{
-                padding: "1rem 1.5rem",
-                borderBottom: "1px solid var(--color-border)",
-                fontWeight: 600,
-              }}
-            >
-              {t("admin.rulesets_version_history")}
+          <div className="sf-card p-0 overflow-hidden shadow-sm border border-[var(--color-border)]">
+            <div className="flex items-center gap-2 px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-subtle)]/50">
+              <History className="w-4 h-4 text-amber-600" />
+              <h2 className="font-bold text-sm text-[var(--color-text)]">
+                {t("admin.rulesets_version_history")}
+              </h2>
             </div>
-            <div style={{ overflowX: "auto" }}>
-              <table className="sf-table">
+            <div className="overflow-x-auto">
+              <table className="sf-table w-full">
                 <thead>
                   <tr>
-                    <th>{t("admin.rulesets_col_version")}</th>
-                    <th>{t("admin.rulesets_col_algorithm")}</th>
-                    <th>{t("admin.rulesets_col_status")}</th>
-                    <th style={{ textAlign: "right" }}>{t("admin.rulesets_col_actions")}</th>
+                    <th className="font-semibold text-xs uppercase tracking-wider text-[var(--color-text-muted)] py-3 px-4">
+                      {t("admin.rulesets_col_version")}
+                    </th>
+                    <th className="font-semibold text-xs uppercase tracking-wider text-[var(--color-text-muted)] py-3 px-4">
+                      {t("admin.rulesets_col_algorithm")}
+                    </th>
+                    <th className="font-semibold text-xs uppercase tracking-wider text-[var(--color-text-muted)] py-3 px-4">
+                      {t("admin.rulesets_col_status")}
+                    </th>
+                    <th className="font-semibold text-xs uppercase tracking-wider text-[var(--color-text-muted)] py-3 px-4 text-right">
+                      {t("admin.rulesets_col_actions")}
+                    </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-[var(--color-border-subtle)]">
                   {rulesets.map((r) => {
                     const isCurrent = currentView?.id === r.id;
                     return (
                       <tr
                         key={r.id}
-                        style={{
-                          backgroundColor: isCurrent
-                            ? "var(--color-primary-50, rgba(34, 197, 94, 0.05))"
-                            : undefined,
-                          cursor: "pointer",
-                        }}
+                        className={`transition-colors cursor-pointer ${
+                          isCurrent
+                            ? "bg-amber-500/10 dark:bg-amber-400/10 font-medium"
+                            : "hover:bg-[var(--color-bg-subtle)]"
+                        }`}
                         onClick={() => setSelectedRuleset(r)}
                       >
-                        <td>
-                          <span style={{ fontWeight: 600, fontFamily: "monospace" }}>
+                        <td className="py-3 px-4">
+                          <span className="font-mono font-bold text-xs text-[var(--color-text)]">
                             {r.version}
                           </span>
                           {r.published_at && (
-                            <div style={{ fontSize: "0.75rem", color: "var(--color-text-muted)" }}>
+                            <div className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
                               {new Date(r.published_at).toLocaleDateString()}
                             </div>
                           )}
                         </td>
-                        <td style={{ fontSize: "0.875rem" }}>{r.algorithm}</td>
-                        <td>
+                        <td className="py-3 px-4 text-xs font-mono text-[var(--color-text-muted)]">
+                          {r.algorithm}
+                        </td>
+                        <td className="py-3 px-4">
                           {r.is_active ? (
-                            <span className="sf-badge sf-badge--success">
-                              {t("admin.rulesets_status_active")}
+                            <span className="sf-badge sf-badge--success inline-flex items-center gap-1 text-xs px-2 py-0.5 font-medium rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>{t("admin.rulesets_status_active")}</span>
                             </span>
                           ) : (
-                            <span className="sf-badge sf-badge--neutral">
-                              {t("admin.rulesets_status_inactive")}
+                            <span className="sf-badge sf-badge--neutral inline-flex items-center gap-1 text-xs px-2 py-0.5 font-medium rounded-full bg-slate-500/10 text-slate-500">
+                              <Clock className="w-3 h-3" />
+                              <span>{t("admin.rulesets_status_inactive")}</span>
                             </span>
                           )}
                         </td>
-                        <td style={{ textAlign: "right" }}>
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
                           {!r.is_active && (
                             <button
                               type="button"
-                              className="sf-btn sf-btn--outline-primary sf-btn--sm"
+                              className="sf-btn sf-btn--outline-primary sf-btn--sm inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
                               disabled={activateMutation.isPending}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setPendingActivateRuleset(r);
                               }}
                             >
-                              {t("admin.rulesets_btn_activate")}
+                              <Zap className="w-3 h-3" />
+                              <span>{t("admin.rulesets_btn_activate")}</span>
                             </button>
                           )}
                         </td>
@@ -149,71 +172,50 @@ export function RulesetsPage(): React.JSX.Element {
 
           {/* Ruleset Inspector & Diff */}
           {currentView && (
-            <div className="sf-card">
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  marginBottom: "1.25rem",
-                  borderBottom: "1px solid var(--color-border)",
-                  paddingBottom: "1rem",
-                }}
-              >
+            <div className="sf-card p-6 shadow-sm border border-[var(--color-border)]">
+              <div className="flex justify-between items-start mb-5 pb-4 border-b border-[var(--color-border)]">
                 <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                    <h2
-                      style={{
-                        fontSize: "1.25rem",
-                        fontWeight: 700,
-                        margin: 0,
-                        fontFamily: "monospace",
-                      }}
-                    >
+                  <div className="flex items-center gap-2.5">
+                    <h2 className="text-xl font-bold font-mono tracking-tight text-[var(--color-text)]">
                       {currentView.version}
                     </h2>
                     {currentView.is_active ? (
-                      <span className="sf-badge sf-badge--success">
-                        {t("admin.rulesets_status_active")}
+                      <span className="sf-badge sf-badge--success inline-flex items-center gap-1 text-xs px-2.5 py-0.5 font-semibold rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>{t("admin.rulesets_status_active")}</span>
                       </span>
                     ) : (
-                      <span className="sf-badge sf-badge--neutral">
-                        {t("admin.rulesets_status_inactive")}
+                      <span className="sf-badge sf-badge--neutral inline-flex items-center gap-1 text-xs px-2.5 py-0.5 font-medium rounded-full bg-slate-500/10 text-slate-500">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>{t("admin.rulesets_status_inactive")}</span>
                       </span>
                     )}
                   </div>
-                  <p
-                    style={{
-                      margin: "0.25rem 0 0",
-                      fontSize: "0.875rem",
-                      color: "var(--color-text-muted)",
-                    }}
-                  >
-                    {t("admin.rulesets_algo_label")}: <code>{currentView.algorithm}</code>
+                  <p className="text-xs text-[var(--color-text-muted)] mt-1.5 flex items-center gap-1.5">
+                    <span>{t("admin.rulesets_algo_label")}:</span>
+                    <code className="bg-slate-100 dark:bg-stone-800/80 px-2 py-0.5 rounded font-mono text-amber-600">
+                      {currentView.algorithm}
+                    </code>
                   </p>
                 </div>
                 {!currentView.is_active && (
                   <button
                     type="button"
-                    className="sf-btn sf-btn--primary sf-btn--sm"
+                    className="sf-btn sf-btn--primary sf-btn--sm inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm"
                     disabled={activateMutation.isPending}
                     onClick={() => setPendingActivateRuleset(currentView)}
                   >
-                    {t("admin.rulesets_btn_activate")}
+                    <Zap className="w-3.5 h-3.5" />
+                    <span>{t("admin.rulesets_btn_activate")}</span>
                   </button>
                 )}
               </div>
 
-              <h3 style={{ fontSize: "0.9375rem", fontWeight: 600, marginBottom: "0.75rem" }}>
+              <h3 className="text-sm font-bold text-[var(--color-text)] mb-3">
                 {t("admin.rulesets_parameters_title")}
               </h3>
 
-              <div
-                style={{
-                  display: "grid",
-                  gap: "0.75rem",
-                }}
-              >
+              <div className="space-y-2.5">
                 {Object.entries(currentView.params).map(([key, val]) => {
                   const activeVal = activeRuleset?.params[key];
                   const hasChanged =
@@ -225,33 +227,24 @@ export function RulesetsPage(): React.JSX.Element {
                   return (
                     <div
                       key={key}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "0.75rem 1rem",
-                        backgroundColor: hasChanged
-                          ? "var(--color-warning-50, rgba(234, 179, 8, 0.1))"
-                          : "var(--color-bg-subtle, #f8fafc)",
-                        borderRadius: "var(--radius-sm, 6px)",
-                        border: hasChanged
-                          ? "1px solid var(--color-warning, #eab308)"
-                          : "1px solid var(--color-border)",
-                      }}
+                      className={`flex justify-between items-center p-3 rounded-xl border transition-all ${
+                        hasChanged
+                          ? "bg-amber-500/10 border-amber-300 dark:border-amber-800"
+                          : "bg-[var(--color-bg-subtle)]/70 border-[var(--color-border-subtle)]"
+                      }`}
                     >
                       <div>
-                        <span
-                          style={{ fontFamily: "monospace", fontWeight: 600, fontSize: "0.875rem" }}
-                        >
+                        <span className="font-mono font-semibold text-xs text-[var(--color-text)]">
                           {key}
                         </span>
                         {hasChanged && (
-                          <div style={{ fontSize: "0.75rem", color: "var(--color-text-muted)" }}>
-                            {t("admin.rulesets_active_val_was")}: <code>{String(activeVal)}</code>
+                          <div className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5">
+                            {t("admin.rulesets_active_val_was")}:{" "}
+                            <code className="font-mono font-bold">{String(activeVal)}</code>
                           </div>
                         )}
                       </div>
-                      <div style={{ fontFamily: "monospace", fontWeight: 700, fontSize: "1rem" }}>
+                      <div className="font-mono font-bold text-sm text-[var(--color-text)]">
                         {String(val)}
                       </div>
                     </div>
@@ -260,17 +253,14 @@ export function RulesetsPage(): React.JSX.Element {
               </div>
 
               {currentView.published_at && (
-                <div
-                  style={{
-                    marginTop: "1.5rem",
-                    fontSize: "0.75rem",
-                    color: "var(--color-text-muted)",
-                  }}
-                >
-                  {t("admin.rulesets_published_meta", {
-                    date: new Date(currentView.published_at).toLocaleString(),
-                    author: currentView.published_by ?? t("admin.rulesets_author_system"),
-                  })}
+                <div className="mt-6 pt-4 border-t border-[var(--color-border-subtle)] text-xs text-[var(--color-text-muted)] flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 opacity-60" />
+                  <span>
+                    {t("admin.rulesets_published_meta", {
+                      date: new Date(currentView.published_at).toLocaleString(),
+                      author: currentView.published_by ?? t("admin.rulesets_author_system"),
+                    })}
+                  </span>
                 </div>
               )}
             </div>
@@ -295,3 +285,4 @@ export function RulesetsPage(): React.JSX.Element {
     </div>
   );
 }
+

@@ -7,16 +7,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import get_current_user, get_db, require_permission
+from app.core.deps import get_db, require_permission
 from app.models.auth import User
 from app.repositories.admin import AdminRepository
 from app.schemas.admin import (
     PaginatedUsersResponse,
-    RoleListResponse,
     RolePermissionsRequest,
     RolePermissionsResponse,
-    RoleResponse,
-    RulesetActivateRequest,
     RulesetResponse,
     UpdateUserRequest,
     UserResponse,
@@ -247,7 +244,7 @@ async def list_rulesets(
             id=ruleset.id,
             version=ruleset.version,
             algorithm=ruleset.algorithm,
-            parameters=ruleset.parameters,
+            parameters=ruleset.params,
             is_active=ruleset.is_active,
             published_at=ruleset.published_at,
             published_by=ruleset.published_by.username if ruleset.published_by else None,
@@ -286,7 +283,7 @@ async def activate_ruleset(
         id=activated_ruleset.id,
         version=activated_ruleset.version,
         algorithm=activated_ruleset.algorithm,
-        parameters=activated_ruleset.parameters,
+        parameters=activated_ruleset.params,
         is_active=activated_ruleset.is_active,
         published_at=activated_ruleset.published_at,
         published_by=activated_ruleset.published_by.username if activated_ruleset.published_by else None,

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import logging
 import uuid
-from typing import Any
 
 from ai.config import ai_config
 from ai.schemas.ai_schemas import AIChatRequest, AIChatResponse

@@ -63,7 +63,7 @@ export interface AIDiagnosisRequest {
 export interface AIDiagnosisResponse {
   extracted_symptoms: ExtractedSymptom;
   diagnosis_session_id: string | null;
-  expert_system_results: any;
+  expert_system_results: unknown;
   ai_explanation: string;
 }
 

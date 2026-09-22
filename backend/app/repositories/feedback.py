@@ -61,7 +61,7 @@ class FeedbackRepository:
     ) -> tuple[list[Feedback], int]:
         """List feedback items with optional user and status filters."""
         # Debug logging
-        print(f"\n[FEEDBACK REPO] ===== LIST PAGINATED =====")
+        print("\n[FEEDBACK REPO] ===== LIST PAGINATED =====")
         print(f"[FEEDBACK REPO] user_id filter: {user_id}")
         print(f"[FEEDBACK REPO] status filter: {status}")
         print(f"[FEEDBACK REPO] page: {page}, size: {size}")

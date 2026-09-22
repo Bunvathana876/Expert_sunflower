@@ -20,7 +20,6 @@ from app.models.disease import Disease, DiseaseSymptom
 from app.models.symptom import Symptom, SymptomCategory
 from app.models.translation import Translation
 
-
 # Sample symptoms data
 SYMPTOMS = [
     # Leaf symptoms
@@ -252,7 +251,7 @@ async def import_sample_data(session: AsyncSession) -> None:
     print()
     print("✅ Import complete!")
     print()
-    print(f"Created:")
+    print("Created:")
     print(f"  - {len(SYMPTOMS)} symptoms")
     print(f"  - {len(DISEASES)} diseases")
     print()

@@ -19,6 +19,7 @@ function renderWithAuth(
         ...authValues,
         login: vi.fn(),
         register: vi.fn(),
+        updateProfile: vi.fn(),
         logout: vi.fn(),
         refreshSession: vi.fn(),
         hasPermission: (code: string) => !!authValues.user?.permissions?.includes(code),

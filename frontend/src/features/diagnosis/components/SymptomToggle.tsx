@@ -27,8 +27,8 @@ export function SymptomToggle({
     <div
       className={`p-3 sm:p-3.5 rounded-xl transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 ${
         isObserved
-          ? "bg-emerald-500/10 dark:bg-emerald-950/30 border border-emerald-500/30 shadow-sm"
-          : "bg-white/60 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700"
+          ? "bg-amber-500/10 dark:bg-amber-950/30 border border-amber-500/30 shadow-sm"
+          : "bg-white/60 dark:bg-stone-900/50 border border-slate-200/80 dark:border-stone-800/80 hover:border-slate-300 dark:hover:border-slate-700"
       }`}
       role="group"
       aria-label={symptom.label}
@@ -37,7 +37,7 @@ export function SymptomToggle({
         <span
           className={`w-2 h-2 rounded-full mt-1.5 shrink-0 transition-colors ${
             isObserved
-              ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+              ? "bg-amber-500 shadow-[0_0_8px_rgba(217,119,6,0.5)]"
               : "bg-slate-300 dark:bg-slate-700"
           }`}
           aria-hidden="true"
@@ -58,8 +58,8 @@ export function SymptomToggle({
           onClick={() => onAnswer(symptom.id, isObserved ? "unknown" : "yes")}
           className={`px-4 py-2 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all ${
             isObserved
-              ? "bg-emerald-600 text-white shadow-sm"
-              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 hover:text-emerald-700"
+              ? "bg-amber-600 text-stone-900 shadow-sm"
+              : "bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-amber-100 dark:hover:bg-amber-950/60 hover:text-amber-700"
           }`}
           aria-pressed={isObserved}
           aria-label={isObserved ? t("checker.mark_clear") : t("checker.mark_observed")}

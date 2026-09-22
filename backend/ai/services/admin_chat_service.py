@@ -12,7 +12,6 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ai.config import ai_config
 from ai.schemas.ai_schemas import AIChatRequest, AIChatResponse
 from ai.services.ollama_service import get_ollama_service
 from app.models.disease import Disease
@@ -43,7 +42,7 @@ class AdminChatService:
             Response with AI message and possible actions taken
         """
         # Debug logging
-        print(f"\n[ADMIN CHAT] ===== NEW REQUEST =====")
+        print("\n[ADMIN CHAT] ===== NEW REQUEST =====")
         print(f"[ADMIN CHAT] User role: {user_role}")
         print(f"[ADMIN CHAT] Message: {request.message}")
         print(f"[ADMIN CHAT] Locale: {request.locale}")
@@ -219,7 +218,7 @@ class AdminChatService:
         # DELETE patterns
         delete_keywords = ["delete", "remove", "លុប", "drop"]
         if any(keyword in message_lower for keyword in delete_keywords):
-            print(f"[ADMIN CHAT] DELETE keyword detected!")
+            print("[ADMIN CHAT] DELETE keyword detected!")
             if "disease" in message_lower or "ជំងឺ" in message_lower:
                 # Extract disease name (rough extraction)
                 # Look for patterns like "delete disease X", "delete X disease"
@@ -250,7 +249,7 @@ class AdminChatService:
         # CREATE patterns
         create_keywords = ["create", "add", "new", "បង្កើត", "បន្ថែម"]
         if any(keyword in message_lower for keyword in create_keywords):
-            print(f"[ADMIN CHAT] CREATE keyword detected!")
+            print("[ADMIN CHAT] CREATE keyword detected!")
             if "disease" in message_lower or "ជំងឺ" in message_lower:
                 name = self._extract_entity_name(message, ["disease", "ជំងឺ"])
                 print(f"[ADMIN CHAT] CREATE DISEASE - Extracted name: '{name}'")
@@ -513,8 +512,8 @@ Return JSON only:
         
         except Exception as e:
             message = self._translate(
-                f"❌ Failed to create disease: {str(e)}",
-                f"❌ បរាជ័យក្នុងការបង្កើតជំងឺ: {str(e)}",
+                f"❌ Failed to create disease: {e!s}",
+                f"❌ បរាជ័យក្នុងការបង្កើតជំងឺ: {e!s}",
                 locale
             )
             return message, []
@@ -578,8 +577,8 @@ Return JSON only:
         
         except Exception as e:
             message = self._translate(
-                f"❌ Failed to update disease: {str(e)}",
-                f"❌ បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពជំងឺ: {str(e)}",
+                f"❌ Failed to update disease: {e!s}",
+                f"❌ បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពជំងឺ: {e!s}",
                 locale
             )
             return message, []
@@ -649,8 +648,8 @@ Return JSON only:
         
         except Exception as e:
             message = self._translate(
-                f"❌ Failed to delete disease: {str(e)}",
-                f"❌ បរាជ័យក្នុងការលុបជំងឺ: {str(e)}",
+                f"❌ Failed to delete disease: {e!s}",
+                f"❌ បរាជ័យក្នុងការលុបជំងឺ: {e!s}",
                 locale
             )
             return message, []
@@ -722,8 +721,8 @@ Return JSON only:
         
         except Exception as e:
             message = self._translate(
-                f"❌ Failed to create symptom: {str(e)}",
-                f"❌ បរាជ័យក្នុងការបង្កើតរោគសញ្ញា: {str(e)}",
+                f"❌ Failed to create symptom: {e!s}",
+                f"❌ បរាជ័យក្នុងការបង្កើតរោគសញ្ញា: {e!s}",
                 locale
             )
             return message, []
@@ -762,15 +761,15 @@ Return JSON only:
             
             # Update fields
             updated_fields = []
-            if "label_en" in data and data["label_en"]:
+            if data.get("label_en"):
                 symptom.label_en = data["label_en"]
                 updated_fields.append("label_en")
             
-            if "label_km" in data and data["label_km"]:
+            if data.get("label_km"):
                 symptom.label_km = data["label_km"]
                 updated_fields.append("label_km")
             
-            if "category" in data and data["category"]:
+            if data.get("category"):
                 symptom.category = data["category"].lower()
                 updated_fields.append("category")
             
@@ -791,8 +790,8 @@ Return JSON only:
         
         except Exception as e:
             message = self._translate(
-                f"❌ Failed to update symptom: {str(e)}",
-                f"❌ បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពរោគសញ្ញា: {str(e)}",
+                f"❌ Failed to update symptom: {e!s}",
+                f"❌ បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពរោគសញ្ញា: {e!s}",
                 locale
             )
             return message, []
@@ -862,8 +861,8 @@ Return JSON only:
         
         except Exception as e:
             message = self._translate(
-                f"❌ Failed to delete symptom: {str(e)}",
-                f"❌ បរាជ័យក្នុងការលុបរោគសញ្ញា: {str(e)}",
+                f"❌ Failed to delete symptom: {e!s}",
+                f"❌ បរាជ័យក្នុងការលុបរោគសញ្ញា: {e!s}",
                 locale
             )
             return message, []

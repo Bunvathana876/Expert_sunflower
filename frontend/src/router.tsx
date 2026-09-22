@@ -33,6 +33,9 @@ const LoginPage = lazy(() =>
 const RegisterPage = lazy(() =>
   import("./features/auth/pages/RegisterPage").then((m) => ({ default: m.RegisterPage })),
 );
+const ProfilePage = lazy(() =>
+  import("./features/auth/pages/ProfilePage").then((m) => ({ default: m.ProfilePage })),
+);
 
 // Admin & Agronomist pages
 const AdminLayout = lazy(() =>
@@ -133,6 +136,10 @@ export const router = createBrowserRouter([
       {
         path: "/feedback",
         element: <FeedbackPage />,
+      },
+      {
+        path: "/profile",
+        element: <ProfilePage />,
       },
       {
         path: "/login",

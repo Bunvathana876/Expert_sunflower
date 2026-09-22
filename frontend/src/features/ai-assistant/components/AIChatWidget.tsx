@@ -32,19 +32,8 @@ export function AIChatWidget() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check if user is admin or expert (MUST BE BEFORE handleSend)
-  const isAdminOrExpert = user?.role?.name === 'admin' || user?.role?.name === 'agronomist';
+  const isAdminOrExpert = user?.role === 'admin' || user?.role === 'agronomist';
   
-  // Debug logging
-  useEffect(() => {
-    if (user) {
-      console.log('[AI CHAT WIDGET] User loaded:', {
-        email: user.email,
-        role: user.role?.name,
-        isAdminOrExpert
-      });
-    }
-  }, [user, isAdminOrExpert]);
-
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -123,9 +112,6 @@ export function AIChatWidget() {
         setImagePreview(null);
       } else {
         // Regular chat - use admin endpoint for admin/expert users
-        console.log('[AI CHAT WIDGET] isAdminOrExpert:', isAdminOrExpert);
-        console.log('[AI CHAT WIDGET] Using endpoint:', isAdminOrExpert ? '/ai/admin/chat' : '/ai/chat');
-        
         if (isAdminOrExpert) {
           response = await adminChatWithAI({
             message: userMessage.content,
@@ -159,7 +145,6 @@ export function AIChatWidget() {
         ].filter(Boolean);
 
         if (symptomsDetected.length > 0) {
-          console.log('Symptoms detected:', symptomsDetected);
           // TODO: Show toast notification suggesting to run diagnosis
         }
       }
@@ -278,7 +263,10 @@ export function AIChatWidget() {
                 <h3 className={`font-bold text-lg truncate flex items-center gap-2 ${i18n.language === 'km' ? 'leading-relaxed' : ''}`}>
                   {t('ai.assistant', 'AI Assistant')}
                   {isAdminOrExpert ? (
-                    <Shield className="w-4 h-4 text-yellow-300 animate-pulse" title="Admin Mode" />
+                    <Shield
+                      className="w-4 h-4 text-yellow-300 animate-pulse"
+                      aria-label="Admin Mode"
+                    />
                   ) : (
                     <Brain className="w-4 h-4 text-cyan-300 animate-pulse" />
                   )}

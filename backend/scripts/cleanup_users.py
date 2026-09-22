@@ -68,7 +68,7 @@ async def cleanup_users(session: AsyncSession) -> None:
     
     # Delete all users NOT in target list
     users_to_keep = {"admin", "expert", "user"}
-    users_to_delete = [u for u in existing_users.keys() if u not in users_to_keep]
+    users_to_delete = [u for u in existing_users if u not in users_to_keep]
     
     if users_to_delete:
         print(f"🗑️  Deleting {len(users_to_delete)} old user(s): {', '.join(users_to_delete)}")

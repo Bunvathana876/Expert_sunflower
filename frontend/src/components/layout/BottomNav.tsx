@@ -39,9 +39,9 @@ export function BottomNav({ onOpenAbout }: BottomNavProps): React.JSX.Element {
   });
 
   return (
-    <div className="fixed bottom-3 inset-x-0 z-40 flex justify-center px-4 md:hidden pointer-events-none">
+    <div className="fixed bottom-3 inset-x-0 z-40 flex justify-center px-3 sm:px-4 lg:hidden pointer-events-none">
       <nav
-        className="sf-glass-dock pointer-events-auto rounded-2xl px-2 py-1.5 flex items-center justify-around gap-1 max-w-md w-full"
+        className="sf-glass-dock pointer-events-auto rounded-2xl px-1.5 sm:px-2 py-1.5 flex items-center justify-around gap-0.5 sm:gap-1 max-w-lg w-full shadow-lg"
         aria-label="Mobile navigation"
       >
         {visibleItems.map((item) => {
@@ -58,14 +58,15 @@ export function BottomNav({ onOpenAbout }: BottomNavProps): React.JSX.Element {
             <Link
               key={item.to}
               to={item.to}
-              className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all min-h-[44px] ${
+              title={label}
+              className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all min-h-[44px] ${
                 active
-                  ? "text-amber-800 dark:text-amber-400 font-bold bg-amber-500/15"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                  ? "text-amber-950 dark:text-amber-300 font-bold bg-amber-500/20"
+                  : "text-gray-700 dark:text-gray-300 hover:text-gray-950 dark:hover:text-white"
               }`}
             >
-              <Icon size={19} strokeWidth={active ? 2.5 : 2} />
-              <span className="text-[0.65rem] tracking-tight mt-0.5 leading-none">
+              <Icon size={18} strokeWidth={active ? 2.5 : 2} className="shrink-0" />
+              <span className="text-[0.6rem] sm:text-[0.65rem] tracking-tight mt-0.5 leading-tight truncate max-w-full text-center">
                 {label}
               </span>
             </Link>
@@ -77,11 +78,12 @@ export function BottomNav({ onOpenAbout }: BottomNavProps): React.JSX.Element {
           <button
             type="button"
             onClick={onOpenAbout}
-            className="flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 min-h-[44px]"
+            title={t("nav.about")}
+            className="flex-1 min-w-0 flex flex-col items-center justify-center py-1 px-1 rounded-xl text-gray-700 dark:text-gray-300 hover:text-gray-950 dark:hover:text-white min-h-[44px]"
             aria-label={t("nav.about")}
           >
-            <Info size={19} />
-            <span className="text-[0.65rem] tracking-tight mt-0.5 leading-none">
+            <Info size={18} className="shrink-0" />
+            <span className="text-[0.6rem] sm:text-[0.65rem] tracking-tight mt-0.5 leading-tight truncate max-w-full text-center">
               {t("nav.about")}
             </span>
           </button>

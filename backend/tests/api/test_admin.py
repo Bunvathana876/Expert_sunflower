@@ -83,7 +83,11 @@ async def test_roles_management(
         headers={"Authorization": f"Bearer {admin_token}"},
     )
     assert put_resp.status_code == 200
-    assert set(put_resp.json()["permissions"]) == {"disease:read", "symptom:read"}
+    assert {
+        permission["code"]
+        for permission in put_resp.json()["permissions"]
+        if permission["granted"]
+    } == {"disease:read", "symptom:read"}
 
 
 @pytest.mark.asyncio
@@ -141,7 +145,7 @@ async def test_ruleset_activation(
         headers={"Authorization": f"Bearer {admin_token}"},
     )
     assert resp.status_code == 200
-    assert len(resp.json()["items"]) >= 2
+    assert len(resp.json()) >= 2
 
     # Activate v2
     act_resp = await client.post(

@@ -28,8 +28,8 @@ from ai.schemas.ai_schemas import (
     SymptomExtractionRequest,
     SymptomExtractionResponse,
 )
-from ai.services.chatbot_service import get_chatbot_service
 from ai.services.admin_chat_service import get_admin_chat_service
+from ai.services.chatbot_service import get_chatbot_service
 from ai.services.disease_assistant import get_disease_assistant
 from ai.services.ollama_service import OllamaError, get_ollama_service
 from ai.services.symptom_extractor import get_symptom_extractor
@@ -137,13 +137,13 @@ async def chat_with_ai(
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"AI service error: {str(e)}",
+            detail=f"AI service error: {e!s}",
         ) from e
     
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Chat failed: {str(e)}",
+            detail=f"Chat failed: {e!s}",
         ) from e
 
 
@@ -181,13 +181,13 @@ async def extract_symptoms(
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"AI service error: {str(e)}",
+            detail=f"AI service error: {e!s}",
         ) from e
     
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Symptom extraction failed: {str(e)}",
+            detail=f"Symptom extraction failed: {e!s}",
         ) from e
 
 
@@ -291,13 +291,13 @@ async def ai_assisted_diagnosis(
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"AI service error: {str(e)}",
+            detail=f"AI service error: {e!s}",
         ) from e
     
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Diagnosis failed: {str(e)}",
+            detail=f"Diagnosis failed: {e!s}",
         ) from e
 
 
@@ -385,13 +385,13 @@ async def analyze_image(
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"AI service error: {str(e)}",
+            detail=f"AI service error: {e!s}",
         ) from e
     
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Image analysis failed: {str(e)}",
+            detail=f"Image analysis failed: {e!s}",
         ) from e
 
 
@@ -453,13 +453,13 @@ async def admin_chat(
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"AI service error: {str(e)}",
+            detail=f"AI service error: {e!s}",
         ) from e
     
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Admin chat failed: {str(e)}",
+            detail=f"Admin chat failed: {e!s}",
         ) from e
 
 
@@ -496,13 +496,13 @@ async def generate_disease_draft(
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"AI service error: {str(e)}",
+            detail=f"AI service error: {e!s}",
         ) from e
     
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Draft generation failed: {str(e)}",
+            detail=f"Draft generation failed: {e!s}",
         ) from e
 
 
@@ -536,11 +536,11 @@ async def check_duplicate_disease(
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"AI service error: {str(e)}",
+            detail=f"AI service error: {e!s}",
         ) from e
     
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Duplicate check failed: {str(e)}",
+            detail=f"Duplicate check failed: {e!s}",
         ) from e

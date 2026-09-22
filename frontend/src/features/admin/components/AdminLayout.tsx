@@ -1,13 +1,23 @@
 import type React from "react";
 import { Link, useLocation, Outlet, Navigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import {
+  BarChart3,
+  Microscope,
+  Leaf,
+  MessageSquare,
+  Users,
+  ShieldCheck,
+  ArrowLeft,
+} from "lucide-react";
 import { useAuth } from "@/features/auth";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 interface AdminNavItem {
   to: string;
   labelKey: string;
-  icon: string;
+  icon: typeof BarChart3;
   permission: string;
   exact?: boolean;
 }
@@ -16,47 +26,40 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   {
     to: "/admin",
     labelKey: "admin.nav_overview",
-    icon: "📊",
+    icon: BarChart3,
     permission: "analytics:read",
     exact: true,
   },
   {
     to: "/admin/diseases",
     labelKey: "admin.nav_diseases",
-    icon: "🔬",
+    icon: Microscope,
     permission: "disease:read",
   },
   {
     to: "/admin/symptoms",
     labelKey: "admin.nav_symptoms",
-    icon: "🍃",
+    icon: Leaf,
     permission: "symptom:read",
   },
   {
     to: "/admin/feedback",
     labelKey: "admin.nav_feedback",
-    icon: "💬",
+    icon: MessageSquare,
     permission: "feedback:read",
   },
   {
     to: "/admin/users",
     labelKey: "admin.nav_users",
-    icon: "👥",
+    icon: Users,
     permission: "user:manage",
   },
   {
     to: "/admin/roles",
     labelKey: "admin.nav_roles",
-    icon: "🛡️",
+    icon: ShieldCheck,
     permission: "rbac:manage",
   },
-  // Rulesets hidden - system manages automatically
-  // {
-  //   to: "/admin/rulesets",
-  //   labelKey: "admin.nav_rulesets",
-  //   icon: "⚙️",
-  //   permission: "ruleset:manage",
-  // },
 ];
 
 export function AdminLayout(): React.JSX.Element {
@@ -84,65 +87,85 @@ export function AdminLayout(): React.JSX.Element {
   };
 
   return (
-    <div className="sf-admin-layout">
+    <div className="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-text)]">
       {/* Top Admin Header */}
-      <header className="sf-admin-header">
-        <div className="sf-admin-header__inner">
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <Link to="/admin" className="sf-header__brand" style={{ textDecoration: "none" }}>
-              <span className="sf-header__logo" aria-hidden="true">
+      <header className="sf-glass-header sticky top-0 z-40 border-b-2 border-amber-600 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Link to="/admin" className="flex items-center gap-2 sm:gap-2.5 text-decoration-none group min-w-0">
+              <span className="text-2xl transition-transform group-hover:scale-110 shrink-0" aria-hidden="true">
                 🌻
               </span>
-              <span className="sf-header__title" style={{ fontSize: "1.125rem" }}>
-                {t("admin.workspace_title")}
-              </span>
+              <div className="flex flex-col min-w-0">
+                <span className="font-bold text-sm sm:text-base tracking-tight text-[var(--color-text)] leading-tight truncate">
+                  {t("admin.workspace_title")}
+                </span>
+                <span className="text-[0.62rem] sm:text-[0.65rem] font-bold text-amber-700 dark:text-amber-400 tracking-wider uppercase font-mono truncate">
+                  {user?.role === "admin" ? "Administrator Workspace" : "Agronomist Portal"}
+                </span>
+              </div>
             </Link>
-            <span
-              className="sf-badge sf-badge--warning"
-              style={{ fontSize: "0.6875rem", textTransform: "uppercase" }}
-            >
-              {user?.role}
-            </span>
+
+            {user?.role && (
+              <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[0.68rem] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-900 dark:text-amber-200 border border-amber-500/30 shrink-0">
+                <ShieldCheck size={12} className="text-amber-600 dark:text-amber-400" />
+                <span>{user.role === "admin" ? "Admin" : user.role === "expert" ? "Expert" : user.role}</span>
+              </span>
+            )}
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <Link
               to="/"
-              className="sf-btn sf-btn--ghost sf-btn--sm"
-              style={{ textDecoration: "none" }}
+              className="sf-btn sf-btn--ghost sf-btn--sm text-xs flex items-center gap-1.5 font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-text)] whitespace-nowrap"
             >
-              ← {t("admin.back_to_grower_app")}
+              <ArrowLeft size={14} className="shrink-0" />
+              <span className="hidden sm:inline">{t("admin.back_to_grower_app")}</span>
+              <span className="sm:hidden">App</span>
             </Link>
+
+            <ThemeToggle />
             <LanguageToggle />
           </div>
         </div>
       </header>
 
       {/* Body: Sidebar + Main Content */}
-      <div className="sf-admin-body">
+      <div className="flex-1 max-w-7xl w-full mx-auto flex flex-col md:flex-row min-h-0">
         {/* Sidebar */}
-        <aside className="sf-admin-sidebar" aria-label={t("admin.sidebar_label")}>
-          <nav className="sf-admin-nav">
-            {allowedItems.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`sf-admin-nav__link ${isActive(item) ? "sf-admin-nav__link--active" : ""}`}
-              >
-                <span className="sf-admin-nav__icon" aria-hidden="true">
-                  {item.icon}
-                </span>
-                <span className="sf-admin-nav__label">{t(item.labelKey)}</span>
-              </Link>
-            ))}
+        <aside
+          className="w-full md:w-60 shrink-0 border-b md:border-b-0 md:border-r border-[var(--color-border)] p-2 sm:p-4 bg-[var(--color-surface)] dark:bg-[var(--color-surface)]"
+          aria-label={t("admin.sidebar_label")}
+        >
+          <nav className="flex md:flex-col gap-1 overflow-x-auto pb-1 md:pb-0 no-scrollbar">
+            {allowedItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item);
+
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all whitespace-nowrap shrink-0 md:shrink ${
+                    active
+                      ? "bg-amber-500/15 text-amber-900 dark:text-amber-200 border border-amber-500/30 shadow-xs"
+                      : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text)]"
+                  }`}
+                >
+                  <Icon size={16} className={`shrink-0 ${active ? "text-amber-600 dark:text-amber-400" : "text-[var(--color-text-muted)]"}`} />
+                  <span className="truncate">{t(item.labelKey)}</span>
+                </Link>
+              );
+            })}
           </nav>
         </aside>
 
         {/* Workspace Content */}
-        <main className="sf-admin-main">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
           <Outlet />
         </main>
       </div>
     </div>
   );
 }
+

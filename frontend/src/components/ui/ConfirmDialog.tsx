@@ -1,6 +1,7 @@
 import type React from "react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { AlertTriangle, Info, Loader2, X } from "lucide-react";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -47,53 +48,50 @@ export function ConfirmDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 100,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        backdropFilter: "blur(2px)",
-        padding: "1rem",
+      className="sf-modal-backdrop"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isLoading) onCancel();
       }}
     >
-      <div
-        className="sf-card"
-        style={{
-          width: "100%",
-          maxWidth: "26rem",
-          padding: "1.5rem",
-          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2)",
-        }}
-      >
-        <h3
-          id="confirm-dialog-title"
-          style={{
-            margin: "0 0 0.5rem",
-            fontSize: "1.125rem",
-            fontWeight: 700,
-            color: isDangerEffective ? "hsl(4 80% 52%)" : "var(--color-text)",
-          }}
-        >
-          {title}
-        </h3>
-        <p
-          style={{
-            margin: "0 0 1.5rem",
-            fontSize: "0.875rem",
-            color: "var(--color-text-muted)",
-            lineHeight: 1.5,
-          }}
-        >
-          {message}
-        </p>
+      <div className="sf-card max-w-md w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150 border border-slate-200 dark:border-slate-800">
+        <div className="flex items-start gap-3.5">
+          <div
+            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+              isDangerEffective
+                ? "bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200 dark:border-rose-900"
+                : "bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200 dark:border-amber-900"
+            }`}
+          >
+            {isDangerEffective ? <AlertTriangle size={20} /> : <Info size={20} />}
+          </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem" }}>
+          <div className="flex-1 min-w-0">
+            <h3
+              id="confirm-dialog-title"
+              className="text-base font-bold text-slate-900 dark:text-slate-100"
+            >
+              {title}
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+              {message}
+            </p>
+          </div>
+
           <button
             type="button"
-            className="sf-btn sf-btn--ghost sf-btn--sm"
+            onClick={onCancel}
+            disabled={isLoading}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg transition-colors"
+            aria-label="Close"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button
+            type="button"
+            className="sf-btn sf-btn--ghost sf-btn--sm text-xs font-semibold"
             disabled={isLoading}
             onClick={onCancel}
           >
@@ -101,16 +99,16 @@ export function ConfirmDialog({
           </button>
           <button
             type="button"
-            className={`sf-btn sf-btn--sm ${isDangerEffective ? "sf-btn--primary" : "sf-btn--secondary"}`}
-            style={
-              isDangerEffective
-                ? { backgroundColor: "hsl(4 80% 52%)", borderColor: "hsl(4 80% 52%)" }
-                : {}
-            }
+            className={`sf-btn sf-btn--sm text-xs font-semibold ${
+              isDangerEffective ? "sf-btn--danger" : "sf-btn--primary"
+            }`}
             disabled={isLoading}
             onClick={onConfirm}
           >
-            {isLoading ? t("common.loading") : (confirmLabel ?? t("common.confirm"))}
+            {isLoading && <Loader2 size={13} className="animate-spin" />}
+            <span>
+              {isLoading ? t("common.loading") : (confirmLabel ?? t("common.confirm"))}
+            </span>
           </button>
         </div>
       </div>

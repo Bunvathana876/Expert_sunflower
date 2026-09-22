@@ -244,8 +244,8 @@ export function CheckerPage(): React.JSX.Element {
           </div>
 
           {/* Quick Stats Pill */}
-          <div className="flex items-center gap-2 self-start md:self-auto bg-slate-100 dark:bg-slate-800/80 px-3.5 py-1.5 rounded-full border border-slate-200/80 dark:border-slate-700 text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="flex items-center gap-2 self-start md:self-auto bg-slate-100 dark:bg-stone-800/80 px-3.5 py-1.5 rounded-full border border-slate-200/80 dark:border-slate-700 text-xs font-semibold">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
             <span className="text-slate-700 dark:text-slate-300">
               {t("checker.answered_count", { count: answeredCount, total: totalSymptoms })}
             </span>
@@ -264,7 +264,7 @@ export function CheckerPage(): React.JSX.Element {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t("checker.search_placeholder")}
-            className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all"
+            className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl bg-white dark:bg-stone-900/70 border border-slate-200 dark:border-slate-700/80 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all"
           />
           {searchQuery && (
             <button
@@ -332,7 +332,7 @@ export function CheckerPage(): React.JSX.Element {
                 key={id}
                 className={`sf-chip sf-chip--removable ${
                   answer === "yes"
-                    ? "bg-emerald-50 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-200 border-emerald-300 dark:border-emerald-800"
+                    ? "bg-amber-50 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200 border-amber-300 dark:border-amber-800"
                     : "bg-rose-50 text-rose-900 dark:bg-rose-950/60 dark:text-rose-200 border-rose-300 dark:border-rose-800"
                 }`}
               >
@@ -431,12 +431,12 @@ export function CheckerPage(): React.JSX.Element {
                 {previewData.next_best_questions.slice(0, 4).map((q) => (
                   <div
                     key={q.symptom}
-                    className="p-2.5 rounded-lg bg-white/80 dark:bg-slate-900/60 border border-amber-500/20 flex justify-between items-center text-xs"
+                    className="p-2.5 rounded-lg bg-white/80 dark:bg-stone-900/70 border border-amber-500/20 flex justify-between items-center text-xs"
                   >
                     <span className="font-medium text-slate-800 dark:text-slate-200 truncate mr-2">
                       {q.symptom}
                     </span>
-                    <span className="text-[0.7rem] font-bold text-emerald-700 dark:text-emerald-400 shrink-0 bg-emerald-100/80 dark:bg-emerald-950 px-1.5 py-0.5 rounded">
+                    <span className="text-[0.7rem] font-bold text-amber-700 dark:text-amber-400 shrink-0 bg-amber-100/80 dark:bg-amber-950 px-1.5 py-0.5 rounded">
                       +{Math.round(q.information_gain * 100)}%
                     </span>
                   </div>

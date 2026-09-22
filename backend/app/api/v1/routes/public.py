@@ -5,13 +5,13 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db
 from app.models.disease import Disease
 from app.models.symptom import Symptom
-from pydantic import BaseModel
 
 router = APIRouter(prefix="/public", tags=["public"])
 

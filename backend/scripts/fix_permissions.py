@@ -5,8 +5,8 @@ Can be run on production database via environment variables.
 import asyncio
 import sys
 
-from scripts.seed import seed_database
 from app.db.session import async_session_factory
+from scripts.seed import seed_database
 
 
 async def main() -> None:

@@ -4,15 +4,14 @@ from __future__ import annotations
 
 import base64
 import logging
-from pathlib import Path
+from io import BytesIO
 from typing import Any
 
 from PIL import Image
-from io import BytesIO
 
 from ai.config import ai_config
 from ai.schemas.ai_schemas import ImageAnalysisResponse, ImageObservation
-from ai.services.json_parser import extract_json_from_response, safe_json_parse
+from ai.services.json_parser import extract_json_from_response
 from ai.services.ollama_service import OllamaService, get_ollama_service
 from ai.services.prompt_loader import load_prompt
 

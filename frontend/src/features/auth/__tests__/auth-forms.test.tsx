@@ -19,6 +19,7 @@ describe("Auth Forms", () => {
       isLoading: false,
       login: mockLogin,
       register: mockRegister,
+      updateProfile: vi.fn(),
       logout: vi.fn(),
       refreshSession: vi.fn(),
       hasPermission: vi.fn().mockReturnValue(false),

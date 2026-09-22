@@ -1,40 +1,42 @@
 # Sunflower Expert System 🌻
 
-AI-powered bilingual (English/Khmer) expert system for diagnosing sunflower diseases with intelligent symptom analysis, image recognition, and real-time knowledge management.
+AI-powered bilingual (English/Khmer) expert system for diagnosing sunflower diseases with intelligent symptom analysis, image recognition, real-time knowledge management, and agronomist tooling.
 
-## ✨ Features
+---
 
-### For Growers:
-- 🔍 **Disease Diagnosis** - Expert system with symptom-based diagnosis
-- 📸 **Image Analysis** - AI-powered vision system for disease identification  
-- 💬 **AI Assistant** - Natural language chat for plant health questions
-- 📊 **Diagnosis History** - Track and review past diagnoses
-- 📝 **Feedback System** - Report issues and request improvements
-- 🌐 **Bilingual** - Full support for English and Khmer languages
+## ✨ Key Features
 
-### For Experts (Agronomists):
-- 🦠 **Disease Management** - Create, update, and manage disease database
-- 🔬 **Symptom Management** - Configure symptoms and diagnostic weights
-- 📈 **Analytics Dashboard** - View system usage and diagnosis patterns
-- 💬 **AI Admin Chat** - Natural language commands to modify database
-- 📬 **Feedback Management** - Review and respond to user feedback
-- 🌍 **Translation Tools** - Manage multilingual content
+### 👨‍🌾 For Growers:
+- 🔍 **Interactive Disease Diagnosis** – Step-by-step symptom checker with visual plant part categories (leaves, stems, flowers, roots).
+- 📸 **AI Vision Analysis** – Multimodal disease identification from plant photos.
+- 💬 **AI Plant Health Assistant** – Real-time chat for sunflower care advice, disease prevention, and organic/chemical treatments.
+- 👤 **User Profile & Account Management** – Edit details, change password, and manage active session with instant refresh persistence.
+- 📊 **Diagnosis History** – Review and track past diagnosis sessions and confidence ratings.
+- 📝 **Feedback System** – Submit field feedback and report discrepancies to agronomists.
+- 🌐 **Full Bilingual Support** – English and Khmer (ភាសាខ្មែរ) with seamless switching.
 
-### For Administrators:
-- 👥 **User Management** - Manage user accounts and roles
-- 🔐 **Role-Based Access Control** - Fine-grained permissions system
-- ⚙️ **Ruleset Configuration** - Tune diagnosis algorithm parameters
-- 📊 **System Analytics** - Monitor system health and performance
-- 💬 **Full AI Capabilities** - Advanced AI-powered data management
-- 🔧 **System Configuration** - Manage system settings
+###  For Agronomists & Experts:
+- 🦠 **Disease Knowledge Base** – Create, review, and publish diseases with causative pathogens and treatment guidelines.
+- 🧬 **Symptom Weighting & Rulesets** – Configure diagnostic indicators, symptom severity, and Bayesian inference weights.
+- 💬 **AI Admin Assistant** – Natural language querying and automated rule suggestions.
+- 📬 **Grower Feedback Review** – Validate diagnosis accuracy and incorporate field reports into the knowledge graph.
+
+### 🛡️ For Administrators:
+- 👥 **User & Role Management** – Fine-grained Role-Based Access Control (RBAC) with granular permissions.
+- 📈 **Analytics Dashboard** – Real-time stats on disease frequency, diagnostic confidence, and user activity.
+- 🔑 **Secure Authentication** – Argon2id password hashing, JWT access tokens, and HttpOnly refresh token rotation with local & production cookie security.
+
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.12+
-- Node.js 18+
-- PostgreSQL 14+
-- Ollama (for AI features)
+- **Python 3.12+**
+- **Node.js 20+** & npm
+- **PostgreSQL 14+**
+- **Ollama** (optional, for local AI chat & vision features)
+
+---
 
 ### Option 1: Docker (Recommended)
 
@@ -43,188 +45,139 @@ AI-powered bilingual (English/Khmer) expert system for diagnosing sunflower dise
 git clone <your-repo-url>
 cd sunflower-expert
 
-# Start services
+# Start full stack (API, DB, Frontend, Ollama)
 docker compose up --build
 
-# Run migrations and seed data
+# Run database migrations and seed initial data
 docker compose exec api alembic upgrade head
 docker compose exec api python -m scripts.seed
 ```
 
 Access:
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:8000
-- **API Docs**: http://localhost:8000/docs
+- **Frontend App**: [http://localhost:5173](http://localhost:5173)
+- **Backend API Docs (Swagger UI)**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+---
 
 ### Option 2: Local Development
 
-**Backend:**
+#### 1. Backend Setup:
 ```bash
 cd backend
 python3 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
 pip install -e .
+
+# Configure environment
+cp ../.env.example .env
+
+# Apply migrations and seed data
 alembic upgrade head
 python -m scripts.seed
-uvicorn app.main:app --reload
+
+# Start FastAPI server
+uvicorn app.main:app --reload --port 8000
 ```
 
-**Frontend:**
+#### 2. Frontend Setup:
 ```bash
 cd frontend
+
+# Install packages
 npm install
+
+# Start Vite dev server
 npm run dev
 ```
 
-**Ollama (AI Features):**
+#### 3. AI Setup (Ollama):
 ```bash
-ollama pull qwen2.5:7b    # Main AI model
-ollama pull llava:7b      # Vision model
+# Pull recommended models
+ollama pull qwen2.5:7b    # Chat & reasoning
+ollama pull llava:7b      # Vision & disease leaf recognition
 ollama serve
 ```
 
-## 📖 Documentation
-
-| Document | Description |
-|----------|-------------|
-| **[SETUP_INSTRUCTIONS.md](SETUP_INSTRUCTIONS.md)** | Complete setup guide for new developers |
-| **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** | System architecture and data model |
-| **[AI_ADMIN_COMMANDS.md](AI_ADMIN_COMMANDS.md)** | AI admin chat commands |
-| **[AI_INTEGRATION.md](AI_INTEGRATION.md)** | AI integration guide |
-| **[AI_PERMISSIONS.md](AI_PERMISSIONS.md)** | Permission system documentation |
-| **[FEEDBACK_SYSTEM_OVERVIEW.md](FEEDBACK_SYSTEM_OVERVIEW.md)** | Feedback feature documentation |
-| **[CLEANUP_GUIDE.md](CLEANUP_GUIDE.md)** | Project cleanup before deployment |
-
-## 🏗️ Project Structure
-
-```
-sunflower-expert/
-├── backend/              # FastAPI + PostgreSQL
-│   ├── app/             # Application code
-│   │   ├── api/         # API routes
-│   │   ├── models/      # Database models
-│   │   ├── services/    # Business logic
-│   │   └── schemas/     # Pydantic schemas
-│   ├── ai/              # AI services (Ollama)
-│   ├── alembic/         # Database migrations
-│   └── tests/           # Backend tests
-│
-├── frontend/            # React + TypeScript
-│   ├── src/
-│   │   ├── features/    # Feature modules
-│   │   ├── components/  # Shared components
-│   │   └── api/         # API client
-│   └── public/          # Static assets
-│
-└── docs/                # Documentation
-```
+---
 
 ## 🔑 Default Credentials
 
-After running seed script:
+After running `python -m scripts.seed`:
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@example.com | change-me-before-production |
-| Expert | expert@example.com | change-me-before-production |
-| Grower | grower@example.com | change-me-before-production |
+| **Admin** | `admin@example.com` | `admin123456` |
+| **Expert** | `expert@example.com` | `expert123456` |
+| **Grower** | `grower@example.com` | `grower123456` |
 
-**⚠️ Change these before deploying to production!**
-
-## 🧪 Testing
-
-**Backend:**
-```bash
-cd backend
-source .venv/bin/activate
-pytest
-```
-
-**Frontend:**
-```bash
-cd frontend
-npm test
-```
-
-**Linting:**
-```bash
-# Backend
-cd backend
-ruff format .
-ruff check --fix .
-
-# Frontend
-cd frontend
-npm run lint
-```
-
-## 🌐 API Endpoints
-
-### Public Endpoints:
-- `GET /api/v1/diseases` - List published diseases
-- `POST /api/v1/diagnosis/run` - Run diagnosis session
-- `POST /api/v1/feedback` - Submit feedback
-
-### Admin Endpoints:
-- `GET /api/v1/admin/users` - Manage users
-- `POST /api/v1/diseases` - Create diseases
-- `PUT /api/v1/diseases/{id}` - Update diseases
-- `GET /api/v1/analytics/overview` - System analytics
-
-### AI Endpoints:
-- `POST /api/v1/ai/chat` - Chat with AI assistant
-- `POST /api/v1/ai/admin/chat` - AI admin commands
-- `POST /api/v1/ai/analyze-image` - Analyze plant images
-
-Full API documentation: http://localhost:8000/docs
-
-## 🛠️ Technologies
-
-### Backend:
-- **FastAPI** - Modern Python web framework
-- **PostgreSQL** - Relational database
-- **SQLAlchemy** - ORM
-- **Alembic** - Database migrations
-- **Ollama** - Local AI models
-- **Pydantic** - Data validation
-
-### Frontend:
-- **React 18** - UI library
-- **TypeScript** - Type safety
-- **Vite** - Build tool
-- **TanStack Query** - Data fetching
-- **React Router** - Navigation
-- **i18next** - Internationalization
-
-### AI/ML:
-- **Ollama** - Local LLM server
-- **Qwen 2.5** - Language model
-- **LLaVA** - Vision model
-
-## 📝 License
-
-[Your License Here]
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read our contributing guidelines.
-
-## 📧 Support
-
-For issues and questions:
-- Create an issue on GitHub
-- Check documentation in `/docs`
-- Review setup instructions
-
-## 🎯 Roadmap
-
-- [ ] Mobile app (React Native)
-- [ ] Offline mode support
-- [ ] Multi-crop support
-- [ ] Advanced analytics
-- [ ] API versioning
-- [ ] Automated testing CI/CD
+> ⚠️ **Important**: Update default passwords before deploying to a public production server. You can reset the admin password anytime using:
+> ```bash
+> cd backend
+> python3 -m scripts.reset_admin_password
+> ```
 
 ---
 
-**Built with ❤️ for sustainable agriculture** 🌱
+## 🧪 Testing & Code Quality
+
+### Backend Tests
+```bash
+cd backend
+python3 -m pytest
+```
+
+### Frontend Tests & Type Checking
+```bash
+cd frontend
+
+# Run Vitest test suites
+npm test -- --run
+
+# TypeScript type check
+npm run typecheck
+
+# Production build test
+npm run build
+```
+
+---
+
+## 🏗️ Tech Stack
+
+### Frontend
+- **React 19** + **TypeScript**
+- **Vite** + **Tailwind CSS 4**
+- **TanStack Query** (React Query)
+- **React Router 7**
+- **Lucide Icons**
+- **i18next** (English & Khmer)
+
+### Backend & Database
+- **FastAPI** (Python 3.12+)
+- **SQLAlchemy 2.0 (Async)** + **Alembic**
+- **PostgreSQL**
+- **Argon2id** & **JWT (Jose)**
+- **Pydantic v2**
+
+### AI Engine
+- **Ollama** (Local self-hosted LLM/VLM runtime)
+- **Qwen 2.5** & **LLaVA**
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📝 License
+
+Distributed under the MIT License. See `LICENSE` for more information.

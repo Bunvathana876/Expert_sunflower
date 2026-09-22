@@ -261,11 +261,11 @@ export function ResultPage(): React.JSX.Element {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
                     {/* Supporting Symptoms */}
-                    <div className="p-3 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/30">
-                      <div className="text-xs font-bold text-emerald-800 dark:text-emerald-300 mb-1.5 flex items-center gap-1">
+                    <div className="p-3 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30">
+                      <div className="text-xs font-bold text-amber-800 dark:text-amber-300 mb-1.5 flex items-center gap-1">
                         <CheckCircle2 size={13} />
                         <span>{t("checker.evidence_supporting")}</span>
-                        <span className="text-[0.65rem] text-emerald-600 dark:text-emerald-400">
+                        <span className="text-[0.65rem] text-amber-600 dark:text-amber-400">
                           ({result.evidence.supporting.length})
                         </span>
                       </div>
@@ -274,10 +274,10 @@ export function ResultPage(): React.JSX.Element {
                           result.evidence.supporting.map((ev) => (
                             <span
                               key={ev.symptom}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 text-[0.7rem] font-medium rounded-md bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-900/60 text-slate-800 dark:text-slate-200"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 text-[0.7rem] font-medium rounded-md bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/60 text-slate-800 dark:text-slate-200"
                             >
                               <span>{ev.symptom}</span>
-                              <span className="text-emerald-700 dark:text-emerald-400 font-mono text-[0.65rem]">
+                              <span className="text-amber-700 dark:text-amber-400 font-mono text-[0.65rem]">
                                 +{Math.round(ev.weight * 100)}%
                               </span>
                             </span>
@@ -360,7 +360,7 @@ export function ResultPage(): React.JSX.Element {
 
                   <Link
                     to={`/diseases/${result.disease.slug}`}
-                    className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                    className="text-xs font-semibold text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1"
                   >
                     <span>{t("result.view_guide")}</span>
                     <ExternalLink size={12} />
@@ -424,7 +424,7 @@ export function ResultPage(): React.JSX.Element {
             {session.selected_symptoms.map((s) => (
               <div
                 key={s.symptom_id}
-                className="p-2 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 flex items-center gap-2 text-xs"
+                className="p-2 rounded-lg bg-slate-50 dark:bg-stone-900/70 border border-slate-200/60 dark:border-slate-800 flex items-center gap-2 text-xs"
               >
                 <span>{s.answer === "yes" ? "✅" : s.answer === "no" ? "❌" : "❓"}</span>
                 <span className="font-mono text-slate-700 dark:text-slate-300 truncate">

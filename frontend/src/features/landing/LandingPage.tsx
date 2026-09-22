@@ -52,16 +52,16 @@ export function LandingPage(): React.JSX.Element {
         />
 
         {/* AI Badge */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 dark:bg-amber-400/15 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs font-bold uppercase tracking-wider">
-          <Sparkles size={13} className="text-amber-600 dark:text-amber-400" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-600/50 text-amber-900 dark:text-amber-200 text-xs font-bold uppercase tracking-wider">
+          <Sparkles size={13} className="text-amber-700 dark:text-amber-400" />
           <span>Agricultural Expert System</span>
         </div>
 
         <div className="space-y-3 max-w-2xl mx-auto">
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 leading-tight">
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-tight">
             {t("landing.hero_title")}
           </h1>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed font-normal">
             {t("landing.hero_subtitle")}
           </p>
         </div>
@@ -87,28 +87,28 @@ export function LandingPage(): React.JSX.Element {
         </div>
 
         {/* Live System Metrics */}
-        <div className="grid grid-cols-3 max-w-lg mx-auto pt-6 border-t border-slate-200/60 dark:border-slate-800/80 gap-3 text-center">
+        <div className="grid grid-cols-3 max-w-lg mx-auto pt-6 border-t border-gray-200 dark:border-stone-800 gap-3 text-center">
           <div>
-            <div className="text-lg sm:text-2xl font-bold font-mono text-slate-900 dark:text-slate-100">
+            <div className="text-lg sm:text-2xl font-extrabold font-mono text-gray-900 dark:text-white">
               {stats ? stats.published_diseases : "—"}
             </div>
-            <div className="text-[0.68rem] text-slate-500 uppercase tracking-wider font-semibold">
+            <div className="text-[0.68rem] text-gray-600 dark:text-gray-400 uppercase tracking-wider font-bold">
               Crop Pathogens
             </div>
           </div>
           <div>
-            <div className="text-lg sm:text-2xl font-bold font-mono text-slate-900 dark:text-slate-100">
+            <div className="text-lg sm:text-2xl font-extrabold font-mono text-gray-900 dark:text-white">
               {stats ? stats.total_symptoms : "—"}
             </div>
-            <div className="text-[0.68rem] text-slate-500 uppercase tracking-wider font-semibold">
+            <div className="text-[0.68rem] text-gray-600 dark:text-gray-400 uppercase tracking-wider font-bold">
               Symptom Indicators
             </div>
           </div>
           <div>
-            <div className="text-lg sm:text-2xl font-bold font-mono text-emerald-700 dark:text-emerald-400">
+            <div className="text-lg sm:text-2xl font-extrabold font-mono text-amber-800 dark:text-amber-400">
               Real-Time
             </div>
-            <div className="text-[0.68rem] text-slate-500 uppercase tracking-wider font-semibold">
+            <div className="text-[0.68rem] text-gray-600 dark:text-gray-400 uppercase tracking-wider font-bold">
               Multi-Attribute AI
             </div>
           </div>
@@ -118,41 +118,41 @@ export function LandingPage(): React.JSX.Element {
       {/* How It Works 3-Step Interactive Cards */}
       <section className="space-y-6">
         <div className="text-center space-y-1">
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
             {t("landing.how_it_works_title")}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500">{t("landing.how_it_works_subtitle")}</p>
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{t("landing.how_it_works_subtitle")}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="sf-glass-card p-6 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-800 dark:text-amber-400 flex items-center justify-center font-bold text-base">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-300 flex items-center justify-center font-bold text-base border border-amber-300 dark:border-amber-700/50">
               <Search size={20} />
             </div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">
               {t("landing.step1_title")}
             </h3>
-            <p className="text-xs text-slate-500 leading-relaxed">{t("landing.step1_desc")}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">{t("landing.step1_desc")}</p>
           </div>
 
           <div className="sf-glass-card p-6 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 flex items-center justify-center font-bold text-base">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-300 flex items-center justify-center font-bold text-base border border-amber-300 dark:border-amber-700/50">
               <Cpu size={20} />
             </div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">
               {t("landing.step2_title")}
             </h3>
-            <p className="text-xs text-slate-500 leading-relaxed">{t("landing.step2_desc")}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">{t("landing.step2_desc")}</p>
           </div>
 
           <div className="sf-glass-card p-6 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-800 dark:text-blue-400 flex items-center justify-center font-bold text-base">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-900 dark:text-blue-300 flex items-center justify-center font-bold text-base border border-blue-300 dark:border-blue-700/50">
               <FileCheck size={20} />
             </div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">
               {t("landing.step3_title")}
             </h3>
-            <p className="text-xs text-slate-500 leading-relaxed">{t("landing.step3_desc")}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">{t("landing.step3_desc")}</p>
           </div>
         </div>
       </section>
@@ -161,14 +161,14 @@ export function LandingPage(): React.JSX.Element {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
               {t("landing.featured_title")}
             </h2>
-            <p className="text-xs text-slate-500">{t("landing.featured_subtitle")}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-300">{t("landing.featured_subtitle")}</p>
           </div>
           <Link
             to="/diseases"
-            className="text-xs font-semibold text-amber-800 dark:text-amber-400 hover:underline flex items-center gap-1"
+            className="text-xs font-semibold text-amber-900 dark:text-amber-400 hover:underline flex items-center gap-1"
           >
             <span>{t("landing.view_all")}</span>
             <ArrowRight size={14} />
@@ -195,12 +195,12 @@ export function LandingPage(): React.JSX.Element {
       </section>
 
       {/* Trust & Localization Banner */}
-      <section className="sf-glass-card p-6 sm:p-8 text-center space-y-2 border-emerald-500/20">
-        <div className="flex items-center justify-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-sm">
+      <section className="sf-glass-card p-6 sm:p-8 text-center space-y-2 border-amber-500/30">
+        <div className="flex items-center justify-center gap-2 text-amber-900 dark:text-amber-300 font-bold text-sm">
           <ShieldCheck size={18} />
           <span>{t("landing.trust_title")}</span>
         </div>
-        <p className="text-xs text-slate-500 max-w-xl mx-auto leading-relaxed">
+        <p className="text-xs text-gray-600 dark:text-gray-300 max-w-xl mx-auto leading-relaxed">
           {t("landing.trust_desc")}
         </p>
       </section>

@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  ShieldCheck,
+  Key,
+  Save,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Lock,
+} from "lucide-react";
 import { useAdminRoles, useUpdateRolePermissions } from "../hooks";
 
 export function RolesPage(): React.JSX.Element {
@@ -101,11 +110,21 @@ export function RolesPage(): React.JSX.Element {
   const roles = rolesData?.items ?? [];
 
   return (
-    <div className="sf-admin-page">
-      <div className="sf-admin-page__header">
+    <div className="sf-admin-page max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="sf-admin-page__header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="sf-admin-page__title">{t("admin.roles_title")}</h1>
-          <p className="sf-admin-page__desc">{t("admin.roles_subtitle")}</p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 dark:bg-amber-400/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <h1 className="sf-admin-page__title text-2xl font-bold tracking-tight">
+              {t("admin.roles_title")}
+            </h1>
+          </div>
+          <p className="sf-admin-page__desc text-sm text-[var(--color-text-muted)] mt-1">
+            {t("admin.roles_subtitle")}
+          </p>
         </div>
       </div>
 
@@ -113,85 +132,109 @@ export function RolesPage(): React.JSX.Element {
         <div
           className={`sf-alert ${
             statusMessage.type === "success" ? "sf-alert--success" : "sf-alert--danger"
-          }`}
-          style={{ marginBottom: "1.5rem" }}
+          } flex items-center gap-2 mb-6`}
           role="alert"
         >
-          {statusMessage.text}
+          {statusMessage.type === "success" ? (
+            <CheckCircle2 className="w-5 h-5 text-amber-600 shrink-0" />
+          ) : (
+            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+          )}
+          <span>{statusMessage.text}</span>
         </div>
       )}
 
       {isLoading ? (
-        <div className="sf-loading-state" style={{ padding: "3rem", textAlign: "center" }}>
-          <span className="sf-spinner" aria-hidden="true" />
-          <p style={{ marginTop: "1rem", color: "var(--color-text-muted)" }}>
+        <div className="sf-card flex flex-col items-center justify-center py-16 text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-amber-600 dark:text-amber-400" />
+          <p className="mt-3 text-sm font-medium text-[var(--color-text-muted)]">
             {t("common.loading")}
           </p>
         </div>
       ) : isError || !rolesData ? (
-        <div className="sf-alert sf-alert--danger" role="alert">
-          {t("admin.roles_load_error")}
+        <div className="sf-alert sf-alert--danger flex items-center gap-2" role="alert">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span>{t("admin.roles_load_error")}</span>
         </div>
       ) : (
-        <div className="sf-card" style={{ padding: "0", overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}>
-            <table className="sf-table sf-matrix-table">
+        <div className="sf-card p-0 overflow-hidden shadow-sm border border-[var(--color-border)]">
+          <div className="overflow-x-auto">
+            <table className="sf-table sf-matrix-table w-full">
               <thead>
-                <tr>
-                  <th style={{ width: "40%" }}>{t("admin.roles_col_permission")}</th>
-                  {roles.map((role) => (
-                    <th key={role.id} style={{ textAlign: "center", minWidth: "140px" }}>
-                      <div
-                        style={{ fontWeight: 600, fontSize: "1rem", textTransform: "capitalize" }}
+                <tr className="border-b border-[var(--color-border)]">
+                  <th className="w-2/5 font-semibold text-xs uppercase tracking-wider text-[var(--color-text-muted)] py-4 px-6 text-left">
+                    <div className="flex items-center gap-2">
+                      <Key className="w-4 h-4 text-amber-600" />
+                      <span>{t("admin.roles_col_permission")}</span>
+                    </div>
+                  </th>
+                  {roles.map((role) => {
+                    const dirty = isRoleDirty(role.id);
+                    const isSaving = savingRoleId === role.id;
+                    return (
+                      <th
+                        key={role.id}
+                        className="py-4 px-4 text-center min-w-[140px] border-l border-[var(--color-border-subtle)]"
                       >
-                        {role.name}
-                      </div>
-                      <div style={{ marginTop: "0.5rem" }}>
-                        <button
-                          type="button"
-                          className="sf-btn sf-btn--primary sf-btn--sm"
-                          disabled={!isRoleDirty(role.id) || savingRoleId === role.id}
-                          onClick={() => void handleSaveRole(role.id)}
-                        >
-                          {savingRoleId === role.id ? t("common.saving") : t("common.save")}
-                        </button>
-                      </div>
-                    </th>
-                  ))}
+                        <div className="font-bold text-sm text-[var(--color-text)] capitalize">
+                          {role.name}
+                        </div>
+                        <div className="mt-2 flex justify-center">
+                          <button
+                            type="button"
+                            className={`sf-btn sf-btn--sm inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                              dirty
+                                ? "bg-amber-600 hover:bg-amber-700 text-white shadow-sm ring-2 ring-amber-500/20"
+                                : "opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400"
+                            }`}
+                            disabled={!dirty || isSaving}
+                            onClick={() => void handleSaveRole(role.id)}
+                          >
+                            {isSaving ? (
+                              <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                <span>{t("common.saving")}</span>
+                              </>
+                            ) : (
+                              <>
+                                <Save className="w-3.5 h-3.5" />
+                                <span>{t("common.save")}</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[var(--color-border-subtle)]">
                 {Object.entries(permGroups).map(([group, permissions]) => (
                   <React.Fragment key={group}>
-                    <tr style={{ backgroundColor: "var(--color-bg-subtle, #f8fafc)" }}>
+                    <tr className="bg-[var(--color-bg-subtle)]/70">
                       <td
                         colSpan={roles.length + 1}
-                        style={{
-                          fontWeight: 700,
-                          fontSize: "0.8125rem",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                          color: "var(--color-text-muted)",
-                          padding: "0.5rem 1rem",
-                        }}
+                        className="font-bold text-xs uppercase tracking-wider text-amber-700 dark:text-amber-400 py-2.5 px-6"
                       >
-                        {group} {t("admin.roles_module_suffix")}
+                        <div className="flex items-center gap-2">
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>
+                            {group} {t("admin.roles_module_suffix")}
+                          </span>
+                        </div>
                       </td>
                     </tr>
                     {permissions.map((perm) => (
-                      <tr key={perm.id}>
-                        <td>
-                          <div
-                            style={{
-                              fontFamily: "monospace",
-                              fontWeight: 600,
-                              fontSize: "0.875rem",
-                            }}
-                          >
+                      <tr
+                        key={perm.id}
+                        className="transition-colors hover:bg-[var(--color-bg-subtle)]/50"
+                      >
+                        <td className="py-3 px-6">
+                          <div className="font-mono font-semibold text-xs text-[var(--color-text)] bg-slate-100 dark:bg-stone-800/80 px-2 py-0.5 rounded inline-block">
                             {perm.code}
                           </div>
                           {perm.description && (
-                            <div style={{ fontSize: "0.75rem", color: "var(--color-text-muted)" }}>
+                            <div className="text-xs text-[var(--color-text-muted)] mt-1">
                               {perm.description}
                             </div>
                           )}
@@ -199,13 +242,16 @@ export function RolesPage(): React.JSX.Element {
                         {roles.map((role) => {
                           const isChecked = rolePermissions[role.id]?.has(perm.code) ?? false;
                           return (
-                            <td key={role.id} style={{ textAlign: "center" }}>
+                            <td
+                              key={role.id}
+                              className="text-center py-3 px-4 border-l border-[var(--color-border-subtle)]"
+                            >
                               <input
                                 type="checkbox"
                                 checked={isChecked}
                                 onChange={() => handleTogglePermission(role.id, perm.code)}
                                 aria-label={`${role.name} - ${perm.code}`}
-                                style={{ width: "1.125rem", height: "1.125rem", cursor: "pointer" }}
+                                className="w-4 h-4 text-amber-600 rounded border-[var(--color-border)] focus:ring-amber-500 cursor-pointer accent-amber-600"
                               />
                             </td>
                           );
@@ -222,3 +268,4 @@ export function RolesPage(): React.JSX.Element {
     </div>
   );
 }
+

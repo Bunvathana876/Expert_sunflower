@@ -8,9 +8,43 @@ import React, {
   type ReactNode,
 } from "react";
 import { setOnRefreshNeeded, setTokenGetter } from "@/api/client";
-import { loginApi, logoutApi, refreshApi, registerApi } from "./api";
+import { loginApi, logoutApi, refreshApi, registerApi, updateMeApi } from "./api";
 import { singleFlightRefresh } from "./refresh";
-import type { LoginCredentials, RegisterCredentials, User } from "./types";
+import type { LoginCredentials, RegisterCredentials, UpdateMeCredentials, User } from "./types";
+
+const USER_STORAGE_KEY = "sunflower_auth_user";
+const TOKEN_STORAGE_KEY = "sunflower_access_token";
+
+function getStoredUser(): User | null {
+  try {
+    const raw = localStorage.getItem(USER_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
+}
+
+function getStoredToken(): string | null {
+  try {
+    return localStorage.getItem(TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function saveStoredAuth(token: string | null, userData: User | null): void {
+  try {
+    if (token && userData) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+    } else {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      localStorage.removeItem(USER_STORAGE_KEY);
+    }
+  } catch {
+    // Ignore storage quota or access errors
+  }
+}
 
 interface AuthContextType {
   user: User | null;
@@ -19,6 +53,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
+  updateProfile: (credentials: UpdateMeCredentials) => Promise<User>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<string | null>;
   hasPermission: (code: string) => boolean;
@@ -32,24 +67,26 @@ export interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<User | null>(() => getStoredUser());
+  const [accessToken, setAccessToken] = useState<string | null>(() => getStoredToken());
+  const [isLoading, setIsLoading] = useState<boolean>(() => !getStoredUser());
 
   // Keep a ref to the latest accessToken so setTokenGetter can read it synchronously
-  const tokenRef = useRef<string | null>(null);
+  const tokenRef = useRef<string | null>(accessToken);
   tokenRef.current = accessToken;
 
   const handleAuthSuccess = useCallback((token: string, userData: User) => {
     tokenRef.current = token;
     setAccessToken(token);
     setUser(userData);
+    saveStoredAuth(token, userData);
   }, []);
 
   const handleAuthClear = useCallback(() => {
     tokenRef.current = null;
     setAccessToken(null);
     setUser(null);
+    saveStoredAuth(null, null);
   }, []);
 
   const refreshSession = useCallback(async (): Promise<string | null> => {
@@ -72,7 +109,7 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
     setOnRefreshNeeded(refreshSession);
   }, [refreshSession]);
 
-  // Attempt initial session restoration on mount
+  // Attempt initial session restoration/validation on mount
   useEffect(() => {
     let mounted = true;
 
@@ -84,6 +121,7 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
         }
       } catch {
         if (mounted) {
+          // If refresh fails on mount and we have no valid cookie/session, clear stale cache
           handleAuthClear();
         }
       } finally {
@@ -116,6 +154,18 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
     [handleAuthSuccess],
   );
 
+  const updateProfile = useCallback(
+    async (credentials: UpdateMeCredentials): Promise<User> => {
+      const updatedUser = await updateMeApi(credentials);
+      setUser(updatedUser);
+      if (tokenRef.current) {
+        saveStoredAuth(tokenRef.current, updatedUser);
+      }
+      return updatedUser;
+    },
+    [],
+  );
+
   const logout = useCallback(async (): Promise<void> => {
     try {
       await logoutApi();
@@ -135,10 +185,11 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
   const value: AuthContextType = {
     user,
     accessToken,
-    isAuthenticated: !!user && !!accessToken,
+    isAuthenticated: !!user,
     isLoading,
     login,
     register,
+    updateProfile,
     logout,
     refreshSession,
     hasPermission,

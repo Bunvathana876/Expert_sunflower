@@ -152,7 +152,7 @@ export function AnalysisProgressModal({
             border: "1px solid var(--color-border)",
           }}
         >
-          <ShieldCheck size={16} className="text-emerald-600 shrink-0" aria-hidden="true" />
+          <ShieldCheck size={16} className="text-green-600 shrink-0" aria-hidden="true" />
           <span className="text-[0.72rem] leading-tight">{t("analysis.safety_notice")}</span>
         </div>
       </div>

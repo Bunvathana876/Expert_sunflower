@@ -6,12 +6,10 @@ Helps experts create, edit, and validate disease knowledge entries.
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ai.config import ai_config
 from ai.schemas.ai_schemas import (
     DiseaseDraft,
     DiseaseDraftRequest,
@@ -20,12 +18,11 @@ from ai.schemas.ai_schemas import (
     DuplicateCheckResponse,
     DuplicateMatch,
 )
-from ai.services.json_parser import extract_json_from_response, safe_json_parse
+from ai.services.json_parser import extract_json_from_response
 from ai.services.ollama_service import OllamaService, get_ollama_service
 from ai.services.prompt_loader import load_prompt
 from ai.services.vision_service import VisionService
 from app.models.disease import Disease
-from app.models.translation import Translation
 
 logger = logging.getLogger(__name__)
 

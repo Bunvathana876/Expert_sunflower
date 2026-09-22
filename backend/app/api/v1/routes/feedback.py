@@ -40,7 +40,7 @@ async def list_feedback(
     can_read_all = current_user.has_permission("feedback:read")
     
     # Debug logging
-    print(f"\n[FEEDBACK API] ===== LIST FEEDBACK =====")
+    print("\n[FEEDBACK API] ===== LIST FEEDBACK =====")
     print(f"[FEEDBACK API] User: {current_user.email}")
     print(f"[FEEDBACK API] User ID: {current_user.id}")
     print(f"[FEEDBACK API] Role: {current_user.role.name if current_user.role else 'None'}")

@@ -78,7 +78,7 @@ export function DiseaseDetailModal({
                   {pathogenType}
                 </span>
                 {result && (
-                  <span className="px-2 py-0.5 text-[0.7rem] font-bold rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                  <span className="px-2 py-0.5 text-[0.7rem] font-bold rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
                     Rank #{result.rank}
                   </span>
                 )}
@@ -157,7 +157,7 @@ export function DiseaseDetailModal({
                   )}
 
                   {result && (
-                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between gap-4">
+                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-stone-800/60 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between gap-4">
                       <div>
                         <div className="text-xs font-bold text-slate-900 dark:text-slate-100">
                           {t("result.match_score")}
@@ -196,7 +196,7 @@ export function DiseaseDetailModal({
                           className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60"
                         >
                           <div className="text-xs font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-1.5">
-                            <Leaf size={14} className="text-emerald-600" />
+                            <Leaf size={14} className="text-amber-600" />
                             {group.category.label}
                           </div>
                           <div className="flex flex-wrap gap-1.5">
@@ -230,8 +230,8 @@ export function DiseaseDetailModal({
                     <div className="space-y-3">
                       {/* Supporting */}
                       {result.evidence.supporting.length > 0 && (
-                        <div className="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40">
-                          <div className="text-xs font-bold text-emerald-800 dark:text-emerald-300 mb-2 flex items-center gap-1.5">
+                        <div className="p-3 rounded-xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/40">
+                          <div className="text-xs font-bold text-amber-800 dark:text-amber-300 mb-2 flex items-center gap-1.5">
                             <CheckCircle2 size={14} />
                             {t("checker.evidence_supporting")} ({result.evidence.supporting.length})
                           </div>
@@ -242,7 +242,7 @@ export function DiseaseDetailModal({
                                 className="flex justify-between items-center text-slate-700 dark:text-slate-300"
                               >
                                 <span>{ev.symptom}</span>
-                                <span className="font-mono text-[0.7rem] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200">
+                                <span className="font-mono text-[0.7rem] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200">
                                   +{Math.round(ev.weight * 100)}%
                                 </span>
                               </li>
@@ -359,7 +359,7 @@ export function DiseaseDetailModal({
           {detail ? (
             <a
               href={`/diseases/${detail.slug}`}
-              className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1"
             >
               <span>{t("result.view_guide")}</span>
               <ExternalLink size={13} />

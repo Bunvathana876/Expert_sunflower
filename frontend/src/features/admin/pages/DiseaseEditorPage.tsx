@@ -2,6 +2,15 @@ import type React from "react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Leaf,
+  Languages,
+  Image as ImageIcon,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
 import { useDiseaseDetail } from "@/features/diseases/hooks";
 import { useSymptomsGrouped } from "@/features/diagnosis/hooks";
 import { previewDiagnosis } from "@/features/diagnosis/api";
@@ -382,82 +391,89 @@ export function DiseaseEditorPage(): React.JSX.Element {
   return (
     <div>
       {/* Top Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          marginBottom: "1.5rem",
-          flexWrap: "wrap",
-          gap: "1rem",
-        }}
-      >
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <Link
             to="/admin/diseases"
-            className="sf-btn sf-btn--ghost sf-btn--sm"
-            style={{ textDecoration: "none", marginBottom: "0.25rem", display: "inline-block" }}
+            className="sf-btn sf-btn--ghost sf-btn--sm inline-flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] mb-2 px-2 py-1 rounded-lg"
           >
-            ← {t("admin.back_to_diseases")}
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>{t("admin.back_to_diseases")}</span>
           </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-            <h1 className="sf-section-title" style={{ margin: 0 }}>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="sf-section-title text-2xl font-bold tracking-tight text-[var(--color-text)]">
               {disease.name}
             </h1>
             <Badge variant={disease.pathogen_type}>{disease.pathogen_type}</Badge>
             <span
-              className={`sf-badge ${disease.is_published ? "sf-badge--success" : "sf-badge--warning"}`}
+              className={`sf-badge inline-flex items-center gap-1 text-xs px-2.5 py-0.5 font-medium rounded-full ${
+                disease.is_published
+                  ? "sf-badge--success bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  : "sf-badge--warning bg-amber-500/10 text-amber-600 dark:text-amber-400"
+              }`}
             >
-              {disease.is_published ? t("admin.status_published") : t("admin.status_draft")}
+              {disease.is_published ? (
+                <CheckCircle2 className="w-3 h-3" />
+              ) : (
+                <AlertTriangle className="w-3 h-3" />
+              )}
+              <span>{disease.is_published ? t("admin.status_published") : t("admin.status_draft")}</span>
             </span>
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "0.5rem" }}>
+        <div className="flex items-center gap-2">
           <Link
             to={`/diseases/${disease.slug}`}
-            className="sf-btn sf-btn--ghost sf-btn--sm"
-            style={{ textDecoration: "none" }}
+            className="sf-btn sf-btn--outline sf-btn--sm inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl shadow-xs"
             target="_blank"
             rel="noopener noreferrer"
           >
-            ↗ {t("admin.preview_public")}
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>{t("admin.preview_public")}</span>
           </Link>
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div
-        className="sf-admin-tabs"
-        style={{
-          display: "flex",
-          gap: "0.5rem",
-          borderBottom: "1px solid var(--color-border)",
-          marginBottom: "1.5rem",
-        }}
-      >
+      <div className="flex items-center gap-2 border-b border-[var(--color-border)] mb-6 pb-2">
         <button
           type="button"
-          className={`sf-admin-tab ${activeTab === "symptoms" ? "sf-admin-tab--active" : ""}`}
+          className={`sf-admin-tab inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all ${
+            activeTab === "symptoms"
+              ? "sf-admin-tab--active bg-amber-500/10 text-amber-700 dark:text-amber-400 shadow-xs"
+              : "text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]"
+          }`}
           onClick={() => setActiveTab("symptoms")}
         >
-          🍃 {t("admin.tab_symptoms")} ({localSymptoms.length})
+          <Leaf className="w-4 h-4" />
+          <span>{t("admin.tab_symptoms")} ({localSymptoms.length})</span>
         </button>
 
         <button
           type="button"
-          className={`sf-admin-tab ${activeTab === "content" ? "sf-admin-tab--active" : ""}`}
+          className={`sf-admin-tab inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all ${
+            activeTab === "content"
+              ? "sf-admin-tab--active bg-amber-500/10 text-amber-700 dark:text-amber-400 shadow-xs"
+              : "text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]"
+          }`}
           onClick={() => setActiveTab("content")}
         >
-          📝 {t("admin.tab_content")} ({completenessPercent}%)
+          <Languages className="w-4 h-4" />
+          <span>{t("admin.tab_content")} ({completenessPercent}%)</span>
         </button>
 
         <button
           type="button"
-          className={`sf-admin-tab ${activeTab === "media" ? "sf-admin-tab--active" : ""}`}
+          className={`sf-admin-tab inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all ${
+            activeTab === "media"
+              ? "sf-admin-tab--active bg-amber-500/10 text-amber-700 dark:text-amber-400 shadow-xs"
+              : "text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]"
+          }`}
           onClick={() => setActiveTab("media")}
         >
-          🖼️ {t("admin.tab_media")}
+          <ImageIcon className="w-4 h-4" />
+          <span>{t("admin.tab_media")}</span>
         </button>
       </div>
 

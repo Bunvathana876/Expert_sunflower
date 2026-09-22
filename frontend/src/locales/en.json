@@ -12,6 +12,7 @@
     "about": "About",
     "login": "Log In",
     "logout": "Log Out",
+    "profile": "My Profile",
     "admin": "Admin",
     "expert": "Expert"
   },
@@ -243,7 +244,7 @@
     "suggestDiagnosis": "I detected some symptoms. Would you like me to run a full diagnosis?"
   },
   "admin": {
-    "workspace_title": "Sunflower Expert Console",
+    "workspace_title": "Sunflower Admin Panel",
     "back_to_grower_app": "Back to Grower App",
     "sidebar_label": "Admin Navigation",
     "nav_overview": "Overview",
@@ -385,5 +386,38 @@
     "pagination_showing_pages": "Page {{page}} of {{totalPages}} ({{total}} items)",
     "pagination_prev": "Previous",
     "pagination_next": "Next"
+  },
+  "profile": {
+    "title": "Account & Profile",
+    "tab_overview": "Overview",
+    "tab_edit_details": "Edit Details",
+    "tab_security": "Security",
+    "role_grower": "Grower",
+    "status_active": "Active",
+    "welcome_description": "Manage your personal account settings, contact information, and security credentials.",
+    "account_summary_title": "Account Details",
+    "user_id": "Account ID",
+    "assigned_role": "System Role",
+    "granted_permissions_title": "Granted Permissions & Capabilities",
+    "granted_permissions_desc": "Permissions assigned to your account based on your role.",
+    "shortcut_admin_desc": "Access expert agronomy knowledge base and system metrics.",
+    "shortcut_check_desc": "Perform real-time crop disease diagnosis.",
+    "shortcut_history_desc": "Review past diagnostic sessions and treatment recommendations.",
+    "edit_details_title": "Edit Account Details",
+    "edit_details_subtitle": "Update your username or email address. Requires your current password to save.",
+    "current_password_label": "Current Password",
+    "current_password_placeholder": "Enter your current password to confirm",
+    "password_required_hint": "For security, you must enter your current password to apply changes.",
+    "new_password_label": "New Password",
+    "confirm_new_password_label": "Confirm New Password",
+    "change_password_title": "Change Password",
+    "change_password_subtitle": "Update your account password. Choose a strong password with at least 8 characters.",
+    "change_password_button": "Update Password",
+    "details_updated_success": "Your profile details have been updated successfully.",
+    "password_updated_success": "Your password has been changed successfully.",
+    "error_current_password_required": "Current password is required to save changes.",
+    "error_no_changes": "No changes were made to your username or email.",
+    "error_password_mismatch": "New password and confirmation do not match."
   }
 }
+
