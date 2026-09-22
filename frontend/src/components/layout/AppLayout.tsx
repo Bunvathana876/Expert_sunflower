@@ -8,6 +8,7 @@ import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { AboutModal } from "./AboutModal";
 import { BottomNav } from "./BottomNav";
+import { AIChatWidget } from "@/features/ai-assistant";
 
 interface NavItem {
   to: string;
@@ -59,6 +60,9 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
     <div className="sf-layout min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-text)]">
       {/* About Expert System Modal */}
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+
+      {/* AI Chat Widget - Shows for authenticated users */}
+      <AIChatWidget />
 
       {/* Desktop Header */}
       <header className="sf-glass-header sticky top-0 z-40 transition-colors">

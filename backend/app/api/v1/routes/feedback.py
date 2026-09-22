@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.deps import get_db, get_optional_current_user, require_permission
 from app.core.errors import UnauthorizedError
 from app.models.auth import User
-from app.schemas.admin import (
+from app.schemas.feedback import (
     FeedbackCreateRequest,
     FeedbackItem,
     FeedbackListResponse,
@@ -38,14 +38,29 @@ async def list_feedback(
         raise UnauthorizedError(detail="Authentication required to view feedback")
 
     can_read_all = current_user.has_permission("feedback:read")
+    
+    # Debug logging
+    print(f"\n[FEEDBACK API] ===== LIST FEEDBACK =====")
+    print(f"[FEEDBACK API] User: {current_user.email}")
+    print(f"[FEEDBACK API] User ID: {current_user.id}")
+    print(f"[FEEDBACK API] Role: {current_user.role.name if current_user.role else 'None'}")
+    print(f"[FEEDBACK API] Has feedback:read permission: {can_read_all}")
+    print(f"[FEEDBACK API] Status filter: {status}")
+    print(f"[FEEDBACK API] Page: {page}, Size: {size}")
+    
     service = FeedbackService(db)
-    return await service.list_feedback(
+    result = await service.list_feedback(
         current_user=current_user,
         can_read_all=can_read_all,
         status_filter=status,
         page=page,
         size=size,
     )
+    
+    print(f"[FEEDBACK API] Total feedback found: {result.total}")
+    print(f"[FEEDBACK API] Items in this page: {len(result.items)}")
+    
+    return result
 
 
 @router.post(

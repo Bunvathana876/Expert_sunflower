@@ -1,168 +1,103 @@
-"""Pydantic schemas for admin console: roles, permissions, users, rulesets, feedback."""
+"""Admin schemas for user and role management."""
 
 from __future__ import annotations
 
-from typing import Any
+from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
-
-# ---------------------------------------------------------------------------
-# RBAC
-# ---------------------------------------------------------------------------
+from pydantic import BaseModel, Field
 
 
-class PermissionItem(BaseModel):
-    """Permission detail."""
+# ============================================================================
+# User Management Schemas
+# ============================================================================
 
-    model_config = ConfigDict(frozen=True)
-
-    id: int
-    code: str
-    description: str | None = None
-
-
-class RoleItem(BaseModel):
-    """Role with associated permission codes."""
-
-    model_config = ConfigDict(frozen=True)
-
-    id: int
-    name: str
-    description: str | None = None
-    permissions: list[str]
-
-
-class RoleListResponse(BaseModel):
-    """List of all roles."""
-
-    model_config = ConfigDict(frozen=True)
-
-    items: list[RoleItem]
-    permissions: list[PermissionItem]
-
-
-class UpdateRolePermissionsRequest(BaseModel):
-    """Request to update a role's permissions."""
-
-    permission_codes: list[str] = Field(..., min_length=0)
-
-
-# ---------------------------------------------------------------------------
-# User Administration
-# ---------------------------------------------------------------------------
-
-
-class AdminUserItem(BaseModel):
-    """User account details for administration."""
-
-    model_config = ConfigDict(frozen=True)
-
+class UserResponse(BaseModel):
+    """User account information for admin view."""
+    
     id: int
     username: str
     email: str
     role: str
     role_id: int
     is_active: bool
-    created_at: str
+    created_at: datetime
 
 
-class AdminUserListResponse(BaseModel):
-    """Paginated list of user accounts."""
-
-    model_config = ConfigDict(frozen=True)
-
-    items: list[AdminUserItem]
+class PaginatedUsersResponse(BaseModel):
+    """Paginated list of users."""
+    
+    items: list[UserResponse]
     total: int
     page: int
     size: int
 
 
-class AdminUserUpdateRequest(BaseModel):
-    """Payload to update user active status or assigned role."""
-
+class UpdateUserRequest(BaseModel):
+    """Request to update user account."""
+    
     role_id: int | None = None
     is_active: bool | None = None
 
 
-# ---------------------------------------------------------------------------
-# Ruleset Administration
-# ---------------------------------------------------------------------------
+# ============================================================================
+# Role & Permission Schemas
+# ============================================================================
+
+class RoleResponse(BaseModel):
+    """Role information."""
+    
+    id: int
+    name: str
+    description: str | None = None
+    permissions: list[str] = Field(default_factory=list)
 
 
-class RulesetItem(BaseModel):
-    """Versioned diagnosis ruleset."""
+class RoleListResponse(BaseModel):
+    """All roles with full permission list."""
+    
+    items: list[RoleResponse]
+    permissions: list[PermissionDetail]
 
-    model_config = ConfigDict(frozen=True)
 
+class PermissionDetail(BaseModel):
+    """Permission with granted status."""
+    
+    code: str
+    description: str
+    granted: bool
+
+
+class RolePermissionsResponse(BaseModel):
+    """Role with all permissions and their grant status."""
+    
+    role_id: int
+    role_name: str
+    permissions: list[PermissionDetail]
+
+
+class RolePermissionsRequest(BaseModel):
+    """Request to update role permissions."""
+    
+    permission_codes: list[str] = Field(default_factory=list)
+
+
+# ============================================================================
+# Ruleset Schemas
+# ============================================================================
+
+class RulesetResponse(BaseModel):
+    """Diagnostic ruleset version."""
+    
     id: int
     version: str
     algorithm: str
-    params: dict[str, Any]
+    parameters: dict
     is_active: bool
-    published_at: str | None = None
+    published_at: datetime | None = None
     published_by: str | None = None
 
 
-class RulesetListResponse(BaseModel):
-    """List of all engine rulesets."""
-
-    model_config = ConfigDict(frozen=True)
-
-    items: list[RulesetItem]
-
-
-class RulesetActivateResponse(BaseModel):
-    """Confirmation of ruleset activation."""
-
-    model_config = ConfigDict(frozen=True)
-
-    id: int
-    version: str
-    is_active: bool
-
-
-# ---------------------------------------------------------------------------
-# Feedback
-# ---------------------------------------------------------------------------
-
-
-class FeedbackItem(BaseModel):
-    """Grower feedback item."""
-
-    model_config = ConfigDict(frozen=True)
-
-    id: int
-    subject: str
-    message: str
-    status: str
-    created_at: str
-    user_id: int | None = None
-    user_name: str | None = None
-    diagnosis_session_id: str | None = None
-    media_url: str | None = None
-
-
-class FeedbackListResponse(BaseModel):
-    """Paginated feedback list."""
-
-    model_config = ConfigDict(frozen=True)
-
-    items: list[FeedbackItem]
-    total: int
-    page: int
-    size: int
-
-
-class FeedbackCreateRequest(BaseModel):
-    """Payload to submit new feedback."""
-
-    subject: str = Field(..., min_length=1, max_length=255)
-    message: str = Field(..., min_length=1)
-    diagnosis_session_id: str | None = None
-    contact_info: str | None = None
-
-
-class FeedbackStatusUpdateRequest(BaseModel):
-    """Payload to transition feedback status."""
-
-    status: str = Field(..., pattern="^(open|in_review|resolved)$")
+class RulesetActivateRequest(BaseModel):
+    """Request to activate a ruleset (no body needed, just the endpoint)."""
+    
+    pass

@@ -60,18 +60,27 @@ class FeedbackRepository:
         size: int = 20,
     ) -> tuple[list[Feedback], int]:
         """List feedback items with optional user and status filters."""
+        # Debug logging
+        print(f"\n[FEEDBACK REPO] ===== LIST PAGINATED =====")
+        print(f"[FEEDBACK REPO] user_id filter: {user_id}")
+        print(f"[FEEDBACK REPO] status filter: {status}")
+        print(f"[FEEDBACK REPO] page: {page}, size: {size}")
+        
         base_query = select(Feedback)
         count_query = select(func.count(Feedback.id))
 
         if user_id is not None:
+            print(f"[FEEDBACK REPO] Filtering by user_id = {user_id}")
             base_query = base_query.where(Feedback.user_id == user_id)
             count_query = count_query.where(Feedback.user_id == user_id)
 
         if status is not None:
+            print(f"[FEEDBACK REPO] Filtering by status = {status}")
             base_query = base_query.where(Feedback.status == status)
             count_query = count_query.where(Feedback.status == status)
 
         total = await self.session.scalar(count_query) or 0
+        print(f"[FEEDBACK REPO] Total count: {total}")
 
         stmt = (
             base_query.options(
@@ -84,6 +93,10 @@ class FeedbackRepository:
         )
         res = await self.session.execute(stmt)
         items = list(res.scalars().all())
+        
+        print(f"[FEEDBACK REPO] Items fetched: {len(items)}")
+        for item in items:
+            print(f"[FEEDBACK REPO]   - ID: {item.id}, Subject: {item.subject}, User ID: {item.user_id}, Status: {item.status}")
 
         return items, total
 

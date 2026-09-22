@@ -24,6 +24,8 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "confirm": "Confirm",
+    "close": "Close",
+    "send": "Send",
     "pagination": "Pagination navigation",
     "previous": "Previous",
     "next": "Next",
@@ -227,6 +229,18 @@
       "password_min": "Password must be at least 8 characters",
       "password_max": "Password must not exceed 128 characters"
     }
+  },
+  "ai": {
+    "assistant": "AI Assistant",
+    "tagline": "Ask me about plant diseases",
+    "openChat": "Open AI Assistant",
+    "welcome": "Hello! How can I help you today?",
+    "welcomeHint": "Describe your plant symptoms and I'll help you understand what might be wrong.",
+    "inputPlaceholder": "Describe your plant symptoms...",
+    "newConversation": "Start new conversation",
+    "error": "Sorry, I encountered an error. Please try again.",
+    "analyzing": "Analyzing symptoms...",
+    "suggestDiagnosis": "I detected some symptoms. Would you like me to run a full diagnosis?"
   },
   "admin": {
     "workspace_title": "Sunflower Expert Console",

@@ -12,7 +12,7 @@ from app.models.auth import User
 from app.models.enums import FeedbackStatus
 from app.models.feedback import Feedback
 from app.repositories.feedback import FeedbackRepository
-from app.schemas.admin import (
+from app.schemas.feedback import (
     FeedbackCreateRequest,
     FeedbackItem,
     FeedbackListResponse,
@@ -111,8 +111,8 @@ class FeedbackService:
             id=feedback.id,
             subject=feedback.subject,
             message=feedback.message,
-            status=feedback.status.value,
-            created_at=feedback.created_at.isoformat(),
+            status=feedback.status.value,  # Convert enum to string
+            created_at=feedback.created_at.isoformat(),  # Convert datetime to ISO string
             user_id=feedback.user_id,
             user_name=feedback.user.username if feedback.user else None,
             diagnosis_session_id=session_id_str,
