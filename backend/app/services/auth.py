@@ -30,12 +30,12 @@ from app.schemas.auth import (
 
 def user_to_response(user: User) -> UserResponse:
     """Convert User ORM model to UserResponse schema with flattened permissions."""
-    permission_codes = sorted([p.code for p in user.role.permissions])
+    permission_codes = sorted([p.code for p in user.role.permissions]) if user.role else []
     return UserResponse(
         id=user.id,
         email=user.email,
         username=user.username,
-        role=user.role.name,
+        role=user.role.name if user.role else "unknown",
         permissions=permission_codes,
         is_active=user.is_active,
     )

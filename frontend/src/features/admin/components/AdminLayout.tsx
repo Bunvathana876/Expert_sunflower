@@ -13,6 +13,7 @@ import {
 import { useAuth } from "@/features/auth";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { ShaderBackground } from "@/components/ui/ShaderBackground";
 
 interface AdminNavItem {
   to: string;
@@ -64,18 +65,28 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
 
 export function AdminLayout(): React.JSX.Element {
   const { t } = useTranslation();
-  const { user, isAuthenticated, hasPermission } = useAuth();
+  const { user, isAuthenticated, isLoading, hasPermission } = useAuth();
   const location = useLocation();
 
-  if (!isAuthenticated) {
+  if (isLoading && !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]" aria-busy="true">
+        <div className="sf-spinner" aria-label="Loading admin portal..." />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated && !user) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  // Filter navigation items by holding server-side permission
-  const allowedItems = ADMIN_NAV_ITEMS.filter((item) => hasPermission(item.permission));
+  // Filter navigation items: Admins have full access; experts/agronomists require specific permissions
+  const allowedItems = ADMIN_NAV_ITEMS.filter(
+    (item) => user?.role === "admin" || hasPermission(item.permission),
+  );
 
   // If user has zero admin/agronomy permissions, redirect to grower portal
-  if (allowedItems.length === 0) {
+  if (!isLoading && user && user.role !== "admin" && allowedItems.length === 0) {
     return <Navigate to="/" replace />;
   }
 
@@ -87,9 +98,12 @@ export function AdminLayout(): React.JSX.Element {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-text)]">
+    <div className="min-h-screen flex flex-col relative text-[var(--color-text)]">
+      {/* Animated WebGL Smoke Organic Flow Background */}
+      <ShaderBackground />
+
       {/* Top Admin Header */}
-      <header className="sf-glass-header sticky top-0 z-40 border-b-2 border-amber-600 backdrop-blur-md">
+      <header className="sticky top-0 z-40 bg-white/85 dark:bg-[#202917]/85 backdrop-blur-md border-b border-stone-200/80 dark:border-white/10">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Link to="/admin" className="flex items-center gap-2 sm:gap-2.5 text-decoration-none group min-w-0">
@@ -97,7 +111,7 @@ export function AdminLayout(): React.JSX.Element {
                 🌻
               </span>
               <div className="flex flex-col min-w-0">
-                <span className="font-bold text-sm sm:text-base tracking-tight text-[var(--color-text)] leading-tight truncate">
+                <span className="font-bold text-sm sm:text-base tracking-tight text-gray-900 dark:text-white leading-tight truncate">
                   {t("admin.workspace_title")}
                 </span>
                 <span className="text-[0.62rem] sm:text-[0.65rem] font-bold text-amber-700 dark:text-amber-400 tracking-wider uppercase font-mono truncate">
@@ -117,7 +131,7 @@ export function AdminLayout(): React.JSX.Element {
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <Link
               to="/"
-              className="sf-btn sf-btn--ghost sf-btn--sm text-xs flex items-center gap-1.5 font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-text)] whitespace-nowrap"
+              className="sf-btn sf-btn--ghost sf-btn--sm text-xs flex items-center gap-1.5 font-semibold text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white whitespace-nowrap"
             >
               <ArrowLeft size={14} className="shrink-0" />
               <span className="hidden sm:inline">{t("admin.back_to_grower_app")}</span>
@@ -134,10 +148,10 @@ export function AdminLayout(): React.JSX.Element {
       <div className="flex-1 max-w-7xl w-full mx-auto flex flex-col md:flex-row min-h-0">
         {/* Sidebar */}
         <aside
-          className="w-full md:w-60 shrink-0 border-b md:border-b-0 md:border-r border-[var(--color-border)] p-2 sm:p-4 bg-[var(--color-surface)] dark:bg-[var(--color-surface)]"
+          className="w-full md:w-60 shrink-0 border-b md:border-b-0 md:border-r border-stone-200/80 dark:border-white/10 p-3 sm:p-4 bg-white/70 dark:bg-[#202917]/75 backdrop-blur-md"
           aria-label={t("admin.sidebar_label")}
         >
-          <nav className="flex md:flex-col gap-1 overflow-x-auto pb-1 md:pb-0 no-scrollbar">
+          <nav className="flex md:flex-col gap-1.5 overflow-x-auto pb-1 md:pb-0 no-scrollbar">
             {allowedItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item);
@@ -146,13 +160,13 @@ export function AdminLayout(): React.JSX.Element {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all whitespace-nowrap shrink-0 md:shrink ${
+                  className={`px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all whitespace-nowrap shrink-0 md:shrink ${
                     active
-                      ? "bg-amber-500/15 text-amber-900 dark:text-amber-200 border border-amber-500/30 shadow-xs"
-                      : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text)]"
+                      ? "bg-amber-500/20 text-amber-950 dark:text-amber-200 border border-amber-500/40 shadow-xs font-bold"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-amber-500/10 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white border border-transparent"
                   }`}
                 >
-                  <Icon size={16} className={`shrink-0 ${active ? "text-amber-600 dark:text-amber-400" : "text-[var(--color-text-muted)]"}`} />
+                  <Icon size={16} className={`shrink-0 ${active ? "text-amber-600 dark:text-amber-400" : "text-gray-500 dark:text-gray-400"}`} />
                   <span className="truncate">{t(item.labelKey)}</span>
                 </Link>
               );

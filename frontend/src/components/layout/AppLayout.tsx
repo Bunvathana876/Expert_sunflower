@@ -18,6 +18,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { AboutModal } from "./AboutModal";
 import { BottomNav } from "./BottomNav";
 import { AIChatWidget } from "@/features/ai-assistant";
+import { ShaderBackground } from "@/components/ui/ShaderBackground";
 
 interface NavItem {
   to: string;
@@ -66,7 +67,10 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
   });
 
   return (
-    <div className="sf-layout min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-text)]">
+    <div className="sf-layout min-h-screen flex flex-col relative text-[var(--color-text)]">
+      {/* Animated WebGL Smoke Organic Flow Background */}
+      <ShaderBackground />
+
       {/* About Expert System Modal */}
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
 
@@ -74,7 +78,7 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
       <AIChatWidget />
 
       {/* Desktop Header */}
-      <header className="sf-glass-header sticky top-0 z-40 transition-colors">
+      <header className="sticky top-0 z-40 bg-white/85 dark:bg-[#202917]/85 backdrop-blur-md border-b border-stone-200/80 dark:border-white/10 transition-colors">
         <div className="max-w-6xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
           {/* Brand */}
           <Link
@@ -115,8 +119,8 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
                   to={item.to}
                   className={`px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap ${
                     active
-                      ? "bg-amber-500/20 text-amber-950 dark:text-amber-200 border border-amber-500/40 shadow-xs"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-stone-800 hover:text-gray-900 dark:hover:text-white"
+                      ? "bg-amber-500/20 text-amber-950 dark:text-amber-200 border border-amber-500/40 shadow-xs font-bold"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-amber-500/10 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white"
                   }`}
                 >
                   <Icon size={15} className="shrink-0" />
@@ -129,7 +133,7 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
             <button
               type="button"
               onClick={() => setIsAboutOpen(true)}
-              className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-stone-800 hover:text-gray-900 dark:hover:text-white flex items-center gap-1.5 transition-all whitespace-nowrap"
+              className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-500/10 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white flex items-center gap-1.5 transition-all whitespace-nowrap"
             >
               <Info size={15} className="shrink-0" />
               <span>{t("nav.about")}</span>
@@ -142,10 +146,10 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
             <LanguageToggle />
 
             {isAuthenticated ? (
-              <div className="flex items-center gap-1.5 sm:gap-2 pl-1 sm:pl-2 border-l border-gray-200 dark:border-stone-800 shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 pl-1 sm:pl-2 border-l border-gray-200 dark:border-white/10 shrink-0">
                 <Link
                   to="/profile"
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-amber-800 dark:hover:text-amber-400 transition-all max-w-[140px]"
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-stone-100 dark:hover:bg-white/5 hover:text-amber-800 dark:hover:text-amber-300 transition-all max-w-[140px]"
                   title={t("nav.profile")}
                 >
                   <div className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-950 dark:text-amber-300 flex items-center justify-center font-bold text-[0.65rem] uppercase shrink-0 border border-amber-500/30">
@@ -156,7 +160,7 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
                 <button
                   type="button"
                   onClick={() => void logout()}
-                  className="sf-btn sf-btn--ghost sf-btn--sm text-xs flex items-center gap-1 text-gray-600 hover:text-rose-600 dark:text-gray-400 dark:hover:text-rose-400 whitespace-nowrap"
+                  className="sf-btn sf-btn--ghost sf-btn--sm text-xs flex items-center gap-1 text-gray-600 hover:text-rose-600 dark:text-gray-300 dark:hover:text-rose-400 whitespace-nowrap"
                   title={t("nav.logout")}
                   aria-label={t("nav.logout")}
                 >

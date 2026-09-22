@@ -23,7 +23,7 @@ from app.services.auth import AuthService, user_to_response
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 REFRESH_COOKIE_NAME = "refresh_token"
-REFRESH_COOKIE_PATH = "/api/v1/auth"
+REFRESH_COOKIE_PATH = "/"
 
 
 def _set_refresh_cookie(response: Response, refresh_token: str) -> None:

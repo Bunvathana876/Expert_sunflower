@@ -110,19 +110,19 @@ export function RolesPage(): React.JSX.Element {
   const roles = rolesData?.items ?? [];
 
   return (
-    <div className="sf-admin-page max-w-7xl mx-auto">
+    <div className="sf-admin-page max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="sf-admin-page__header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="sf-glass-card bg-white/85 dark:bg-[#2A3420]/80 backdrop-blur-md border border-stone-200/80 dark:border-white/10 shadow-lg rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 dark:bg-amber-400/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/15 dark:bg-amber-400/15 flex items-center justify-center text-amber-700 dark:text-amber-400">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <h1 className="sf-admin-page__title text-2xl font-bold tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
               {t("admin.roles_title")}
             </h1>
           </div>
-          <p className="sf-admin-page__desc text-sm text-[var(--color-text-muted)] mt-1">
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1">
             {t("admin.roles_subtitle")}
           </p>
         </div>
@@ -132,7 +132,7 @@ export function RolesPage(): React.JSX.Element {
         <div
           className={`sf-alert ${
             statusMessage.type === "success" ? "sf-alert--success" : "sf-alert--danger"
-          } flex items-center gap-2 mb-6`}
+          } flex items-center gap-2`}
           role="alert"
         >
           {statusMessage.type === "success" ? (
@@ -145,26 +145,28 @@ export function RolesPage(): React.JSX.Element {
       )}
 
       {isLoading ? (
-        <div className="sf-card flex flex-col items-center justify-center py-16 text-center">
+        <div className="sf-glass-card bg-white/85 dark:bg-[#2A3420]/80 backdrop-blur-md border border-stone-200/80 dark:border-white/10 shadow-lg rounded-2xl flex flex-col items-center justify-center py-16 text-center">
           <Loader2 className="w-8 h-8 animate-spin text-amber-600 dark:text-amber-400" />
-          <p className="mt-3 text-sm font-medium text-[var(--color-text-muted)]">
+          <p className="mt-3 text-sm font-medium text-gray-600 dark:text-gray-300">
             {t("common.loading")}
           </p>
         </div>
       ) : isError || !rolesData ? (
-        <div className="sf-alert sf-alert--danger flex items-center gap-2" role="alert">
-          <AlertCircle className="w-5 h-5 shrink-0" />
-          <span>{t("admin.roles_load_error")}</span>
+        <div className="sf-glass-card bg-white/85 dark:bg-[#2A3420]/80 backdrop-blur-md border border-stone-200/80 dark:border-white/10 shadow-lg rounded-2xl p-6">
+          <div className="sf-alert sf-alert--danger flex items-center gap-2" role="alert">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span>{t("admin.roles_load_error")}</span>
+          </div>
         </div>
       ) : (
-        <div className="sf-card p-0 overflow-hidden shadow-sm border border-[var(--color-border)]">
+        <div className="sf-glass-card bg-white/85 dark:bg-[#2A3420]/80 backdrop-blur-md p-0 overflow-hidden shadow-lg border border-stone-200/80 dark:border-white/10 rounded-2xl">
           <div className="overflow-x-auto">
             <table className="sf-table sf-matrix-table w-full">
               <thead>
-                <tr className="border-b border-[var(--color-border)]">
-                  <th className="w-2/5 font-semibold text-xs uppercase tracking-wider text-[var(--color-text-muted)] py-4 px-6 text-left">
+                <tr className="bg-stone-100/80 dark:bg-[#1E2615]/90 border-b border-stone-200/80 dark:border-white/10">
+                  <th className="w-2/5 font-semibold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-200 py-4 px-6 text-left">
                     <div className="flex items-center gap-2">
-                      <Key className="w-4 h-4 text-amber-600" />
+                      <Key className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                       <span>{t("admin.roles_col_permission")}</span>
                     </div>
                   </th>
@@ -174,9 +176,9 @@ export function RolesPage(): React.JSX.Element {
                     return (
                       <th
                         key={role.id}
-                        className="py-4 px-4 text-center min-w-[140px] border-l border-[var(--color-border-subtle)]"
+                        className="py-4 px-4 text-center min-w-[140px] border-l border-stone-200/80 dark:border-white/10"
                       >
-                        <div className="font-bold text-sm text-[var(--color-text)] capitalize">
+                        <div className="font-bold text-sm text-gray-900 dark:text-white capitalize">
                           {role.name}
                         </div>
                         <div className="mt-2 flex justify-center">
@@ -185,7 +187,7 @@ export function RolesPage(): React.JSX.Element {
                             className={`sf-btn sf-btn--sm inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                               dirty
                                 ? "bg-amber-600 hover:bg-amber-700 text-white shadow-sm ring-2 ring-amber-500/20"
-                                : "opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400"
+                                : "opacity-40 cursor-not-allowed bg-stone-200 dark:bg-[#1E2615]/80 text-stone-500 dark:text-stone-400 border border-transparent dark:border-white/5"
                             }`}
                             disabled={!dirty || isSaving}
                             onClick={() => void handleSaveRole(role.id)}
@@ -208,13 +210,13 @@ export function RolesPage(): React.JSX.Element {
                   })}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--color-border-subtle)]">
+              <tbody className="divide-y divide-stone-200/70 dark:divide-white/10">
                 {Object.entries(permGroups).map(([group, permissions]) => (
                   <React.Fragment key={group}>
-                    <tr className="bg-[var(--color-bg-subtle)]/70">
+                    <tr className="bg-stone-100/50 dark:bg-[#182010]/90">
                       <td
                         colSpan={roles.length + 1}
-                        className="font-bold text-xs uppercase tracking-wider text-amber-700 dark:text-amber-400 py-2.5 px-6"
+                        className="font-bold text-xs uppercase tracking-wider text-amber-800 dark:text-amber-300 py-2.5 px-6"
                       >
                         <div className="flex items-center gap-2">
                           <Lock className="w-3.5 h-3.5" />
@@ -227,14 +229,14 @@ export function RolesPage(): React.JSX.Element {
                     {permissions.map((perm) => (
                       <tr
                         key={perm.id}
-                        className="transition-colors hover:bg-[var(--color-bg-subtle)]/50"
+                        className="transition-colors hover:bg-amber-500/5 dark:hover:bg-white/5"
                       >
                         <td className="py-3 px-6">
-                          <div className="font-mono font-semibold text-xs text-[var(--color-text)] bg-slate-100 dark:bg-stone-800/80 px-2 py-0.5 rounded inline-block">
+                          <div className="font-mono font-semibold text-xs text-gray-900 dark:text-gray-100 bg-white dark:bg-[#182010] px-2 py-0.5 rounded inline-block border border-stone-200 dark:border-white/10">
                             {perm.code}
                           </div>
                           {perm.description && (
-                            <div className="text-xs text-[var(--color-text-muted)] mt-1">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">
                               {perm.description}
                             </div>
                           )}
@@ -244,14 +246,14 @@ export function RolesPage(): React.JSX.Element {
                           return (
                             <td
                               key={role.id}
-                              className="text-center py-3 px-4 border-l border-[var(--color-border-subtle)]"
+                              className="text-center py-3 px-4 border-l border-stone-200/70 dark:border-white/10"
                             >
                               <input
                                 type="checkbox"
                                 checked={isChecked}
                                 onChange={() => handleTogglePermission(role.id, perm.code)}
                                 aria-label={`${role.name} - ${perm.code}`}
-                                className="w-4 h-4 text-amber-600 rounded border-[var(--color-border)] focus:ring-amber-500 cursor-pointer accent-amber-600"
+                                className="w-4 h-4 text-amber-600 rounded border-stone-300 dark:border-stone-600 focus:ring-amber-500 cursor-pointer accent-amber-600"
                               />
                             </td>
                           );

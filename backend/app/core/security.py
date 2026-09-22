@@ -93,23 +93,26 @@ def verify_dummy_password(password: str) -> None:
 
 
 class RefreshTokenStore:
-    """Interface and in-memory store for active and revoked refresh tokens.
+    """In-memory store for tracking revoked refresh tokens.
 
     Can be replaced with Redis in production.
     """
 
     def __init__(self) -> None:
-        # Stores valid active refresh token jtis: jti -> user_id
-        self._active_tokens: dict[str, int] = {}
+        # Stores revoked refresh token jtis
+        self._revoked_tokens: set[str] = set()
 
     def register(self, jti: str, user_id: int) -> None:
-        self._active_tokens[jti] = user_id
+        """Register active token (no-op with revocation-based model)."""
+        pass
 
     def is_valid(self, jti: str) -> bool:
-        return jti in self._active_tokens
+        """Return True if the jti has not been explicitly revoked."""
+        return jti not in self._revoked_tokens
 
     def revoke(self, jti: str) -> None:
-        self._active_tokens.pop(jti, None)
+        """Revoke a jti so it cannot be reused."""
+        self._revoked_tokens.add(jti)
 
 
 token_store = RefreshTokenStore()

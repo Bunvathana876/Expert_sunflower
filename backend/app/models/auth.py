@@ -99,4 +99,6 @@ class User(Base, TimestampMixin):
         """Check if user's role has been granted the given permission code."""
         if self.role is None:
             return False
+        if self.role.name == "admin":
+            return True
         return any(p.code == code for p in self.role.permissions)

@@ -19,8 +19,8 @@ export default defineConfig({
     // The app talks to the API through /api/v1 in dev, so cookies are same-origin
     // and the refresh-token cookie works without SameSite headaches.
     proxy: {
-      "/api": { target: "http://localhost:8000", changeOrigin: true },
-      "/media": { target: "http://localhost:8000", changeOrigin: true },
+      "/api": { target: process.env.VITE_PROXY_TARGET || "http://localhost:8000", changeOrigin: true },
+      "/media": { target: process.env.VITE_PROXY_TARGET || "http://localhost:8000", changeOrigin: true },
     },
   },
   test: {

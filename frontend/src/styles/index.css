@@ -139,29 +139,29 @@
   --color-accent-hover: #0EA5E9;
   --color-accent-subtle: #082F49;
 
-  /* Dark backgrounds — rich dark with clear depth */
-  --color-bg: #141210;             /* Very dark warm black */
-  --color-bg-subtle: #1C1917;      /* Slightly elevated dark surface */
-  --color-bg-card: #1E1A16;        /* Standard dark card surface */
-  --color-surface: #1E1A16;        /* Slightly lighter warm dark */
-  --color-surface-raised: #28231D; /* Cards / raised elements */
-  --color-border: #3D3530;         /* Clear visible border in dark */
-  --color-border-subtle: #2E2823;  /* Softer divider border */
-  --color-border-light: #2E2820;
+  /* Dark backgrounds — translucent warm/olive glass for shader integration */
+  --color-bg: #141810;             /* Dark warm botanical background */
+  --color-bg-subtle: rgba(42, 52, 32, 0.65);
+  --color-bg-card: rgba(42, 52, 32, 0.80);
+  --color-surface: rgba(42, 52, 32, 0.80);
+  --color-surface-raised: rgba(53, 66, 40, 0.85);
+  --color-border: rgba(255, 255, 255, 0.15);
+  --color-border-subtle: rgba(255, 255, 255, 0.10);
+  --color-border-light: rgba(255, 255, 255, 0.08);
 
   /* Text — MAXIMUM contrast in dark mode */
-  --color-text: #F5F0E8;           /* Warm bright white */
-  --color-text-secondary: #C8BCB0; /* Light warm grey */
-  --color-text-muted: #9A8E82;     /* Readable muted warm grey */
+  --color-text: #FFFFFF;           /* Pure crisp white */
+  --color-text-secondary: #E2E8F0; /* Bright readable light slate */
+  --color-text-muted: #94A3B8;     /* High contrast muted text */
   --color-text-inverse: #141210;
 
-  /* Glassmorphism — rich dark glass */
-  --glass-bg: rgba(30, 26, 22, 0.92);
+  /* Glassmorphism — organic flow translucent dark glass */
+  --glass-bg: rgba(42, 52, 32, 0.82);
   --glass-blur: blur(20px);
-  --glass-border: rgba(61, 53, 48, 0.95);
-  --glass-border-subtle: rgba(61, 53, 48, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-border-subtle: rgba(255, 255, 255, 0.10);
   --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 4px 10px -2px rgba(0, 0, 0, 0.45);
-  --glow-card: 0 12px 35px -5px rgba(251, 191, 36, 0.2), 0 4px 12px -2px rgba(52, 211, 153, 0.1);
+  --glow-card: 0 12px 35px -5px rgba(251, 191, 36, 0.25), 0 4px 12px -2px rgba(52, 211, 153, 0.15);
   --glow-primary: 0 0 24px rgba(251, 191, 36, 0.4);
   --glow-emerald: 0 0 30px rgba(52, 211, 153, 0.3);
 
@@ -254,12 +254,22 @@ body {
 .sf-skeleton {
   background: linear-gradient(
     90deg,
-    var(--color-surface-raised) 25%,
-    var(--color-border) 50%,
-    var(--color-surface-raised) 75%
+    rgba(229, 231, 235, 0.7) 25%,
+    rgba(209, 213, 219, 0.9) 50%,
+    rgba(229, 231, 235, 0.7) 75%
   );
   background-size: 200% 100%;
   animation: sf-shimmer 1.5s ease-in-out infinite;
+}
+
+[data-theme="dark"] .sf-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(55, 65, 81, 0.6) 25%,
+    rgba(75, 85, 99, 0.85) 50%,
+    rgba(55, 65, 81, 0.6) 75%
+  );
+  background-size: 200% 100%;
 }
 
 /* -------------------------------------------------------------------------

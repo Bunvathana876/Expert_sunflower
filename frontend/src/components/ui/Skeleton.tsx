@@ -23,7 +23,7 @@ export function Skeleton({
 }: SkeletonProps): React.JSX.Element {
   return (
     <div
-      className={cn("sf-skeleton", className)}
+      className={cn("sf-skeleton bg-stone-200/70 dark:bg-gray-700/50", className)}
       style={{
         width: circle ? height : width,
         height,
