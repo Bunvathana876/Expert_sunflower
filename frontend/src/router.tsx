@@ -10,6 +10,11 @@ const LandingPage = lazy(() =>
 const DiseasesPage = lazy(() =>
   import("./features/diseases/pages/DiseasesPage").then((m) => ({ default: m.DiseasesPage })),
 );
+const DiseaseComparePage = lazy(() =>
+  import("./features/diseases/pages/DiseaseComparePage").then((m) => ({
+    default: m.DiseaseComparePage,
+  })),
+);
 const DiseaseDetailPage = lazy(() =>
   import("./features/diseases/pages/DiseaseDetailPage").then((m) => ({
     default: m.DiseaseDetailPage,
@@ -116,6 +121,10 @@ export const router = createBrowserRouter([
       {
         path: "/diseases",
         element: <DiseasesPage />,
+      },
+      {
+        path: "/diseases/compare",
+        element: <DiseaseComparePage />,
       },
       {
         path: "/diseases/:slug",

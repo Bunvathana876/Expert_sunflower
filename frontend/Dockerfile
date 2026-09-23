@@ -2,9 +2,11 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-COPY package.json ./
+# Copy dependency manifests first for efficient Docker layer caching
+COPY package*.json ./
 RUN npm install
 
+# Copy source files
 COPY . .
 
 EXPOSE 5173

@@ -19,6 +19,7 @@ import { AboutModal } from "./AboutModal";
 import { BottomNav } from "./BottomNav";
 import { AIChatWidget } from "@/features/ai-assistant";
 import { ShaderBackground } from "@/components/ui/ShaderBackground";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
 
 interface NavItem {
   to: string;
@@ -180,6 +181,9 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
           </div>
         </div>
       </header>
+
+      {/* Offline Status & Sync Banner */}
+      <OfflineBanner />
 
       {/* Main Content Viewport */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-12">

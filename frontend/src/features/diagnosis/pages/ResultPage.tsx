@@ -13,11 +13,14 @@ import {
   AlertTriangle,
   CheckCircle2,
   XCircle,
+  Download,
+  Share2,
 } from "lucide-react";
 import { useSessionDetail } from "../hooks";
 import { useDiseaseDetail } from "@/features/diseases/hooks";
 import { PercentageVisualization } from "@/components/ui/PercentageVisualization";
 import { DiseaseDetailModal } from "@/features/diseases/components/DiseaseDetailModal";
+import { DiagnosticReportModal } from "../components/DiagnosticReportModal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
 import type { DiagnosisResponse, DiagnosisResult } from "@/types/api";
@@ -28,6 +31,7 @@ export function ResultPage(): React.JSX.Element {
   const location = useLocation();
 
   const [selectedResult, setSelectedResult] = useState<DiagnosisResult | null>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
 
   const directResult = (location.state as { result?: DiagnosisResponse } | null)?.result;
 
@@ -96,6 +100,14 @@ export function ResultPage(): React.JSX.Element {
         isLoading={isInspecting}
       />
 
+      {/* Full Diagnostic PDF Report Preview & Export Modal */}
+      <DiagnosticReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        session={session ?? null}
+        results={displayData.results}
+      />
+
       {/* Top Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -112,7 +124,33 @@ export function ResultPage(): React.JSX.Element {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          {/* Export PDF Button */}
+          {isMatched && (
+            <button
+              type="button"
+              onClick={() => setIsReportModalOpen(true)}
+              className="sf-btn sf-btn--primary sf-btn--sm flex items-center gap-1.5 cursor-pointer font-semibold"
+              title={t("report.btn_download_pdf")}
+            >
+              <Download size={15} />
+              <span>{t("report.btn_download_pdf")}</span>
+            </button>
+          )}
+
+          {/* Share Report Button */}
+          {isMatched && (
+            <button
+              type="button"
+              onClick={() => setIsReportModalOpen(true)}
+              className="sf-btn sf-btn--secondary sf-btn--sm flex items-center gap-1.5 cursor-pointer font-semibold"
+              title={t("report.btn_share")}
+            >
+              <Share2 size={15} />
+              <span>{t("report.btn_share")}</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => window.print()}
@@ -121,7 +159,8 @@ export function ResultPage(): React.JSX.Element {
             <Printer size={15} />
             <span>{t("diseases.print")}</span>
           </button>
-          <Link to="/check" className="sf-btn sf-btn--primary sf-btn--sm flex items-center gap-1.5">
+
+          <Link to="/check" className="sf-btn sf-btn--secondary sf-btn--sm flex items-center gap-1.5">
             <RotateCcw size={15} />
             <span>{t("result.start_new")}</span>
           </Link>

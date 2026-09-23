@@ -11,7 +11,9 @@ import {
   Stethoscope,
   Layers,
   HelpCircle,
+  CheckCircle2,
 } from "lucide-react";
+import { enqueueOfflineDiagnosis } from "@/lib/offlineQueue";
 import { useSymptomsGrouped, useSubmitDiagnosis } from "../hooks";
 import { previewDiagnosis } from "../api";
 import { checkerReducer, initialCheckerState, countDefiniteAnswers } from "../reducer";
@@ -35,6 +37,7 @@ export function CheckerPage(): React.JSX.Element {
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [offlineSaved, setOfflineSaved] = useState(false);
 
   // Active abort controller ref to cancel in-flight previews
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -182,6 +185,21 @@ export function CheckerPage(): React.JSX.Element {
   const handleSubmit = async () => {
     if (answeredCount === 0) return;
 
+    // Check offline status immediately
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      try {
+        setIsAnalyzing(true);
+        await enqueueOfflineDiagnosis({
+          answers: state.answers,
+          locale: i18n.language,
+        });
+        setOfflineSaved(true);
+      } finally {
+        setIsAnalyzing(false);
+      }
+      return;
+    }
+
     try {
       setIsAnalyzing(true);
       const minAnimationDelay = new Promise((resolve) => setTimeout(resolve, 1400));
@@ -198,6 +216,14 @@ export function CheckerPage(): React.JSX.Element {
         void navigate("/check/result", { state: { result } });
       }
     } catch {
+      // If offline or network dropped during request, save offline automatically
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        await enqueueOfflineDiagnosis({
+          answers: state.answers,
+          locale: i18n.language,
+        });
+        setOfflineSaved(true);
+      }
       setIsAnalyzing(false);
     }
   };
@@ -225,6 +251,33 @@ export function CheckerPage(): React.JSX.Element {
     <div className="space-y-6">
       {/* Real-Time Animated Analysis Progress Modal */}
       <AnalysisProgressModal isOpen={isAnalyzing} symptomCount={answeredCount} />
+
+      {/* Offline Saved Notification */}
+      {offlineSaved && (
+        <div className="sf-glass-card p-5 bg-emerald-500/10 dark:bg-emerald-950/40 border-emerald-500/40 text-emerald-950 dark:text-emerald-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-bold text-sm sm:text-base">
+                {t("offline.saved_offline_title")}
+              </h3>
+              <p className="text-xs sm:text-sm mt-0.5 text-emerald-800 dark:text-emerald-300">
+                {t("offline.saved_offline_desc")}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setOfflineSaved(false);
+              dispatch({ type: "RESET" });
+            }}
+            className="sf-btn sf-btn--primary sf-btn--sm shrink-0 cursor-pointer"
+          >
+            {t("checker.reset_all")}
+          </button>
+        </div>
+      )}
 
       {/* Header & Search Bar */}
       <div className="sf-glass-card p-5 sm:p-6 space-y-4">

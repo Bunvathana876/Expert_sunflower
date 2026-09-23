@@ -1,7 +1,8 @@
 import type React from "react";
 import { useState, useEffect } from "react";
+import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Search, BookOpen, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, BookOpen, X, ChevronLeft, ChevronRight, Layers } from "lucide-react";
 import { useDiseases } from "../hooks";
 import { DiseaseCard } from "../components/DiseaseCard";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -60,11 +61,21 @@ export function DiseasesPage(): React.JSX.Element {
             </p>
           </div>
 
-          {data && (
-            <div className="self-start sm:self-auto px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-              {t("diseases.total_count", { count: data.total, defaultValue: `${data.total} Diseases` })}
-            </div>
-          )}
+          <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+            <Link
+              to="/diseases/compare"
+              className="sf-btn sf-btn--primary sf-btn--sm flex items-center gap-1.5 font-semibold shadow-xs"
+            >
+              <Layers size={15} />
+              <span>{t("compare.btn_compare_from_list")}</span>
+            </Link>
+
+            {data && (
+              <div className="px-3 py-1 rounded-full bg-slate-100 dark:bg-stone-800 text-xs font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10">
+                {t("diseases.total_count", { count: data.total, defaultValue: `${data.total} Diseases` })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Search Input */}

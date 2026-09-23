@@ -30,15 +30,18 @@ services:
 
   web:
     build: ./frontend
+    environment:
+      - VITE_PROXY_TARGET=http://api:8000
     env_file: .env
     depends_on:
-      - api
+      api:
+        condition: service_started
     ports:
       - "5173:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    command: npm run dev -- --host 0.0.0.0
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
 
 volumes:
   pgdata:
