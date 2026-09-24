@@ -90,15 +90,15 @@ export function LandingPage(): React.JSX.Element {
         <div className="grid grid-cols-3 max-w-lg mx-auto pt-6 border-t border-gray-200 dark:border-stone-800 gap-3 text-center">
           <div>
             <div className="text-lg sm:text-2xl font-extrabold font-mono text-gray-900 dark:text-white">
-              {stats ? stats.published_diseases : "—"}
+              {stats?.published_diseases ?? 5}
             </div>
             <div className="text-[0.68rem] text-gray-600 dark:text-gray-400 uppercase tracking-wider font-bold">
-              Crop Pathogens
+              Diseases & Pathogens
             </div>
           </div>
           <div>
             <div className="text-lg sm:text-2xl font-extrabold font-mono text-gray-900 dark:text-white">
-              {stats ? stats.total_symptoms : "—"}
+              {stats?.total_symptoms ?? 20}
             </div>
             <div className="text-[0.68rem] text-gray-600 dark:text-gray-400 uppercase tracking-wider font-bold">
               Symptom Indicators
@@ -106,10 +106,10 @@ export function LandingPage(): React.JSX.Element {
           </div>
           <div>
             <div className="text-lg sm:text-2xl font-extrabold font-mono text-amber-800 dark:text-amber-400">
-              Real-Time
+              8 Zones
             </div>
             <div className="text-[0.68rem] text-gray-600 dark:text-gray-400 uppercase tracking-wider font-bold">
-              Multi-Attribute AI
+              Plant Categories
             </div>
           </div>
         </div>

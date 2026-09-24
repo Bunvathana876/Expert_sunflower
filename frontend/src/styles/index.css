@@ -41,9 +41,9 @@
   --color-border-light: #E8E3DC;
 
   /* Text — MAXIMUM contrast in light mode */
-  --color-text: #111109;           /* Almost pure black */
-  --color-text-secondary: #3D3830; /* Very dark warm brown (not grey) */
-  --color-text-muted: #6B6258;     /* Medium warm brown — still readable */
+  --color-text: #0F172A;           /* Deep solid black/slate 900 */
+  --color-text-secondary: #1E293B; /* Slate 800 - crisp, strong contrast */
+  --color-text-muted: #334155;     /* Slate 700 - very legible */
   --color-text-inverse: #FFFFFF;
 
   /* Feedback */
@@ -57,10 +57,10 @@
   --color-info-bg: #F0F9FF;
 
   /* Glassmorphism & Brand Glows */
-  --glass-bg: rgba(255, 254, 250, 0.92);
+  --glass-bg: rgba(255, 255, 255, 0.94);
   --glass-blur: blur(16px);
-  --glass-border: rgba(214, 208, 200, 0.95);
-  --glass-border-subtle: rgba(214, 208, 200, 0.6);
+  --glass-border: rgba(203, 213, 225, 0.9);
+  --glass-border-subtle: rgba(226, 232, 240, 0.85);
   --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
   --glow-card: 0 12px 35px -5px rgba(217, 119, 6, 0.14), 0 4px 12px -2px rgba(22, 163, 74, 0.08);
   --glow-primary: 0 0 20px rgba(217, 119, 6, 0.3);
@@ -139,27 +139,27 @@
   --color-accent-hover: #0EA5E9;
   --color-accent-subtle: #082F49;
 
-  /* Dark backgrounds — translucent warm/olive glass for shader integration */
-  --color-bg: #141810;             /* Dark warm botanical background */
-  --color-bg-subtle: rgba(42, 52, 32, 0.65);
-  --color-bg-card: rgba(42, 52, 32, 0.80);
-  --color-surface: rgba(42, 52, 32, 0.80);
-  --color-surface-raised: rgba(53, 66, 40, 0.85);
-  --color-border: rgba(255, 255, 255, 0.15);
-  --color-border-subtle: rgba(255, 255, 255, 0.10);
-  --color-border-light: rgba(255, 255, 255, 0.08);
+  /* Dark backgrounds — solid & legible surfaces with sunflower botanical accent */
+  --color-bg: #0D1308;             /* Deep botanical dark */
+  --color-bg-subtle: rgba(26, 36, 18, 0.92);
+  --color-bg-card: rgba(24, 32, 18, 0.94);
+  --color-surface: rgba(24, 32, 18, 0.94);
+  --color-surface-raised: rgba(36, 48, 28, 0.96);
+  --color-border: rgba(255, 255, 255, 0.22);
+  --color-border-subtle: rgba(255, 255, 255, 0.14);
+  --color-border-light: rgba(255, 255, 255, 0.10);
 
   /* Text — MAXIMUM contrast in dark mode */
-  --color-text: #FFFFFF;           /* Pure crisp white */
-  --color-text-secondary: #E2E8F0; /* Bright readable light slate */
-  --color-text-muted: #94A3B8;     /* High contrast muted text */
-  --color-text-inverse: #141210;
+  --color-text: #FFFFFF;           /* Pure 100% crisp white */
+  --color-text-secondary: #F1F5F9; /* Bright readable light slate (Slate 100) */
+  --color-text-muted: #CBD5E1;     /* High contrast muted text (Slate 300) */
+  --color-text-inverse: #0B1220;
 
-  /* Glassmorphism — organic flow translucent dark glass */
-  --glass-bg: rgba(42, 52, 32, 0.82);
+  /* Glassmorphism — high-contrast frosted glass */
+  --glass-bg: rgba(24, 32, 18, 0.92);
   --glass-blur: blur(20px);
-  --glass-border: rgba(255, 255, 255, 0.18);
-  --glass-border-subtle: rgba(255, 255, 255, 0.10);
+  --glass-border: rgba(255, 255, 255, 0.22);
+  --glass-border-subtle: rgba(255, 255, 255, 0.14);
   --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 4px 10px -2px rgba(0, 0, 0, 0.45);
   --glow-card: 0 12px 35px -5px rgba(251, 191, 36, 0.25), 0 4px 12px -2px rgba(52, 211, 153, 0.15);
   --glow-primary: 0 0 24px rgba(251, 191, 36, 0.4);
@@ -169,6 +169,42 @@
   --shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
   --shadow-lg: 0 10px 20px -3px rgb(0 0 0 / 0.5), 0 4px 8px -4px rgb(0 0 0 / 0.4);
   --shadow-xl: 0 20px 30px -5px rgb(0 0 0 / 0.6), 0 8px 12px -6px rgb(0 0 0 / 0.5);
+}
+
+/* -------------------------------------------------------------------------
+   Global High-Contrast Text Clarity Overrides
+   Guarantees that labels, captions, metadata, and tables across all pages
+   are completely legible and never washed out in Light or Dark mode.
+   ------------------------------------------------------------------------- */
+
+/* Dark Mode text boosts */
+[data-theme="dark"] .text-slate-400,
+[data-theme="dark"] .text-gray-400,
+[data-theme="dark"] .text-stone-400,
+[data-theme="dark"] .text-zinc-400 {
+  color: #E2E8F0; /* Slate 200 - crystal clear */
+}
+
+[data-theme="dark"] .text-slate-500,
+[data-theme="dark"] .text-gray-500,
+[data-theme="dark"] .text-stone-500,
+[data-theme="dark"] .text-zinc-500 {
+  color: #CBD5E1; /* Slate 300 - high visibility */
+}
+
+/* Light Mode text boosts */
+html:not([data-theme="dark"]) .text-slate-400,
+html:not([data-theme="dark"]) .text-gray-400,
+html:not([data-theme="dark"]) .text-stone-400,
+html:not([data-theme="dark"]) .text-zinc-400 {
+  color: #475569; /* Slate 600 - solid readability */
+}
+
+html:not([data-theme="dark"]) .text-slate-500,
+html:not([data-theme="dark"]) .text-gray-500,
+html:not([data-theme="dark"]) .text-stone-500,
+html:not([data-theme="dark"]) .text-zinc-500 {
+  color: #334155; /* Slate 700 - sharp clarity */
 }
 
 /* -------------------------------------------------------------------------

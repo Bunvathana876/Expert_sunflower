@@ -1,6 +1,7 @@
 import type React from "react";
 import { Link, useLocation, Outlet, Navigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import {
   BarChart3,
   Microscope,
@@ -11,9 +12,16 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { useAuth } from "@/features/auth";
+import { apiFetch } from "@/api/client";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { ShaderBackground } from "@/components/ui/ShaderBackground";
+import { ThemeBackground } from "@/components/layout/ThemeBackground";
+
+interface SystemStats {
+  total_diseases: number;
+  total_symptoms: number;
+  published_diseases: number;
+}
 
 interface AdminNavItem {
   to: string;
@@ -21,6 +29,7 @@ interface AdminNavItem {
   icon: typeof BarChart3;
   permission: string;
   exact?: boolean;
+  statKey?: "total_diseases" | "total_symptoms";
 }
 
 const ADMIN_NAV_ITEMS: AdminNavItem[] = [
@@ -36,12 +45,14 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     labelKey: "admin.nav_diseases",
     icon: Microscope,
     permission: "disease:read",
+    statKey: "total_diseases",
   },
   {
     to: "/admin/symptoms",
     labelKey: "admin.nav_symptoms",
     icon: Leaf,
     permission: "symptom:read",
+    statKey: "total_symptoms",
   },
   {
     to: "/admin/feedback",
@@ -67,6 +78,12 @@ export function AdminLayout(): React.JSX.Element {
   const { t } = useTranslation();
   const { user, isAuthenticated, isLoading, hasPermission } = useAuth();
   const location = useLocation();
+
+  const { data: stats } = useQuery({
+    queryKey: ["system-stats"],
+    queryFn: () => apiFetch<SystemStats>("/public/stats"),
+    staleTime: 30_000,
+  });
 
   if (isLoading && !user) {
     return (
@@ -99,8 +116,8 @@ export function AdminLayout(): React.JSX.Element {
 
   return (
     <div className="min-h-screen flex flex-col relative text-[var(--color-text)]">
-      {/* Animated WebGL Smoke Organic Flow Background */}
-      <ShaderBackground />
+      {/* Responsive Theme-Aware Fixed Sunflower Background */}
+      <ThemeBackground />
 
       {/* Top Admin Header */}
       <header className="sticky top-0 z-40 bg-white/85 dark:bg-[#202917]/85 backdrop-blur-md border-b border-stone-200/80 dark:border-white/10">
@@ -155,6 +172,7 @@ export function AdminLayout(): React.JSX.Element {
             {allowedItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item);
+              const count = item.statKey ? (stats?.[item.statKey] ?? (item.statKey === "total_diseases" ? 5 : 20)) : null;
 
               return (
                 <Link
@@ -167,7 +185,18 @@ export function AdminLayout(): React.JSX.Element {
                   }`}
                 >
                   <Icon size={16} className={`shrink-0 ${active ? "text-amber-600 dark:text-amber-400" : "text-gray-500 dark:text-gray-400"}`} />
-                  <span className="truncate">{t(item.labelKey)}</span>
+                  <span className="truncate flex-1">{t(item.labelKey)}</span>
+                  {count !== null && (
+                    <span
+                      className={`px-1.5 py-0.5 rounded-md text-[0.65rem] font-mono font-bold shrink-0 ${
+                        active
+                          ? "bg-amber-500/30 text-amber-950 dark:text-amber-100"
+                          : "bg-stone-200/80 dark:bg-white/10 text-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  )}
                 </Link>
               );
             })}

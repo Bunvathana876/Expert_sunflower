@@ -18,7 +18,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { AboutModal } from "./AboutModal";
 import { BottomNav } from "./BottomNav";
 import { AIChatWidget } from "@/features/ai-assistant";
-import { ShaderBackground } from "@/components/ui/ShaderBackground";
+import { ThemeBackground } from "./ThemeBackground";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 
 interface NavItem {
@@ -69,8 +69,8 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
 
   return (
     <div className="sf-layout min-h-screen flex flex-col relative text-[var(--color-text)]">
-      {/* Animated WebGL Smoke Organic Flow Background */}
-      <ShaderBackground />
+      {/* Responsive Theme-Aware Fixed Sunflower Background */}
+      <ThemeBackground />
 
       {/* About Expert System Modal */}
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
