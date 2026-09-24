@@ -1,13 +1,23 @@
 /**
- * AI Chat Widget - Futuristic Design
- * 
- * Floating chat widget for conversational AI assistance.
- * Enhanced with admin capabilities for database management.
+ * AI Assistant Chat Widget - Sunflower Botanical Theme
+ *
+ * Floating conversational AI crop advisor crafted to match the Sunflower
+ * Expert System's botanical glassmorphic visual language (Amber & Emerald).
  */
 
+import type React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Send, Loader2, Image as ImageIcon, Bot, Zap, Brain, Shield } from 'lucide-react';
+import {
+  X,
+  Send,
+  Loader2,
+  Image as ImageIcon,
+  Sparkles,
+  Shield,
+  Trash2,
+  Sprout,
+} from 'lucide-react';
 import { chatWithAI, adminChatWithAI, analyzeImage, type AIChatResponse } from '@/api/ai';
 import { useAuth } from '@/features/auth';
 
@@ -17,7 +27,25 @@ interface Message {
   timestamp: Date;
 }
 
-export function AIChatWidget() {
+const QUICK_PROMPTS = [
+  {
+    en: 'How to identify Downy Mildew?',
+    km: 'តើត្រូវសម្គាល់ជំងឺស្រឡទឹករោយយ៉ាងដូចម្តេច?',
+    icon: '🌻',
+  },
+  {
+    en: 'What causes yellow spots on leaves?',
+    km: 'តើអ្វីបណ្តាលឱ្យមានស្នាមលឿងលើស្លឹក?',
+    icon: '🍂',
+  },
+  {
+    en: 'Treatment for Sclerotinia Head Rot',
+    km: 'វិធីព្យាបាលជំងឺក្បាលផ្ការលួយ Sclerotinia',
+    icon: '🛡️',
+  },
+];
+
+export function AIChatWidget(): React.JSX.Element | null {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -31,13 +59,13 @@ export function AIChatWidget() {
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Check if user is admin or expert (MUST BE BEFORE handleSend)
+  // Check if user is admin or expert
   const isAdminOrExpert = user?.role === 'admin' || user?.role === 'agronomist';
-  
+
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isLoading]);
 
   // Focus input when opened
   useEffect(() => {
@@ -46,14 +74,15 @@ export function AIChatWidget() {
     }
   }, [isOpen]);
 
-  const handleSend = async () => {
-    if ((!input.trim() && !selectedImage) || isLoading || !user) return;
+  const handleSend = async (messageText?: string) => {
+    const textToSend = (messageText ?? input).trim();
+    if ((!textToSend && !selectedImage) || isLoading || !user) return;
 
     const userMessage: Message = {
       role: 'user',
-      content: selectedImage 
-        ? `${input.trim() || 'Analyze this image'} [Image attached]`
-        : input.trim(),
+      content: selectedImage
+        ? `${textToSend || 'Analyze this crop photo'} [Photo attached]`
+        : textToSend,
       timestamp: new Date(),
     };
 
@@ -73,7 +102,7 @@ export function AIChatWidget() {
             const parts = base64.split(',');
             const base64Data = parts[1];
             if (base64Data) {
-              resolve(base64Data); // Remove data:image/...;base64, prefix
+              resolve(base64Data);
             } else {
               reject(new Error('Invalid image format'));
             }
@@ -85,13 +114,12 @@ export function AIChatWidget() {
         const imageAnalysis = await analyzeImage({
           image_base64: imageBase64,
           locale: i18n.language,
-          additional_context: input.trim(),
+          additional_context: textToSend,
         });
 
-        // Convert image analysis to chat response format
         response = {
           message: imageAnalysis.analysis_text,
-          conversation_id: conversationId || crypto.randomUUID(),
+          conversation_id: conversationId ?? crypto.randomUUID(),
           needs_diagnosis: imageAnalysis.observations.visible_symptoms.length > 0,
           extracted_symptoms: {
             crop: imageAnalysis.observations.crop_identified || '',
@@ -136,18 +164,6 @@ export function AIChatWidget() {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-
-      // If AI suggests diagnosis, show a subtle notification
-      if (response.needs_diagnosis && response.extracted_symptoms) {
-        const symptomsDetected = [
-          ...response.extracted_symptoms.symptoms,
-          ...response.extracted_symptoms.color_changes,
-        ].filter(Boolean);
-
-        if (symptomsDetected.length > 0) {
-          // TODO: Show toast notification suggesting to run diagnosis
-        }
-      }
     } catch (error) {
       console.error('AI chat error:', error);
       const errorMessage: Message = {
@@ -164,7 +180,7 @@ export function AIChatWidget() {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      void handleSend();
     }
   };
 
@@ -197,207 +213,199 @@ export function AIChatWidget() {
 
   if (!user) return null;
 
+  const isKhmer = i18n.language === 'km';
+
   return (
     <>
-      {/* Floating Button - Futuristic Design */}
+      {/* Floating Button - Sunflower Botanical Design */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 group"
+          className="fixed bottom-6 right-6 z-50 group flex items-center focus:outline-hidden"
           aria-label={t('ai.openChat', 'Open AI Assistant')}
         >
-          {/* Animated rings */}
-          <div className={`absolute inset-0 rounded-full bg-gradient-to-r ${isAdminOrExpert ? 'from-yellow-500 via-orange-500 to-red-600' : 'from-cyan-500 via-blue-500 to-purple-600'} animate-pulse opacity-75`}></div>
-          <div className={`absolute inset-0 rounded-full bg-gradient-to-r ${isAdminOrExpert ? 'from-yellow-500 via-orange-500 to-red-600' : 'from-cyan-500 via-blue-500 to-purple-600'} animate-ping opacity-30`}></div>
-          
-          {/* Main button */}
-          <div className={`relative flex items-center gap-3 bg-gradient-to-r ${isAdminOrExpert ? 'from-yellow-500 via-orange-600 to-red-600' : 'from-cyan-500 via-blue-600 to-purple-600'} text-white px-5 py-3 rounded-full shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105`}>
-            {/* Robot Icon with glow */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-white rounded-full blur-md opacity-50 animate-pulse"></div>
-              <Bot className="w-6 h-6 relative z-10" />
+          {/* Subtle sunflower golden halo animation */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 opacity-60 blur-md group-hover:opacity-90 group-hover:blur-lg transition-all duration-300 animate-pulse" />
+
+          {/* Main button pill */}
+          <div className="relative flex items-center gap-3 bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 text-white pl-4 pr-5 py-3.5 rounded-full shadow-xl shadow-amber-900/20 border border-amber-300/30 transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl">
+            {/* Sunflower emblem avatar */}
+            <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs border border-white/30 shrink-0">
+              <span className="text-base select-none">🌻</span>
             </div>
-            <div className="flex flex-col items-start">
-              <span className="font-bold text-sm flex items-center gap-1">
+
+            <div className="flex flex-col items-start text-left">
+              <span className="font-bold text-xs sm:text-sm tracking-tight flex items-center gap-1.5 drop-shadow-xs">
                 {t('ai.assistant', 'AI Assistant')}
                 {isAdminOrExpert ? (
-                  <Shield className="w-3 h-3 text-yellow-100 animate-pulse" />
+                  <Shield className="w-3.5 h-3.5 text-amber-200 shrink-0" />
                 ) : (
-                  <Zap className="w-3 h-3 text-yellow-300 animate-pulse" />
+                  <Sparkles className="w-3.5 h-3.5 text-amber-200 shrink-0" />
                 )}
               </span>
-              <span className="text-xs opacity-90">
-                {isAdminOrExpert ? 'Admin Mode' : 'Powered by AI'}
+              <span className="text-[0.68rem] text-amber-100/90 font-medium">
+                {t('ai.tagline', 'Ask me about plant diseases')}
               </span>
             </div>
           </div>
         </button>
       )}
 
-      {/* Chat Window - Futuristic Design */}
+      {/* Chat Window - Botanical Glassmorphism */}
       {isOpen && (
-        <div 
-          className="fixed bottom-6 right-6 z-50 w-96 h-[600px] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden border-2 border-cyan-500/30"
-          dir={i18n.language === 'km' ? 'ltr' : 'ltr'}
-          style={{
-            boxShadow: '0 0 40px rgba(6, 182, 212, 0.3), 0 0 80px rgba(139, 92, 246, 0.2)',
-          }}
+        <div
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[410px] h-[580px] max-h-[85vh] bg-white/95 dark:bg-[#1E2615]/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-stone-900/20 dark:shadow-black/60 flex flex-col overflow-hidden border border-stone-200/90 dark:border-white/15 animate-in fade-in zoom-in-95 duration-200"
+          dir={isKhmer ? 'ltr' : 'ltr'}
         >
-          {/* Header - Futuristic with animated background */}
-          <div className="relative bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-700 text-white px-4 py-4 flex items-center justify-between overflow-hidden">
-            {/* Animated background pattern */}
-            <div className="absolute inset-0 opacity-20">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
-            </div>
-            
-            <div className="flex items-center gap-3 min-w-0 flex-1 relative z-10">
-              {/* Robot Avatar with animated glow */}
-              <div className="relative">
-                <div className="absolute inset-0 bg-white rounded-full blur-md opacity-60 animate-pulse"></div>
-                <div className="relative bg-white/10 backdrop-blur-sm p-2 rounded-full border border-white/20">
-                  <Bot className="w-6 h-6" />
-                </div>
+          {/* Header - Botanical Sunflower Amber to Emerald */}
+          <div className="relative bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 text-white px-4.5 py-4 flex items-center justify-between border-b border-amber-400/20 shadow-xs">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              {/* Avatar */}
+              <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/25 shadow-xs shrink-0">
+                <span className="text-xl select-none">🌻</span>
+                {/* Live Online Badge */}
+                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-amber-600" />
               </div>
-              
+
               <div className="min-w-0 flex-1">
-                <h3 className={`font-bold text-lg truncate flex items-center gap-2 ${i18n.language === 'km' ? 'leading-relaxed' : ''}`}>
-                  {t('ai.assistant', 'AI Assistant')}
-                  {isAdminOrExpert ? (
-                    <Shield
-                      className="w-4 h-4 text-yellow-300 animate-pulse"
-                      aria-label="Admin Mode"
-                    />
-                  ) : (
-                    <Brain className="w-4 h-4 text-cyan-300 animate-pulse" />
+                <div className="flex items-center gap-1.5">
+                  <h3 className={`font-bold text-base text-white truncate ${isKhmer ? 'leading-relaxed' : ''}`}>
+                    {t('ai.assistant', 'AI Assistant')}
+                  </h3>
+                  {isAdminOrExpert && (
+                    <span className="px-1.5 py-0.2 rounded text-[0.62rem] font-bold bg-amber-400/30 text-amber-100 border border-white/20 shrink-0">
+                      ADMIN
+                    </span>
                   )}
-                </h3>
-                <p className={`text-xs opacity-90 truncate ${i18n.language === 'km' ? 'leading-relaxed' : ''}`}>
-                  {isAdminOrExpert 
-                    ? (i18n.language === 'km' ? 'របៀបអ្នកគ្រប់គ្រង - អាចកែប្រែទិន្នន័យ' : 'Admin Mode - Can modify data')
-                    : t('ai.tagline', 'Ask me about plant diseases')
-                  }
+                </div>
+                <p className={`text-[0.72rem] text-amber-100/90 truncate ${isKhmer ? 'leading-relaxed' : ''}`}>
+                  {isAdminOrExpert
+                    ? isKhmer
+                      ? 'របៀបអ្នកគ្រប់គ្រង - អាចកែប្រែទិន្នន័យ'
+                      : 'Agronomist Admin Command Mode'
+                    : t('ai.tagline', 'Ask me about plant diseases')}
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="hover:bg-white/20 rounded-lg p-2 transition-all hover:rotate-90 duration-300 relative z-10"
-              aria-label={t('common.close', 'Close')}
-            >
-              <X className="w-5 h-5" />
-            </button>
+
+            <div className="flex items-center gap-1">
+              {messages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="p-1.5 text-white/80 hover:text-white hover:bg-white/15 rounded-lg transition-colors"
+                  title={t('ai.newConversation', 'New conversation')}
+                  aria-label={t('ai.newConversation', 'New conversation')}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="p-1.5 text-white/80 hover:text-white hover:bg-white/15 rounded-lg transition-colors"
+                aria-label={t('common.close', 'Close')}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
-          {/* Messages - Dark theme with neon accents */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-900/50 to-gray-800/50 backdrop-blur-sm">
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-stone-50/50 dark:bg-[#161D10]/50">
             {messages.length === 0 && (
-              <div className="text-center text-gray-300 py-8">
-                {/* Animated Robot Icon */}
-                <div className="relative inline-block mb-4">
-                  <div className="absolute inset-0 bg-cyan-500 rounded-full blur-xl opacity-50 animate-pulse"></div>
-                  <div className="relative bg-gradient-to-br from-cyan-500 to-purple-600 p-4 rounded-full">
-                    <Bot className="w-12 h-12 text-white" />
-                  </div>
+              <div className="text-center py-6 px-2 space-y-4">
+                {/* Botanical Icon */}
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs">
+                  <Sprout className="w-7 h-7" />
                 </div>
-                
-                <p className={`font-semibold mb-2 text-cyan-300 ${i18n.language === 'km' ? 'leading-relaxed' : ''}`}>
-                  {t('ai.welcome', 'Hello! How can I help you today?')}
-                </p>
-                <p className={`text-sm text-gray-400 ${i18n.language === 'km' ? 'leading-relaxed' : ''}`}>
-                  {isAdminOrExpert 
-                    ? (i18n.language === 'km' 
-                        ? 'អ្នកអាចសួរខ្ញុំអំពីជំងឺរុក្ខជាតិ ឬប្រើពាក្យបញ្ជាដើម្បីគ្រប់គ្រងទិន្នន័យ។ សាកល្បង "បង្ហាញជំងឺទាំងអស់" ឬ "ជំនួយ"។'
-                        : 'You can ask me about plant diseases or use commands to manage data. Try "list all diseases" or "help".')
-                    : t(
-                        'ai.welcomeHint',
-                        "Describe your plant symptoms and I'll help you understand what might be wrong."
-                      )
-                  }
-                </p>
-                
-                {/* Feature badges */}
-                <div className="flex flex-wrap justify-center gap-2 mt-6">
-                  {isAdminOrExpert ? (
-                    <>
-                      <span className="text-xs px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 rounded-full text-yellow-300 flex items-center gap-1">
-                        <Shield className="w-3 h-3" />
-                        Admin Mode
-                      </span>
-                      <span className="text-xs px-3 py-1 bg-cyan-500/20 border border-cyan-500/30 rounded-full text-cyan-300 flex items-center gap-1">
-                        <Brain className="w-3 h-3" />
-                        Data Control
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-xs px-3 py-1 bg-cyan-500/20 border border-cyan-500/30 rounded-full text-cyan-300 flex items-center gap-1">
-                        <Brain className="w-3 h-3" />
-                        Smart Analysis
-                      </span>
-                      <span className="text-xs px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full text-purple-300 flex items-center gap-1">
-                        <ImageIcon className="w-3 h-3" />
-                        Image Recognition
-                      </span>
-                    </>
-                  )}
+
+                <div className="space-y-1">
+                  <h4 className={`font-bold text-sm text-gray-900 dark:text-white ${isKhmer ? 'leading-relaxed' : ''}`}>
+                    {t('ai.welcome', 'Hello! How can I help you today?')}
+                  </h4>
+                  <p className={`text-xs text-gray-600 dark:text-gray-300 max-w-xs mx-auto leading-relaxed ${isKhmer ? 'leading-relaxed' : ''}`}>
+                    {isAdminOrExpert
+                      ? isKhmer
+                        ? 'អ្នកអាចសួរអំពីជំងឺរុក្ខជាតិ ឬគ្រប់គ្រងទិន្នន័យជំងឺ។'
+                        : 'Ask plant disease questions or manage catalog knowledge base.'
+                      : t('ai.welcomeHint', "Describe your plant symptoms and I'll help you understand what might be wrong.")}
+                  </p>
+                </div>
+
+                {/* Quick Suggestion Prompt Chips */}
+                <div className="space-y-1.5 pt-2">
+                  <span className="text-[0.68rem] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                    Suggested Questions
+                  </span>
+                  <div className="flex flex-col gap-1.5 text-left">
+                    {QUICK_PROMPTS.map((prompt, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => void handleSend(isKhmer ? prompt.km : prompt.en)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-[#1E2615] hover:bg-amber-50/80 dark:hover:bg-[#2A3420] text-gray-800 dark:text-gray-200 text-xs border border-stone-200/80 dark:border-white/10 shadow-2xs hover:border-amber-400/50 transition-all text-left"
+                      >
+                        <span className="text-sm shrink-0">{prompt.icon}</span>
+                        <span className="truncate flex-1 font-medium">
+                          {isKhmer ? prompt.km : prompt.en}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
 
+            {/* Chat Messages */}
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in duration-200`}
               >
-                {/* AI Avatar for assistant messages */}
+                {/* Assistant botanical badge */}
                 {message.role === 'assistant' && (
-                  <div className="mr-2 flex-shrink-0">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-cyan-500 rounded-full blur-sm opacity-50"></div>
-                      <div className="relative bg-gradient-to-br from-cyan-500 to-blue-600 p-2 rounded-full">
-                        <Bot className="w-4 h-4 text-white" />
-                      </div>
+                  <div className="mr-2 shrink-0 self-end mb-1">
+                    <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center border border-amber-500/30 text-xs select-none">
+                      🌻
                     </div>
                   </div>
                 )}
-                
+
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                  className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 shadow-xs ${
                     message.role === 'user'
-                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
-                      : 'bg-gray-700/50 backdrop-blur-sm text-gray-100 border border-cyan-500/20 shadow-lg'
-                  } ${i18n.language === 'km' ? 'leading-relaxed' : ''}`}
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-br-xs'
+                      : 'bg-white dark:bg-[#253018] text-gray-800 dark:text-gray-100 border border-stone-200/80 dark:border-white/10 rounded-bl-xs'
+                  } ${isKhmer ? 'leading-relaxed' : ''}`}
                 >
-                  <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-                  <p
-                    className={`text-xs mt-1 ${
-                      message.role === 'user'
-                        ? 'text-cyan-100'
-                        : 'text-gray-400'
+                  <p className="text-xs sm:text-[0.82rem] whitespace-pre-wrap break-words leading-relaxed">
+                    {message.content}
+                  </p>
+                  <span
+                    className={`block text-[0.62rem] mt-1 text-right font-mono ${
+                      message.role === 'user' ? 'text-amber-100' : 'text-gray-600 dark:text-gray-300'
                     }`}
                   >
-                    {message.timestamp.toLocaleTimeString(i18n.language, {
+                    {message.timestamp.toLocaleTimeString([], {
                       hour: '2-digit',
                       minute: '2-digit',
                     })}
-                  </p>
+                  </span>
                 </div>
               </div>
             ))}
 
             {isLoading && (
-              <div className="flex justify-start animate-fadeIn">
-                <div className="mr-2 flex-shrink-0">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-cyan-500 rounded-full blur-sm opacity-50 animate-pulse"></div>
-                    <div className="relative bg-gradient-to-br from-cyan-500 to-blue-600 p-2 rounded-full">
-                      <Bot className="w-4 h-4 text-white" />
-                    </div>
-                  </div>
+              <div className="flex justify-start items-center gap-2 animate-in fade-in">
+                <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center border border-amber-500/30 text-xs select-none">
+                  🌻
                 </div>
-                <div className="bg-gray-700/50 backdrop-blur-sm border border-cyan-500/20 rounded-2xl px-4 py-3 flex items-center gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin text-cyan-400" />
-                  <span className="text-sm text-gray-300">Analyzing...</span>
+                <div className="bg-white dark:bg-[#253018] border border-stone-200/80 dark:border-white/10 rounded-2xl px-3.5 py-2.5 flex items-center gap-2 shadow-xs">
+                  <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
+                  <span className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                    {isKhmer ? 'កំពុងវិភាគរោគសញ្ញា...' : 'Analyzing plant symptoms...'}
+                  </span>
                 </div>
               </div>
             )}
@@ -405,37 +413,28 @@ export function AIChatWidget() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input - Futuristic style */}
-          <div className="border-t border-cyan-500/30 bg-gray-800/80 backdrop-blur-sm p-4">
-            {messages.length > 0 && (
-              <button
-                onClick={handleReset}
-                className="text-xs text-cyan-400 hover:text-cyan-300 mb-2 flex items-center gap-1 transition-colors"
-              >
-                <Zap className="w-3 h-3" />
-                {t('ai.newConversation', 'Start new conversation')}
-              </button>
-            )}
-            
-            {/* Image Preview */}
+          {/* Input Footer */}
+          <div className="p-3 bg-white/95 dark:bg-[#1E2615]/95 border-t border-stone-200/80 dark:border-white/10 space-y-2">
+            {/* Image Preview if attached */}
             {imagePreview && (
-              <div className="mb-2 relative inline-block">
+              <div className="relative inline-block">
                 <img
                   src={imagePreview}
-                  alt="Upload preview"
-                  className="max-h-20 rounded-lg border-2 border-cyan-500/50 shadow-lg shadow-cyan-500/20"
+                  alt="Crop preview"
+                  className="max-h-16 rounded-xl border border-amber-400 shadow-xs"
                 />
                 <button
+                  type="button"
                   onClick={handleRemoveImage}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+                  className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-rose-600 transition-colors shadow-xs"
                   aria-label="Remove image"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3 h-3" />
                 </button>
               </div>
             )}
-            
-            <div className="flex gap-2">
+
+            <div className="flex items-center gap-1.5">
               {/* Hidden file input */}
               <input
                 ref={fileInputRef}
@@ -444,39 +443,42 @@ export function AIChatWidget() {
                 onChange={handleImageSelect}
                 className="hidden"
               />
-              
-              {/* Image upload button - Futuristic */}
+
+              {/* Photo Upload Button */}
               <button
+                type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-gray-700/50 border border-cyan-500/30 text-cyan-400 px-3 py-2 rounded-lg hover:bg-gray-600/50 hover:border-cyan-400/50 transition-all hover:shadow-lg hover:shadow-cyan-500/20"
+                className="p-2.5 rounded-xl bg-stone-100 hover:bg-amber-50 dark:bg-[#253018] dark:hover:bg-[#2A3420] text-gray-600 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 border border-stone-200/80 dark:border-white/10 transition-colors"
                 disabled={isLoading}
-                aria-label="Upload image"
+                title="Attach plant photo"
+                aria-label="Attach plant photo"
               >
-                <ImageIcon className="w-5 h-5" />
+                <ImageIcon className="w-4 h-4" />
               </button>
-              
+
+              {/* Text Input */}
               <input
                 ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder={t(
-                  'ai.inputPlaceholder',
-                  'Describe your plant symptoms...'
-                )}
-                className={`flex-1 px-4 py-2 bg-gray-700/50 border border-cyan-500/30 text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all text-sm ${
-                  i18n.language === 'km' ? 'leading-relaxed' : ''
+                onKeyDown={handleKeyPress}
+                placeholder={t('ai.inputPlaceholder', 'Describe your plant symptoms...')}
+                className={`flex-1 px-3.5 py-2 rounded-xl bg-stone-100/90 dark:bg-[#253018]/90 border border-stone-200/80 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-600 dark:placeholder-gray-300 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all ${
+                  isKhmer ? 'leading-relaxed' : ''
                 }`}
                 disabled={isLoading}
               />
+
+              {/* Send Button */}
               <button
-                onClick={handleSend}
+                type="button"
+                onClick={() => void handleSend()}
                 disabled={(!input.trim() && !selectedImage) || isLoading}
-                className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-cyan-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-cyan-500/50 disabled:shadow-none flex items-center gap-2"
+                className="p-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow-xs shadow-amber-600/20 transition-all shrink-0"
                 aria-label={t('common.send', 'Send')}
               >
-                <Send className="w-5 h-5" />
+                <Send className="w-4 h-4" />
               </button>
             </div>
           </div>
