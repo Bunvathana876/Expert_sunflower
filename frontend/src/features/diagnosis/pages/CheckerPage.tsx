@@ -383,18 +383,18 @@ export function CheckerPage(): React.JSX.Element {
             {selectedSymptomsList.map(({ id, item, answer }) => (
               <span
                 key={id}
-                className={`sf-chip sf-chip--removable ${
+                className={`sf-chip sf-chip--removable max-w-full ${
                   answer === "yes"
                     ? "bg-amber-50 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200 border-amber-300 dark:border-amber-800"
                     : "bg-rose-50 text-rose-900 dark:bg-rose-950/60 dark:text-rose-200 border-rose-300 dark:border-rose-800"
                 }`}
               >
-                <span className="text-[0.7rem] font-bold">{answer === "yes" ? "✓" : "✗"}</span>
-                <span>{item?.label ?? `Symptom #${id}`}</span>
+                <span className="text-[0.7rem] font-bold shrink-0">{answer === "yes" ? "✓" : "✗"}</span>
+                <span className="break-words min-w-0">{item?.label ?? `Symptom #${id}`}</span>
                 <button
                   type="button"
                   onClick={() => handleAnswer(id, "unknown")}
-                  className="sf-chip__remove-btn"
+                  className="sf-chip__remove-btn shrink-0"
                   aria-label={`Remove ${item?.label ?? "symptom"}`}
                 >
                   ✕
@@ -484,9 +484,9 @@ export function CheckerPage(): React.JSX.Element {
                 {previewData.next_best_questions.slice(0, 4).map((q) => (
                   <div
                     key={q.symptom}
-                    className="p-2.5 rounded-lg bg-white/80 dark:bg-stone-900/70 border border-amber-500/20 flex justify-between items-center text-xs"
+                    className="p-2.5 rounded-lg bg-white/80 dark:bg-stone-900/70 border border-amber-500/20 flex justify-between items-center text-xs gap-2 min-w-0"
                   >
-                    <span className="font-medium text-slate-800 dark:text-slate-200 truncate mr-2">
+                    <span className="font-medium text-slate-800 dark:text-slate-200 truncate min-w-0 flex-1">
                       {q.symptom}
                     </span>
                     <span className="text-[0.7rem] font-bold text-amber-700 dark:text-amber-400 shrink-0 bg-amber-100/80 dark:bg-amber-950 px-1.5 py-0.5 rounded">

@@ -315,13 +315,14 @@ export function DiseaseComparePage(): React.JSX.Element {
                         className="p-5 text-left border-l border-stone-200/80 dark:border-white/10 min-w-[260px] w-1/3"
                       >
                         <div className="space-y-2">
-                          <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                          <div className="flex items-start justify-between gap-2 min-w-0">
+                            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white break-words min-w-0 flex-1 leading-snug">
                               {detail?.name || slug}
                             </h3>
                             {detail?.pathogen_type && (
                               <Badge
                                 variant={detail.pathogen_type}
+                                className="shrink-0"
                               >
                                 {detail.pathogen_type}
                               </Badge>

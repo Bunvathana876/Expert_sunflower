@@ -46,7 +46,7 @@ export function EvidenceBreakdown({ evidence }: EvidenceBreakdownProps): React.J
               {group.items.map((item) => (
                 <div key={item.symptom} className="sf-evidence__item">
                   <span className={`sf-evidence__dot sf-evidence__dot--${group.variant}`} />
-                  <span>{item.symptom}</span>
+                  <span className="break-words min-w-0 flex-1">{item.symptom}</span>
                 </div>
               ))}
             </div>

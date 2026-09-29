@@ -116,15 +116,15 @@ export function HistoryPage(): React.JSX.Element {
                   to={`/check/${session.id}`}
                   className="sf-glass-card bg-white/90 dark:bg-[#222C19]/85 backdrop-blur-md border border-stone-200/90 dark:border-white/10 shadow-sm hover:shadow-md hover:border-amber-500/60 p-4 sm:p-5 flex items-center justify-between gap-3 transition-all hover:translate-y-[-2px] group block rounded-xl"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-sm text-gray-900 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
+                  <div className="space-y-1 min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap min-w-0">
+                      <span className="font-bold text-sm text-gray-900 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors break-words">
                         {session.top_disease
                           ? session.top_disease.name
                           : t("history.no_disease_match")}
                       </span>
                       {session.outcome === "no_match" && (
-                        <span className="px-2 py-0.5 text-[0.65rem] font-bold rounded-full bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30">
+                        <span className="px-2 py-0.5 text-[0.65rem] font-bold rounded-full bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30 shrink-0">
                           {t("history.no_match")}
                         </span>
                       )}

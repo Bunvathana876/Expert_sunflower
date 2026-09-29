@@ -188,7 +188,7 @@ export function ResultPage(): React.JSX.Element {
             </div>
           </div>
 
-          <div className="sf-glass-card p-3.5 space-y-1">
+          <div className="sf-glass-card p-3.5 space-y-1 min-w-0">
             <div className="text-[0.7rem] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">
               {t("result.stat_top_match")}
             </div>
@@ -197,8 +197,8 @@ export function ResultPage(): React.JSX.Element {
             </div>
           </div>
 
-          <div className="sf-glass-card p-3.5 space-y-1 border-amber-500/30">
-            <div className="text-[0.7rem] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+          <div className="sf-glass-card p-3.5 space-y-1 border-amber-500/30 min-w-0">
+            <div className="text-[0.7rem] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 truncate">
               {t("result.stat_confidence")}
             </div>
             <div className="text-xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
@@ -219,11 +219,11 @@ export function ResultPage(): React.JSX.Element {
           className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"
           aria-hidden="true"
         />
-        <div className="space-y-0.5">
-          <div className="text-xs font-bold text-amber-900 dark:text-amber-200">
+        <div className="space-y-0.5 min-w-0 flex-1">
+          <div className="text-xs font-bold text-amber-900 dark:text-amber-200 break-words">
             Agricultural Decision-Support Disclaimer
           </div>
-          <p className="text-xs text-amber-800/90 dark:text-amber-300/90 leading-relaxed">
+          <p className="text-xs text-amber-800/90 dark:text-amber-300/90 leading-relaxed break-words">
             {t("result.medical_disclaimer")}
           </p>
         </div>
@@ -247,7 +247,7 @@ export function ResultPage(): React.JSX.Element {
               >
                 {/* Header: Title, Badges, and Gauge */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200/60 dark:border-slate-800">
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
                     <span
                       className={`px-2 py-1 text-xs font-bold rounded-lg shrink-0 ${
                         isTop
@@ -258,10 +258,10 @@ export function ResultPage(): React.JSX.Element {
                       #{result.rank}
                     </span>
 
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         {isTop && (
-                          <span className="px-2 py-0.5 text-[0.65rem] font-bold rounded-md bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1">
+                          <span className="px-2 py-0.5 text-[0.65rem] font-bold rounded-md bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1 shrink-0">
                             <Sparkles size={10} />
                             <span>{t("result.top_match_badge")}</span>
                           </span>
@@ -275,14 +275,14 @@ export function ResultPage(): React.JSX.Element {
                         </span>
                       </div>
 
-                      <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-50">
+                      <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-50 break-words leading-snug">
                         {result.disease.name}
                       </h2>
                     </div>
                   </div>
 
                   {/* Circular Percentage Visualization Gauge */}
-                  <div className="flex items-center gap-4 self-end sm:self-center">
+                  <div className="flex items-center gap-4 self-end sm:self-center shrink-0">
                     <PercentageVisualization
                       value={result.confidence}
                       size={isTop ? 88 : 74}

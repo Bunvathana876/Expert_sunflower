@@ -33,7 +33,7 @@ export function SymptomToggle({
       role="group"
       aria-label={symptom.label}
     >
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-start gap-2.5 min-w-0 flex-1">
         <span
           className={`w-2 h-2 rounded-full mt-1.5 shrink-0 transition-colors ${
             isObserved
@@ -42,7 +42,7 @@ export function SymptomToggle({
           }`}
           aria-hidden="true"
         />
-        <div className="text-sm font-medium text-slate-800 dark:text-slate-100 leading-snug">
+        <div className="text-sm font-medium text-slate-800 dark:text-slate-100 leading-snug break-words min-w-0 flex-1">
           {symptom.label}
         </div>
       </div>
@@ -56,7 +56,7 @@ export function SymptomToggle({
         <button
           type="button"
           onClick={() => onAnswer(symptom.id, isObserved ? "unknown" : "yes")}
-          className={`px-4 py-2 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all ${
+          className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all text-center break-words ${
             isObserved
               ? "bg-amber-600 text-stone-900 shadow-sm"
               : "bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-amber-100 dark:hover:bg-amber-950/60 hover:text-amber-700"
@@ -67,7 +67,7 @@ export function SymptomToggle({
         >
           {isObserved ? (
             <>
-              <Check size={16} strokeWidth={2.5} />
+              <Check size={16} strokeWidth={2.5} className="shrink-0" />
               <span>{t("checker.observed")}</span>
             </>
           ) : (

@@ -93,16 +93,16 @@ export function DiseaseDetailPage(): React.JSX.Element {
         {/* Title Header */}
         <div className="p-6 sm:p-8 space-y-3 bg-white/60 dark:bg-stone-900/70 backdrop-blur-md">
           <div className="space-y-1">
-            <div className="text-[0.68rem] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider font-mono">
+            <div className="text-[0.68rem] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider font-mono break-all">
               Sunflower Pathology Index • {disease.slug}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 break-words">
               {disease.name}
             </h1>
           </div>
 
           {disease.description && (
-            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl break-words">
               {disease.description}
             </p>
           )}
@@ -115,10 +115,10 @@ export function DiseaseDetailPage(): React.JSX.Element {
         {disease.cause && (
           <section className="sf-glass-card p-6 space-y-3">
             <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Info size={18} className="text-amber-500" />
-              <span>{t("diseases.section_cause")}</span>
+              <Info size={18} className="text-amber-500 shrink-0" />
+              <span className="break-words">{t("diseases.section_cause")}</span>
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed break-words">
               {disease.cause}
             </p>
           </section>
@@ -178,10 +178,10 @@ export function DiseaseDetailPage(): React.JSX.Element {
         {disease.treatment && (
           <section className="sf-glass-card p-6 space-y-3">
             <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Stethoscope size={18} className="text-blue-500" />
-              <span>{t("diseases.section_treatment")}</span>
+              <Stethoscope size={18} className="text-blue-500 shrink-0" />
+              <span className="break-words">{t("diseases.section_treatment")}</span>
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line break-words">
               {disease.treatment}
             </p>
           </section>
@@ -191,10 +191,10 @@ export function DiseaseDetailPage(): React.JSX.Element {
         {disease.prevention && (
           <section className="sf-glass-card p-6 space-y-3 border-amber-500/20">
             <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <ShieldCheck size={18} className="text-green-600" />
-              <span>{t("diseases.section_prevention")}</span>
+              <ShieldCheck size={18} className="text-green-600 shrink-0" />
+              <span className="break-words">{t("diseases.section_prevention")}</span>
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line break-words">
               {disease.prevention}
             </p>
           </section>

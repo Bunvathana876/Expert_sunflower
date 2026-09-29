@@ -95,7 +95,7 @@ export function FeedbackPage(): React.JSX.Element {
           {sessionId && (
             <div className="p-3 rounded-xl bg-amber-500/10 dark:bg-amber-400/10 border border-amber-500/20 flex items-center gap-2 text-xs text-amber-900 dark:text-amber-200 font-mono">
               <Sparkles size={14} className="text-amber-600 shrink-0" />
-              <span>{t("feedback.attached_session")}: <code>{sessionId}</code></span>
+              <span className="min-w-0 break-words">{t("feedback.attached_session")}: <code className="break-all">{sessionId}</code></span>
             </div>
           )}
 

@@ -48,14 +48,14 @@ export function DiseaseCard({ disease }: DiseaseCardProps): React.JSX.Element {
       </div>
 
       {/* Card Content Body */}
-      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
-        <div className="space-y-1.5">
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-1">
+      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3 min-w-0">
+        <div className="space-y-1.5 min-w-0">
+          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-2 break-words leading-snug">
             {disease.name}
           </h3>
 
           {disease.description && (
-            <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed break-words">
               {disease.description}
             </p>
           )}

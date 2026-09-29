@@ -127,7 +127,7 @@ export function AdminLayout(): React.JSX.Element {
               <span className="text-2xl transition-transform group-hover:scale-110 shrink-0" aria-hidden="true">
                 🌻
               </span>
-              <div className="flex flex-col min-w-0">
+              <div className="flex flex-col min-w-0 flex-1">
                 <span className="font-bold text-sm sm:text-base tracking-tight text-gray-900 dark:text-white leading-tight truncate">
                   {t("admin.workspace_title")}
                 </span>
@@ -185,7 +185,7 @@ export function AdminLayout(): React.JSX.Element {
                   }`}
                 >
                   <Icon size={16} className={`shrink-0 ${active ? "text-amber-600 dark:text-amber-400" : "text-gray-500 dark:text-gray-400"}`} />
-                  <span className="truncate flex-1">{t(item.labelKey)}</span>
+                  <span className="truncate flex-1 min-w-0">{t(item.labelKey)}</span>
                   {count !== null && (
                     <span
                       className={`px-1.5 py-0.5 rounded-md text-[0.65rem] font-mono font-bold shrink-0 ${

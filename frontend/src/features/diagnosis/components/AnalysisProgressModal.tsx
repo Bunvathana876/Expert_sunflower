@@ -92,7 +92,7 @@ export function AnalysisProgressModal({
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">{t("analysis.subtitle")}</p>
 
         {/* Step Progress Checklist */}
-        <div className="space-y-3 text-left max-w-xs mx-auto mb-6">
+        <div className="space-y-3 text-left max-w-sm w-full mx-auto mb-6">
           {steps.map((step) => {
             const isFinished = activeStep > step.id;
             const isCurrent = activeStep === step.id;
@@ -127,7 +127,7 @@ export function AnalysisProgressModal({
                 </div>
 
                 <span
-                  className="text-xs font-medium"
+                  className="text-xs font-medium break-words min-w-0 flex-1"
                   style={{
                     color: isFinished
                       ? "var(--color-text)"
@@ -153,7 +153,7 @@ export function AnalysisProgressModal({
           }}
         >
           <ShieldCheck size={16} className="text-green-600 shrink-0" aria-hidden="true" />
-          <span className="text-[0.72rem] leading-tight">{t("analysis.safety_notice")}</span>
+          <span className="text-[0.72rem] leading-tight break-words min-w-0 flex-1">{t("analysis.safety_notice")}</span>
         </div>
       </div>
     </div>

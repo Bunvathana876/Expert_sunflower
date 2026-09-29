@@ -109,22 +109,22 @@ export function DiagnosticReportModal({
       <div className="relative w-full max-w-4xl bg-white dark:bg-[#1E2615] rounded-2xl shadow-2xl border border-stone-200/80 dark:border-white/10 flex flex-col max-h-[92vh] overflow-hidden">
         {/* Modal Top Bar */}
         <div className="p-4 sm:px-6 bg-stone-50/90 dark:bg-[#182010]/90 border-b border-stone-200/80 dark:border-white/10 flex items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-700 dark:text-amber-400">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-700 dark:text-amber-400 shrink-0">
               <FileText className="w-4 h-4" />
             </div>
-            <div>
-              <h2 id="report-modal-title" className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
+            <div className="min-w-0 flex-1">
+              <h2 id="report-modal-title" className="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate">
                 {t("report.modal_title")}
               </h2>
-              <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-mono truncate block">
                 {reportId}
               </span>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={() => void handleShare()}

@@ -63,7 +63,7 @@ export function DiseaseDetailModal({
       <div className="sf-modal-sheet" style={{ maxWidth: "42rem", padding: "1.5rem" }}>
         {/* Header with Title, Match Badge, and Close Button */}
         <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             {imageUrl ? (
               <img
                 src={imageUrl}
@@ -75,27 +75,27 @@ export function DiseaseDetailModal({
                 🌻
               </div>
             )}
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2 py-0.5 text-[0.7rem] uppercase font-bold tracking-wider rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                <span className="px-2 py-0.5 text-[0.7rem] uppercase font-bold tracking-wider rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 shrink-0">
                   {pathogenType}
                 </span>
                 {result && (
-                  <span className="px-2 py-0.5 text-[0.7rem] font-bold rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                  <span className="px-2 py-0.5 text-[0.7rem] font-bold rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 shrink-0">
                     Rank #{result.rank}
                   </span>
                 )}
               </div>
               <h2
                 id="disease-modal-title"
-                className="text-lg md:text-xl font-bold text-slate-900 dark:text-slate-50 mt-1"
+                className="text-lg md:text-xl font-bold text-slate-900 dark:text-slate-50 mt-1 break-words leading-snug"
               >
                 {diseaseName}
               </h2>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {result && (
               <div className="hidden sm:block">
                 <PercentageVisualization value={confidence} size={58} strokeWidth={5} />

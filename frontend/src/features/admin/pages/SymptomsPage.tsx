@@ -215,14 +215,14 @@ export function SymptomsPage(): React.JSX.Element {
               <tbody>
                 {filtered.map((s) => (
                   <tr key={s.id}>
-                    <td className="font-semibold text-slate-900 dark:text-slate-100">{s.label}</td>
+                    <td className="font-semibold text-slate-900 dark:text-slate-100 max-w-xs break-words">{s.label}</td>
                     <td>
-                      <code className="text-[0.75rem] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                      <code className="text-[0.75rem] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded break-all">
                         {s.code}
                       </code>
                     </td>
                     <td>
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 break-words">
                         {s.category_label}
                       </span>
                     </td>

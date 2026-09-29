@@ -66,7 +66,7 @@ export function BottomNav({ onOpenAbout }: BottomNavProps): React.JSX.Element {
               }`}
             >
               <Icon size={18} strokeWidth={active ? 2.5 : 2} className="shrink-0" />
-              <span className="text-[0.6rem] sm:text-[0.65rem] tracking-tight mt-0.5 leading-tight truncate max-w-full text-center">
+              <span className="block w-full text-[0.6rem] sm:text-[0.65rem] tracking-tight mt-0.5 leading-tight truncate text-center">
                 {label}
               </span>
             </Link>
@@ -83,7 +83,7 @@ export function BottomNav({ onOpenAbout }: BottomNavProps): React.JSX.Element {
             aria-label={t("nav.about")}
           >
             <Info size={18} className="shrink-0" />
-            <span className="text-[0.6rem] sm:text-[0.65rem] tracking-tight mt-0.5 leading-tight truncate max-w-full text-center">
+            <span className="block w-full text-[0.6rem] sm:text-[0.65rem] tracking-tight mt-0.5 leading-tight truncate text-center">
               {t("nav.about")}
             </span>
           </button>
