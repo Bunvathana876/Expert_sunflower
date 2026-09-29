@@ -10,8 +10,10 @@ import {
   Layers,
   Leaf,
   Info,
+  Images,
 } from "lucide-react";
 import { useDiseaseDetail } from "../hooks";
+import { getDiseaseImage, getDiseaseGallery } from "../utils/diseaseImages";
 import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -21,6 +23,9 @@ export function DiseaseDetailPage(): React.JSX.Element {
   const { t } = useTranslation();
 
   const { data: disease, isLoading, isError, refetch } = useDiseaseDetail(slug ?? "");
+
+  const mainImageUrl = getDiseaseImage(disease?.slug, disease?.image_url);
+  const galleryImages = getDiseaseGallery(disease?.slug);
 
   if (isLoading) {
     return (
@@ -62,9 +67,9 @@ export function DiseaseDetailPage(): React.JSX.Element {
       {/* Hero Visual Card */}
       <div className="sf-glass-card overflow-hidden border border-slate-200/80 dark:border-slate-800">
         <div className="relative w-full aspect-[21/9] sm:aspect-[2/1] bg-slate-100 dark:bg-stone-800/80 overflow-hidden">
-          {disease.image_url ? (
+          {mainImageUrl ? (
             <img
-              src={disease.image_url}
+              src={mainImageUrl}
               alt={disease.name}
               className="w-full h-full object-cover"
             />
@@ -192,6 +197,35 @@ export function DiseaseDetailPage(): React.JSX.Element {
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
               {disease.prevention}
             </p>
+          </section>
+        )}
+
+        {/* Clinical Image Gallery (if multiple photos available) */}
+        {galleryImages.length > 1 && (
+          <section className="sf-glass-card p-6 space-y-4">
+            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Images size={18} className="text-amber-500" />
+              <span>Clinical Pathology Gallery</span>
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {galleryImages.map((img, idx) => (
+                <div
+                  key={idx}
+                  className="group relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800 aspect-[4/3] bg-slate-100 dark:bg-stone-800"
+                >
+                  <img
+                    src={img}
+                    alt={`${disease.name} reference ${idx + 1}`}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                    <span className="text-xs text-white font-medium">
+                      {disease.name} • Reference #{idx + 1}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </section>
         )}
       </div>

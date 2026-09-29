@@ -68,4 +68,4 @@ def get_settings() -> Settings:
     Call this everywhere instead of constructing Settings() directly so that
     the environment is only parsed once.
     """
-    return Settings()
+    return Settings()  # type: ignore[call-arg]

@@ -42,7 +42,9 @@ describe("AuthProvider Session Persistence", () => {
       <AuthProvider>{children}</AuthProvider>
     );
 
-    let hookResult: any;
+    let hookResult: { current: ReturnType<typeof useAuth> } = {
+      current: undefined as unknown as ReturnType<typeof useAuth>,
+    };
     await act(async () => {
       const { result } = renderHook(() => useAuth(), { wrapper });
       hookResult = result;

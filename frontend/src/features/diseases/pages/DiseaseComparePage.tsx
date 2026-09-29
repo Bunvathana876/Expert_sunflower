@@ -16,6 +16,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useDiseases, useDiseaseDetail } from "../hooks";
+import { getDiseaseImage } from "../utils/diseaseImages";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Badge } from "@/components/ui/Badge";
 import type { DiseaseDetail, PathogenType } from "@/types/api";
@@ -327,13 +328,16 @@ export function DiseaseComparePage(): React.JSX.Element {
                             )}
                           </div>
 
-                          {detail?.image_url && (
-                            <img
-                              src={detail.image_url}
-                              alt={detail.name}
-                              className="w-full h-32 object-cover rounded-xl border border-slate-200 dark:border-white/10 shadow-xs"
-                            />
-                          )}
+                          {(() => {
+                            const compareImg = getDiseaseImage(slug, detail?.image_url);
+                            return compareImg ? (
+                              <img
+                                src={compareImg}
+                                alt={detail?.name ?? slug}
+                                className="w-full h-32 object-cover rounded-xl border border-slate-200 dark:border-white/10 shadow-xs"
+                              />
+                            ) : null;
+                          })()}
 
                           <Link
                             to={`/diseases/${slug}`}

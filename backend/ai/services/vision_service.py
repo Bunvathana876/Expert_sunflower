@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import logging
 from io import BytesIO
 from typing import Any
@@ -52,7 +53,7 @@ class VisionService:
             
             return True, ""
         
-        except base64.binascii.Error:
+        except (binascii.Error, ValueError):
             return False, "Invalid base64 encoding"
         except Exception as e:
             return False, f"Invalid image: {e}"

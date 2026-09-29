@@ -32,7 +32,7 @@ ollama pull qwen2.5:7b && ollama pull llava:7b && ollama serve
 
 | Service | URL | Port |
 |---------|-----|------|
-| Frontend | http://localhost:5173 | 5173 |
+| Frontend | http://localhost:5174 | 5174 |
 | Backend | http://localhost:8000 | 8000 |
 | API Docs | http://localhost:8000/docs | 8000 |
 | PostgreSQL | localhost:5432 | 5432 |

@@ -104,8 +104,8 @@ docker compose exec api python -m scripts.import_sample_diseases
 
 | Service | URL | Default Credentials |
 |---|---|---|
-| 🌐 **Grower Web App** | [http://localhost:5173](http://localhost:5173) | Free registration or seed accounts |
-| 🛡️ **Admin Dashboard** | [http://localhost:5173/admin](http://localhost:5173/admin) | `admin@example.com` / `leetaka!1234568` |
+| 🌐 **Grower Web App** | [http://localhost:5174](http://localhost:5174) | Free registration or seed accounts |
+| 🛡️ **Admin Dashboard** | [http://localhost:5174/admin](http://localhost:5174/admin) | `admin@example.com` / `leetaka!1234568` |
 | 📄 **API Swagger Docs** | [http://localhost:8000/docs](http://localhost:8000/docs) | N/A |
 | 🗄️ **pgAdmin 4 Console** | [http://localhost:5050](http://localhost:5050) | `admin@sunflower.local` / `AdminPassword123!` |
 

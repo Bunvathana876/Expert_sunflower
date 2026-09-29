@@ -25,6 +25,8 @@ class AIChatResponse(BaseModel):
     conversation_id: str
     needs_diagnosis: bool = False
     extracted_symptoms: dict[str, Any] | None = None
+    actions_taken: list[Any] = Field(default_factory=list)
+    metadata: dict[str, Any] | None = None
 
 
 # ============================================================================

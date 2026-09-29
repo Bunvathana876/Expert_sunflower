@@ -12,6 +12,7 @@ from app.models.auth import User
 from app.repositories.admin import AdminRepository
 from app.schemas.admin import (
     PaginatedUsersResponse,
+    PermissionDetail,
     RolePermissionsRequest,
     RolePermissionsResponse,
     RulesetResponse,
@@ -171,11 +172,11 @@ async def get_role_permissions(
         role_id=role.id,
         role_name=role.name,
         permissions=[
-            {
-                "code": p.code,
-                "description": p.description or "",
-                "granted": p.code in role_permission_codes,
-            }
+            PermissionDetail(
+                code=p.code,
+                description=p.description or "",
+                granted=p.code in role_permission_codes,
+            )
             for p in all_permissions
         ],
     )
@@ -212,11 +213,11 @@ async def update_role_permissions(
         role_id=updated_role.id,
         role_name=updated_role.name,
         permissions=[
-            {
-                "code": p.code,
-                "description": p.description or "",
-                "granted": p.code in role_permission_codes,
-            }
+            PermissionDetail(
+                code=p.code,
+                description=p.description or "",
+                granted=p.code in role_permission_codes,
+            )
             for p in all_permissions
         ],
     )

@@ -122,7 +122,13 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   const response = await fetch(url, { ...init, headers, credentials: "include" });
 
   // --- Refresh interceptor hook (Step 3) ---
-  if (response.status === 401 && _onRefreshNeeded) {
+  const isAuthEndpoint =
+    cleanPath.startsWith("/auth/login") ||
+    cleanPath.startsWith("/auth/refresh") ||
+    cleanPath.startsWith("/auth/register") ||
+    cleanPath.startsWith("/auth/logout");
+
+  if (response.status === 401 && _onRefreshNeeded && !isAuthEndpoint) {
     // Attempt refresh once, then replay.
     const newToken = await _onRefreshNeeded();
     if (newToken) {

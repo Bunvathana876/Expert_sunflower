@@ -7,15 +7,19 @@ Provides a conversational interface for database operations.
 from __future__ import annotations
 
 import json
+import uuid
 from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from ai.schemas.ai_schemas import AIChatRequest, AIChatResponse
 from ai.services.ollama_service import get_ollama_service
 from app.models.disease import Disease
-from app.models.symptom import Symptom
+from app.models.enums import PathogenType
+from app.models.symptom import Symptom, SymptomCategory
+from app.models.translation import Translation
 
 
 class AdminChatService:
@@ -379,553 +383,761 @@ Return JSON only:
     async def _list_diseases(
         self,
         db: AsyncSession,
-        locale: str
-    ) -> tuple[str, list[str]]:
+        locale: str,
+    ) -> tuple[str, list[dict[str, Any]]]:
         """List all diseases in the database."""
-        
         result = await db.execute(
-            select(Disease).where(Disease.is_published == True).order_by(Disease.name)
+            select(Disease).where(Disease.is_published == True).order_by(Disease.slug)
         )
-        diseases = result.scalars().all()
-        
+        diseases = list(result.scalars().all())
+
         if not diseases:
             message = self._translate(
                 "No diseases found in the database.",
                 "រកមិនឃើញជំងឺក្នុងមូលដ្ឋានទិន្នន័យទេ។",
-                locale
+                locale,
             )
             return message, []
-        
+
+        disease_ids = [d.id for d in diseases]
+        trans_res = await db.execute(
+            select(Translation).where(
+                Translation.entity_type == "disease",
+                Translation.entity_id.in_(disease_ids),
+                Translation.field == "name",
+                Translation.locale.in_([locale, "en"]),
+            )
+        )
+        translations = list(trans_res.scalars().all())
+        name_map: dict[int, str] = {}
+        for t in translations:
+            if t.locale == "en":
+                name_map[t.entity_id] = t.value
+        for t in translations:
+            if t.locale == locale:
+                name_map[t.entity_id] = t.value
+
         disease_list = "\n".join([
-            f"• {d.name} ({d.pathogen_type})" for d in diseases[:20]
+            f"• {name_map.get(d.id, d.slug.replace('-', ' ').title())} ({d.pathogen_type.value if hasattr(d.pathogen_type, 'value') else d.pathogen_type})"
+            for d in diseases[:20]
         ])
-        
+
         total = len(diseases)
         showing = min(20, total)
-        
+
         message = self._translate(
             f"Found {total} diseases. Showing first {showing}:\n\n{disease_list}",
             f"រកឃើញជំងឺ {total}។ បង្ហាញ {showing} ដំបូង:\n\n{disease_list}",
-            locale
+            locale,
         )
-        
+
         return message, [{"action": "listed_diseases", "count": total}]
-    
+
     async def _list_symptoms(
         self,
         db: AsyncSession,
-        locale: str
-    ) -> tuple[str, list[str]]:
+        locale: str,
+    ) -> tuple[str, list[dict[str, Any]]]:
         """List all symptoms in the database."""
-        
         result = await db.execute(
-            select(Symptom).order_by(Symptom.category, Symptom.label_en)
+            select(Symptom).options(selectinload(Symptom.category)).order_by(Symptom.code)
         )
-        symptoms = result.scalars().all()
-        
+        symptoms = list(result.scalars().all())
+
         if not symptoms:
             message = self._translate(
                 "No symptoms found in the database.",
                 "រកមិនឃើញរោគសញ្ញាក្នុងមូលដ្ឋានទិន្នន័យទេ។",
-                locale
+                locale,
             )
             return message, []
-        
-        # Group by category
-        by_category: dict[str, list] = {}
+
+        symptom_ids = [s.id for s in symptoms]
+        trans_res = await db.execute(
+            select(Translation).where(
+                Translation.entity_type == "symptom",
+                Translation.entity_id.in_(symptom_ids),
+                Translation.field == "label",
+                Translation.locale.in_([locale, "en"]),
+            )
+        )
+        translations = list(trans_res.scalars().all())
+        label_map: dict[int, str] = {}
+        for t in translations:
+            if t.locale == "en":
+                label_map[t.entity_id] = t.value
+        for t in translations:
+            if t.locale == locale:
+                label_map[t.entity_id] = t.value
+
+        by_category: dict[str, list[Symptom]] = {}
         for s in symptoms:
-            if s.category not in by_category:
-                by_category[s.category] = []
-            by_category[s.category].append(s)
-        
-        symptom_list = []
+            cat_code = s.category.code if s.category else "general"
+            if cat_code not in by_category:
+                by_category[cat_code] = []
+            by_category[cat_code].append(s)
+
+        symptom_list: list[str] = []
         for category, items in by_category.items():
             symptom_list.append(f"\n**{category.upper()}:**")
             for item in items[:10]:
-                symptom_list.append(f"  • {item.label_en} ({item.code})")
-        
+                lbl = label_map.get(item.id, item.code)
+                symptom_list.append(f"  • {lbl} ({item.code})")
+
         message = self._translate(
             f"Found {len(symptoms)} symptoms:\n" + "\n".join(symptom_list),
             f"រកឃើញរោគសញ្ញា {len(symptoms)}:\n" + "\n".join(symptom_list),
-            locale
+            locale,
         )
-        
+
         return message, [{"action": "listed_symptoms", "count": len(symptoms)}]
-    
+
     async def _create_disease(
         self,
         data: dict,
         db: AsyncSession,
-        locale: str
-    ) -> tuple[str, list[str]]:
+        locale: str,
+    ) -> tuple[str, list[dict[str, Any]]]:
         """Create a new disease in the database."""
-        
-        # Extract data (this is a simplified version)
-        # In production, you'd want more validation
-        
-        if not data.get("name"):
+        name = data.get("name") or data.get("disease_name")
+
+        if not name:
             message = self._translate(
                 "Please provide a disease name. Example: 'Create disease Rust with pathogen fungal'",
                 "សូមផ្តល់ឈ្មោះជំងឺ។ ឧទាហរណ៍: 'បង្កើតជំងឺ Rust ដែលមានមេរោគ fungal'",
-                locale
+                locale,
             )
             return message, []
-        
+
         try:
-            # Check if disease already exists
-            result = await db.execute(
-                select(Disease).where(Disease.name == data["name"])
-            )
+            slug = str(name).lower().strip().replace(" ", "-").replace("_", "-")
+            result = await db.execute(select(Disease).where(Disease.slug == slug))
             existing = result.scalar_one_or_none()
-            
+
             if existing:
                 message = self._translate(
-                    f"Disease '{data['name']}' already exists.",
-                    f"ជំងឺ '{data['name']}' មានរួចហើយ។",
-                    locale
+                    f"Disease '{name}' already exists.",
+                    f"ជំងឺ '{name}' មានរួចហើយ។",
+                    locale,
                 )
                 return message, []
-            
-            # Create new disease
+
+            raw_pathogen = str(data.get("pathogen_type", "fungal")).lower()
+            try:
+                pathogen_type = PathogenType(raw_pathogen)
+            except ValueError:
+                pathogen_type = PathogenType.FUNGAL
+
             new_disease = Disease(
-                name=data["name"],
-                pathogen_type=data.get("pathogen_type", "fungal"),
-                description_en=data.get("description", f"New disease: {data['name']}"),
+                slug=slug,
+                pathogen_type=pathogen_type,
                 is_published=False,  # Draft by default
             )
-            
+
             db.add(new_disease)
+            await db.flush()
+
+            # Add English name translation
+            db.add(
+                Translation(
+                    entity_type="disease",
+                    entity_id=new_disease.id,
+                    locale="en",
+                    field="name",
+                    value=str(name),
+                )
+            )
+
+            if data.get("description"):
+                db.add(
+                    Translation(
+                        entity_type="disease",
+                        entity_id=new_disease.id,
+                        locale="en",
+                        field="description",
+                        value=str(data["description"]),
+                    )
+                )
+
             await db.commit()
             await db.refresh(new_disease)
-            
+
             message = self._translate(
-                f"✅ Successfully created disease '{data['name']}' (ID: {new_disease.id}).\n\nIt's currently in DRAFT mode. You can edit it in the admin panel to add symptoms, treatment, and translations, then publish it.",
-                f"✅ បានបង្កើតជំងឺ '{data['name']}' ដោយជោគជ័យ (ID: {new_disease.id})។\n\nវាស្ថិតក្នុងរបៀបសេចក្តីព្រាងបច្ចុប្បន្ន។ អ្នកអាចកែសម្រួលវានៅក្នុងផ្ទាំងអ្នកគ្រប់គ្រង ដើម្បីបន្ថែមរោគសញ្ញា ការព្យាបាល និងការបកប្រែ បន្ទាប់មកផ្សព្វផ្សាយវា។",
-                locale
+                f"✅ Successfully created disease '{name}' (ID: {new_disease.id}).\n\nIt's currently in DRAFT mode. You can edit it in the admin panel to add symptoms, treatment, and translations, then publish it.",
+                f"✅ បានបង្កើតជំងឺ '{name}' ដោយជោគជ័យ (ID: {new_disease.id})។\n\nវាស្ថិតក្នុងរបៀបសេចក្តីព្រាងបច្ចុប្បន្ន។ អ្នកអាចកែសម្រួលវានៅក្នុងផ្ទាំងអ្នកគ្រប់គ្រង ដើម្បីបន្ថែមរោគសញ្ញា ការព្យាបាល និងការបកប្រែ បន្ទាប់មកផ្សព្វផ្សាយវា។",
+                locale,
             )
-            
+
             return message, [{
                 "action": "created_disease",
                 "disease_id": new_disease.id,
-                "disease_name": new_disease.name
+                "disease_name": name,
             }]
-        
+
         except Exception as e:
             message = self._translate(
                 f"❌ Failed to create disease: {e!s}",
                 f"❌ បរាជ័យក្នុងការបង្កើតជំងឺ: {e!s}",
-                locale
+                locale,
             )
             return message, []
-    
+
     async def _update_disease(
         self,
         data: dict,
         db: AsyncSession,
-        locale: str
-    ) -> tuple[str, list[str]]:
+        locale: str,
+    ) -> tuple[str, list[dict[str, Any]]]:
         """Update an existing disease."""
-        
         disease_name = data.get("disease_name") or data.get("name")
-        
+
         if not disease_name:
             message = self._translate(
                 "Please specify which disease to update.",
                 "សូមបញ្ជាក់ជំងឺមួយណាដែលត្រូវធ្វើបច្ចុប្បន្នភាព។",
-                locale
+                locale,
             )
             return message, []
-        
+
         try:
-            result = await db.execute(
-                select(Disease).where(Disease.name.ilike(f"%{disease_name}%"))
-            )
-            disease = result.scalar_one_or_none()
-            
+            disease = None
+            if str(disease_name).isdigit():
+                res = await db.execute(select(Disease).where(Disease.id == int(disease_name)))
+                disease = res.scalar_one_or_none()
+
+            if not disease:
+                slug_query = str(disease_name).lower().strip().replace(" ", "-")
+                res = await db.execute(select(Disease).where(Disease.slug.ilike(f"%{slug_query}%")))
+                disease = res.scalar_one_or_none()
+
+            if not disease:
+                res_trans = await db.execute(
+                    select(Translation.entity_id).where(
+                        Translation.entity_type == "disease",
+                        Translation.field == "name",
+                        Translation.value.ilike(f"%{disease_name}%"),
+                    )
+                )
+                matching_id = res_trans.scalar_one_or_none()
+                if matching_id:
+                    res_by_id = await db.execute(select(Disease).where(Disease.id == matching_id))
+                    disease = res_by_id.scalar_one_or_none()
+
             if not disease:
                 message = self._translate(
                     f"Disease '{disease_name}' not found.",
                     f"រកមិនឃើញជំងឺ '{disease_name}' ទេ។",
-                    locale
+                    locale,
                 )
                 return message, []
-            
-            # Update fields
-            updated_fields = []
+
+            updated_fields: list[str] = []
             if "description" in data:
-                disease.description_en = data["description"]
+                t_res = await db.execute(
+                    select(Translation).where(
+                        Translation.entity_type == "disease",
+                        Translation.entity_id == disease.id,
+                        Translation.locale == "en",
+                        Translation.field == "description",
+                    )
+                )
+                trans = t_res.scalar_one_or_none()
+                if trans:
+                    trans.value = str(data["description"])
+                else:
+                    db.add(
+                        Translation(
+                            entity_type="disease",
+                            entity_id=disease.id,
+                            locale="en",
+                            field="description",
+                            value=str(data["description"]),
+                        )
+                    )
                 updated_fields.append("description")
-            
+
             if "pathogen_type" in data:
-                disease.pathogen_type = data["pathogen_type"]
-                updated_fields.append("pathogen_type")
-            
+                try:
+                    disease.pathogen_type = PathogenType(str(data["pathogen_type"]).lower())
+                    updated_fields.append("pathogen_type")
+                except ValueError:
+                    pass
+
             await db.commit()
-            
+            display_name = disease.slug.replace("-", " ").title()
+
             message = self._translate(
-                f"✅ Updated disease '{disease.name}'. Fields updated: {', '.join(updated_fields)}",
-                f"✅ បានធ្វើបច្ចុប្បន្នភាពជំងឺ '{disease.name}'។ វាលធ្វើបច្ចុប្បន្នភាព: {', '.join(updated_fields)}",
-                locale
+                f"✅ Updated disease '{display_name}'. Fields updated: {', '.join(updated_fields)}",
+                f"✅ បានធ្វើបច្ចុប្បន្នភាពជំងឺ '{display_name}'។ វាលធ្វើបច្ចុប្បន្នភាព: {', '.join(updated_fields)}",
+                locale,
             )
-            
+
             return message, [{
                 "action": "updated_disease",
                 "disease_id": disease.id,
-                "disease_name": disease.name,
-                "fields_updated": updated_fields
+                "disease_name": display_name,
+                "fields_updated": updated_fields,
             }]
-        
+
         except Exception as e:
             message = self._translate(
                 f"❌ Failed to update disease: {e!s}",
                 f"❌ បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពជំងឺ: {e!s}",
-                locale
+                locale,
             )
             return message, []
-    
+
     async def _delete_disease(
         self,
         data: dict,
         db: AsyncSession,
-        locale: str
-    ) -> tuple[str, list[str]]:
+        locale: str,
+    ) -> tuple[str, list[dict[str, Any]]]:
         """Delete a disease from the database."""
-        
         disease_name = data.get("disease_name") or data.get("name")
         disease_id = data.get("disease_id") or data.get("id")
-        
+
         if not disease_name and not disease_id:
             message = self._translate(
                 "Please specify which disease to delete. Example: 'delete disease Rust' or 'delete disease 1'",
                 "សូមបញ្ជាក់ជំងឺមួយណាដែលត្រូវលុប។ ឧទាហរណ៍: 'លុបជំងឺ Rust' ឬ 'លុបជំងឺ 1'",
-                locale
+                locale,
             )
             return message, []
-        
+
         try:
-            # Try to find by ID first (if it's a number)
             disease = None
-            
-            if disease_id or (disease_name and disease_name.isdigit()):
-                disease_id_to_find = disease_id or int(disease_name)
-                result = await db.execute(
-                    select(Disease).where(Disease.id == disease_id_to_find)
-                )
+            if disease_id is not None or (disease_name and str(disease_name).isdigit()):
+                did = int(disease_id if disease_id is not None else str(disease_name))
+                result = await db.execute(select(Disease).where(Disease.id == did))
                 disease = result.scalar_one_or_none()
-            
-            # If not found by ID, try by name
+
             if not disease and disease_name:
-                result = await db.execute(
-                    select(Disease).where(Disease.name.ilike(f"%{disease_name}%"))
-                )
+                slug_query = str(disease_name).lower().strip().replace(" ", "-")
+                result = await db.execute(select(Disease).where(Disease.slug == slug_query))
                 disease = result.scalar_one_or_none()
-            
+
+            if not disease and disease_name:
+                res_trans = await db.execute(
+                    select(Translation.entity_id).where(
+                        Translation.entity_type == "disease",
+                        Translation.field == "name",
+                        Translation.value.ilike(f"%{disease_name}%"),
+                    )
+                )
+                matching_id = res_trans.scalar_one_or_none()
+                if matching_id:
+                    result = await db.execute(select(Disease).where(Disease.id == matching_id))
+                    disease = result.scalar_one_or_none()
+
             if not disease:
                 message = self._translate(
                     f"Disease '{disease_name or disease_id}' not found. Try 'list diseases' to see available diseases.",
                     f"រកមិនឃើញជំងឺ '{disease_name or disease_id}' ទេ។ សាកល្បង 'បង្ហាញជំងឺទាំងអស់' ដើម្បីមើលជំងឺដែលមាន។",
-                    locale
+                    locale,
                 )
                 return message, []
-            
-            disease_id = disease.id
-            disease_full_name = disease.name
-            
+
+            did = disease.id
+            display_name = disease.slug.replace("-", " ").title()
+
+            # Delete associated translations
+            t_res = await db.execute(
+                select(Translation).where(
+                    Translation.entity_type == "disease",
+                    Translation.entity_id == did,
+                )
+            )
+            for t in t_res.scalars().all():
+                await db.delete(t)
+
             await db.delete(disease)
             await db.commit()
-            
+
             message = self._translate(
-                f"✅ Successfully deleted disease '{disease_full_name}' (ID: {disease_id}).",
-                f"✅ បានលុបជំងឺ '{disease_full_name}' (ID: {disease_id}) ដោយជោគជ័យ។",
-                locale
+                f"✅ Successfully deleted disease '{display_name}' (ID: {did}).",
+                f"✅ បានលុបជំងឺ '{display_name}' (ID: {did}) ដោយជោគជ័យ។",
+                locale,
             )
-            
+
             return message, [{
                 "action": "deleted_disease",
-                "disease_id": disease_id,
-                "disease_name": disease_full_name
+                "disease_id": did,
+                "disease_name": display_name,
             }]
-        
+
         except Exception as e:
             message = self._translate(
                 f"❌ Failed to delete disease: {e!s}",
                 f"❌ បរាជ័យក្នុងការលុបជំងឺ: {e!s}",
-                locale
+                locale,
             )
             return message, []
-    
+
     async def _create_symptom(
         self,
         data: dict,
         db: AsyncSession,
-        locale: str
-    ) -> tuple[str, list[str]]:
+        locale: str,
+    ) -> tuple[str, list[dict[str, Any]]]:
         """Create a new symptom in the database."""
-        
-        if not data.get("label"):
+        label = data.get("label") or data.get("symptom_label")
+
+        if not label:
             message = self._translate(
                 "Please provide a symptom name. Example: 'Create symptom yellow spots on leaves'",
                 "សូមផ្តល់ឈ្មោះរោគសញ្ញា។ ឧទាហរណ៍: 'បង្កើតរោគសញ្ញា ស្នាមលឿងលើស្លឹក'",
-                locale
+                locale,
             )
             return message, []
-        
+
         try:
-            # Check if symptom already exists
-            result = await db.execute(
-                select(Symptom).where(Symptom.label_en.ilike(f"%{data['label']}%"))
+            cat_code = str(data.get("category", "leaf")).lower()
+            cat_res = await db.execute(
+                select(SymptomCategory).where(SymptomCategory.code == cat_code)
             )
-            existing = result.scalar_one_or_none()
-            
-            if existing:
-                message = self._translate(
-                    f"Symptom '{data['label']}' already exists.",
-                    f"រោគសញ្ញា '{data['label']}' មានរួចហើយ។",
-                    locale
-                )
-                return message, []
-            
-            # Generate code automatically
-            category = data.get("category", "leaf").upper()
-            # Get count of symptoms in this category
-            count_result = await db.execute(
-                select(Symptom).where(Symptom.category == category.lower())
-            )
-            existing_count = len(count_result.scalars().all())
-            code = f"{category[:4]}-{existing_count + 1:03d}"
-            
-            # Create new symptom
+            category = cat_res.scalar_one_or_none()
+            if not category:
+                first_cat = await db.execute(select(SymptomCategory).order_by(SymptomCategory.id))
+                category = first_cat.scalars().first()
+            category_id = category.id if category else 1
+
+            code = f"SYM-{str(label).lower().strip().replace(' ', '-')[:30]}"
+            existing_s = await db.execute(select(Symptom).where(Symptom.code == code))
+            if existing_s.scalar_one_or_none():
+                code = f"{code}-{uuid.uuid4().hex[:4]}"
+
             new_symptom = Symptom(
                 code=code,
-                label_en=data["label"],
-                label_km=data.get("label_km", data["label"]),  # Default to English if Khmer not provided
-                category=category.lower(),
+                category_id=category_id,
+                is_environmental=False,
             )
-            
+
             db.add(new_symptom)
+            await db.flush()
+
+            # Add translation
+            db.add(
+                Translation(
+                    entity_type="symptom",
+                    entity_id=new_symptom.id,
+                    locale="en",
+                    field="label",
+                    value=str(label),
+                )
+            )
+            if data.get("label_km"):
+                db.add(
+                    Translation(
+                        entity_type="symptom",
+                        entity_id=new_symptom.id,
+                        locale="km",
+                        field="label",
+                        value=str(data["label_km"]),
+                    )
+                )
+
             await db.commit()
             await db.refresh(new_symptom)
-            
+
             message = self._translate(
-                f"✅ Successfully created symptom '{data['label']}' (Code: {code}, ID: {new_symptom.id}).",
-                f"✅ បានបង្កើតរោគសញ្ញា '{data['label']}' (កូដ: {code}, ID: {new_symptom.id}) ដោយជោគជ័យ។",
-                locale
+                f"✅ Successfully created symptom '{label}' (Code: {code}, ID: {new_symptom.id}).",
+                f"✅ បានបង្កើតរោគសញ្ញា '{label}' (កូដ: {code}, ID: {new_symptom.id}) ដោយជោគជ័យ។",
+                locale,
             )
-            
+
             return message, [{
                 "action": "created_symptom",
                 "symptom_id": new_symptom.id,
                 "symptom_code": code,
-                "symptom_label": new_symptom.label_en
+                "symptom_label": str(label),
             }]
-        
+
         except Exception as e:
             message = self._translate(
                 f"❌ Failed to create symptom: {e!s}",
                 f"❌ បរាជ័យក្នុងការបង្កើតរោគសញ្ញា: {e!s}",
-                locale
+                locale,
             )
             return message, []
-    
+
     async def _update_symptom(
         self,
         data: dict,
         db: AsyncSession,
-        locale: str
-    ) -> tuple[str, list[str]]:
+        locale: str,
+    ) -> tuple[str, list[dict[str, Any]]]:
         """Update an existing symptom."""
-        
         symptom_label = data.get("symptom_label") or data.get("label")
-        
+
         if not symptom_label:
             message = self._translate(
                 "Please specify which symptom to update.",
                 "សូមបញ្ជាក់រោគសញ្ញាមួយណាដែលត្រូវធ្វើបច្ចុប្បន្នភាព។",
-                locale
+                locale,
             )
             return message, []
-        
+
         try:
-            result = await db.execute(
-                select(Symptom).where(Symptom.label_en.ilike(f"%{symptom_label}%"))
-            )
-            symptom = result.scalar_one_or_none()
-            
+            symptom = None
+            if str(symptom_label).isdigit():
+                res = await db.execute(select(Symptom).where(Symptom.id == int(symptom_label)))
+                symptom = res.scalar_one_or_none()
+
+            if not symptom:
+                res = await db.execute(select(Symptom).where(Symptom.code.ilike(f"%{symptom_label}%")))
+                symptom = res.scalar_one_or_none()
+
+            if not symptom:
+                res_trans = await db.execute(
+                    select(Translation.entity_id).where(
+                        Translation.entity_type == "symptom",
+                        Translation.field == "label",
+                        Translation.value.ilike(f"%{symptom_label}%"),
+                    )
+                )
+                matching_id = res_trans.scalar_one_or_none()
+                if matching_id:
+                    res_s = await db.execute(select(Symptom).where(Symptom.id == matching_id))
+                    symptom = res_s.scalar_one_or_none()
+
             if not symptom:
                 message = self._translate(
                     f"Symptom '{symptom_label}' not found.",
                     f"រកមិនឃើញរោគសញ្ញា '{symptom_label}' ទេ។",
-                    locale
+                    locale,
                 )
                 return message, []
-            
-            # Update fields
-            updated_fields = []
-            if data.get("label_en"):
-                symptom.label_en = data["label_en"]
+
+            updated_fields: list[str] = []
+            val_en = data.get("label_en") or data.get("label")
+            if val_en:
+                t_res = await db.execute(
+                    select(Translation).where(
+                        Translation.entity_type == "symptom",
+                        Translation.entity_id == symptom.id,
+                        Translation.locale == "en",
+                        Translation.field == "label",
+                    )
+                )
+                trans = t_res.scalar_one_or_none()
+                if trans:
+                    trans.value = str(val_en)
+                else:
+                    db.add(
+                        Translation(
+                            entity_type="symptom",
+                            entity_id=symptom.id,
+                            locale="en",
+                            field="label",
+                            value=str(val_en),
+                        )
+                    )
                 updated_fields.append("label_en")
-            
+
             if data.get("label_km"):
-                symptom.label_km = data["label_km"]
+                t_res = await db.execute(
+                    select(Translation).where(
+                        Translation.entity_type == "symptom",
+                        Translation.entity_id == symptom.id,
+                        Translation.locale == "km",
+                        Translation.field == "label",
+                    )
+                )
+                trans = t_res.scalar_one_or_none()
+                if trans:
+                    trans.value = str(data["label_km"])
+                else:
+                    db.add(
+                        Translation(
+                            entity_type="symptom",
+                            entity_id=symptom.id,
+                            locale="km",
+                            field="label",
+                            value=str(data["label_km"]),
+                        )
+                    )
                 updated_fields.append("label_km")
-            
-            if data.get("category"):
-                symptom.category = data["category"].lower()
-                updated_fields.append("category")
-            
+
             await db.commit()
-            
+
             message = self._translate(
-                f"✅ Updated symptom '{symptom.label_en}'. Fields updated: {', '.join(updated_fields)}",
-                f"✅ បានធ្វើបច្ចុប្បន្នភាពរោគសញ្ញា '{symptom.label_en}'។ វាលធ្វើបច្ចុប្បន្នភាព: {', '.join(updated_fields)}",
-                locale
+                f"✅ Updated symptom '{symptom.code}'. Fields updated: {', '.join(updated_fields)}",
+                f"✅ បានធ្វើបច្ចុប្បន្នភាពរោគសញ្ញា '{symptom.code}'។ វាលធ្វើបច្ចុប្បន្នភាព: {', '.join(updated_fields)}",
+                locale,
             )
-            
+
             return message, [{
                 "action": "updated_symptom",
                 "symptom_id": symptom.id,
-                "symptom_label": symptom.label_en,
-                "fields_updated": updated_fields
+                "symptom_code": symptom.code,
+                "fields_updated": updated_fields,
             }]
-        
+
         except Exception as e:
             message = self._translate(
                 f"❌ Failed to update symptom: {e!s}",
                 f"❌ បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពរោគសញ្ញា: {e!s}",
-                locale
+                locale,
             )
             return message, []
-    
+
     async def _delete_symptom(
         self,
         data: dict,
         db: AsyncSession,
-        locale: str
-    ) -> tuple[str, list[str]]:
+        locale: str,
+    ) -> tuple[str, list[dict[str, Any]]]:
         """Delete a symptom from the database."""
-        
         symptom_label = data.get("symptom_label") or data.get("label")
         symptom_id = data.get("symptom_id") or data.get("id")
-        
+
         if not symptom_label and not symptom_id:
             message = self._translate(
                 "Please specify which symptom to delete. Example: 'delete symptom yellow spots' or 'delete symptom 1'",
                 "សូមបញ្ជាក់រោគសញ្ញាមួយណាដែលត្រូវលុប។ ឧទាហរណ៍: 'លុបរោគសញ្ញា ស្នាមលឿង' ឬ 'លុបរោគសញ្ញា 1'",
-                locale
+                locale,
             )
             return message, []
-        
+
         try:
-            # Try to find by ID first (if it's a number)
             symptom = None
-            
-            if symptom_id or (symptom_label and symptom_label.isdigit()):
-                symptom_id_to_find = symptom_id or int(symptom_label)
-                result = await db.execute(
-                    select(Symptom).where(Symptom.id == symptom_id_to_find)
-                )
+            if symptom_id is not None or (symptom_label and str(symptom_label).isdigit()):
+                sid = int(symptom_id if symptom_id is not None else str(symptom_label))
+                result = await db.execute(select(Symptom).where(Symptom.id == sid))
                 symptom = result.scalar_one_or_none()
-            
-            # If not found by ID, try by label
+
             if not symptom and symptom_label:
-                result = await db.execute(
-                    select(Symptom).where(Symptom.label_en.ilike(f"%{symptom_label}%"))
-                )
+                result = await db.execute(select(Symptom).where(Symptom.code == str(symptom_label)))
                 symptom = result.scalar_one_or_none()
-            
+
+            if not symptom and symptom_label:
+                res_trans = await db.execute(
+                    select(Translation.entity_id).where(
+                        Translation.entity_type == "symptom",
+                        Translation.field == "label",
+                        Translation.value.ilike(f"%{symptom_label}%"),
+                    )
+                )
+                matching_id = res_trans.scalar_one_or_none()
+                if matching_id:
+                    result = await db.execute(select(Symptom).where(Symptom.id == matching_id))
+                    symptom = result.scalar_one_or_none()
+
             if not symptom:
                 message = self._translate(
                     f"Symptom '{symptom_label or symptom_id}' not found. Try 'list symptoms' to see available symptoms.",
                     f"រកមិនឃើញរោគសញ្ញា '{symptom_label or symptom_id}' ទេ។ សាកល្បង 'បង្ហាញរោគសញ្ញាទាំងអស់' ដើម្បីមើលរោគសញ្ញាដែលមាន។",
-                    locale
+                    locale,
                 )
                 return message, []
-            
-            symptom_id = symptom.id
-            symptom_full_label = symptom.label_en
-            
+
+            sid = symptom.id
+            scode = symptom.code
+
+            # Delete translations
+            t_res = await db.execute(
+                select(Translation).where(
+                    Translation.entity_type == "symptom",
+                    Translation.entity_id == sid,
+                )
+            )
+            for t in t_res.scalars().all():
+                await db.delete(t)
+
             await db.delete(symptom)
             await db.commit()
-            
+
             message = self._translate(
-                f"✅ Successfully deleted symptom '{symptom_full_label}' (ID: {symptom_id}).",
-                f"✅ បានលុបរោគសញ្ញា '{symptom_full_label}' (ID: {symptom_id}) ដោយជោគជ័យ។",
-                locale
+                f"✅ Successfully deleted symptom '{scode}' (ID: {sid}).",
+                f"✅ បានលុបរោគសញ្ញា '{scode}' (ID: {sid}) ដោយជោគជ័យ។",
+                locale,
             )
-            
+
             return message, [{
                 "action": "deleted_symptom",
-                "symptom_id": symptom_id,
-                "symptom_label": symptom_full_label
+                "symptom_id": sid,
+                "symptom_code": scode,
             }]
-        
+
         except Exception as e:
             message = self._translate(
                 f"❌ Failed to delete symptom: {e!s}",
                 f"❌ បរាជ័យក្នុងការលុបរោគសញ្ញា: {e!s}",
-                locale
+                locale,
             )
             return message, []
-    
+
     async def _search_data(
         self,
         query: str,
         db: AsyncSession,
-        locale: str
-    ) -> tuple[str, list[str]]:
+        locale: str,
+    ) -> tuple[str, list[dict[str, Any]]]:
         """Search for diseases or symptoms."""
-        
-        # Search diseases
-        disease_result = await db.execute(
+        # Search diseases in translations and slugs
+        trans_d = await db.execute(
+            select(Translation.entity_id).where(
+                Translation.entity_type == "disease",
+                Translation.value.ilike(f"%{query}%"),
+            ).limit(10)
+        )
+        d_ids = list(trans_d.scalars().all())
+        disease_res = await db.execute(
             select(Disease).where(
-                Disease.name.ilike(f"%{query}%") |
-                Disease.description_en.ilike(f"%{query}%")
+                (Disease.id.in_(d_ids)) | (Disease.slug.ilike(f"%{query}%"))
             ).limit(10)
         )
-        diseases = disease_result.scalars().all()
-        
-        # Search symptoms
-        symptom_result = await db.execute(
+        diseases = list(disease_res.scalars().all())
+
+        # Search symptoms in translations and codes
+        trans_s = await db.execute(
+            select(Translation.entity_id).where(
+                Translation.entity_type == "symptom",
+                Translation.value.ilike(f"%{query}%"),
+            ).limit(10)
+        )
+        s_ids = list(trans_s.scalars().all())
+        symptom_res = await db.execute(
             select(Symptom).where(
-                Symptom.label_en.ilike(f"%{query}%") |
-                Symptom.code.ilike(f"%{query}%")
+                (Symptom.id.in_(s_ids)) | (Symptom.code.ilike(f"%{query}%"))
             ).limit(10)
         )
-        symptoms = symptom_result.scalars().all()
-        
-        result_parts = []
-        
+        symptoms = list(symptom_res.scalars().all())
+
+        result_parts: list[str] = []
+
         if diseases:
-            disease_list = "\n".join([f"• {d.name} ({d.pathogen_type})" for d in diseases])
+            disease_list = "\n".join([f"• {d.slug.replace('-', ' ').title()} ({d.pathogen_type.value if hasattr(d.pathogen_type, 'value') else d.pathogen_type})" for d in diseases])
             result_parts.append(self._translate(
                 f"**Diseases ({len(diseases)}):**\n{disease_list}",
                 f"**ជំងឺ ({len(diseases)}):**\n{disease_list}",
-                locale
+                locale,
             ))
-        
+
         if symptoms:
-            symptom_list = "\n".join([f"• {s.label_en} ({s.code})" for s in symptoms])
+            symptom_list = "\n".join([f"• {s.code}" for s in symptoms])
             result_parts.append(self._translate(
                 f"\n**Symptoms ({len(symptoms)}):**\n{symptom_list}",
                 f"\n**រោគសញ្ញា ({len(symptoms)}):**\n{symptom_list}",
-                locale
+                locale,
             ))
-        
+
         if not diseases and not symptoms:
             message = self._translate(
                 f"No results found for '{query}'.",
                 f"រកមិនឃើញលទ្ធផលសម្រាប់ '{query}' ទេ។",
-                locale
+                locale,
             )
             return message, []
-        
+
         message = "\n".join(result_parts)
-        
+
         return message, [{
             "action": "searched",
             "query": query,
             "diseases_found": len(diseases),
-            "symptoms_found": len(symptoms)
+            "symptoms_found": len(symptoms),
         }]
     
     async def _general_chat(

@@ -7,7 +7,7 @@ comes from the existing rule-based expert system.
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -37,7 +37,7 @@ from ai.services.vision_service import get_vision_service
 from app.core.deps import get_current_user, get_db, require_permission
 from app.models.auth import User
 from app.repositories.diagnosis import DiagnosisRepository
-from app.schemas.diagnosis import DiagnosisRequest
+from app.schemas.diagnosis import AnswerType, DiagnosisRequest
 from app.services.engine.runner import DiagnosisRunner
 
 router = APIRouter(prefix="/ai", tags=["ai"])
@@ -255,10 +255,10 @@ async def ai_assisted_diagnosis(
         
         # Step 3: Run existing expert system diagnosis
         # Build answers dict: symptom_id -> "yes"
-        answers = {symptom_id: "yes" for symptom_id in mapped_ids}
+        answers: dict[int, AnswerType] = {symptom_id: "yes" for symptom_id in mapped_ids}
         
         diagnosis_request = DiagnosisRequest(
-            answers=answers,
+            answers=answers,  # type: ignore[arg-type]
             locale=request.locale,
         )
         
@@ -302,14 +302,17 @@ async def ai_assisted_diagnosis(
 
 
 async def _generate_diagnosis_explanation(
-    extracted: any,
-    diagnosis_result: dict,
+    extracted: Any,
+    diagnosis_result: Any,
     locale: str,
 ) -> str:
     """Generate natural language explanation of diagnosis results."""
     ollama = get_ollama_service()
     
-    results = diagnosis_result.get("results", [])
+    results = getattr(diagnosis_result, "results", None)
+    if results is None and isinstance(diagnosis_result, dict):
+        results = diagnosis_result.get("results", [])
+    results = results or []
     
     if not results:
         if locale == "km":
@@ -317,14 +320,26 @@ async def _generate_diagnosis_explanation(
         return "We could not identify a matching disease. Please consult with an agronomist."
     
     top_disease = results[0]
+    if hasattr(top_disease, "disease"):
+        disease_name = getattr(top_disease.disease, "name", "Unknown")
+        confidence_val = getattr(top_disease, "confidence", 0)
+    elif isinstance(top_disease, dict):
+        disease_name = top_disease.get("disease", {}).get("name", "Unknown")
+        confidence_val = top_disease.get("confidence", 0)
+    else:
+        disease_name = "Unknown"
+        confidence_val = 0
+    
+    symptoms_list = getattr(extracted, "symptoms", []) or []
+    plant_parts = getattr(extracted, "plant_part", []) or []
     
     prompt = f"""Generate a clear, helpful explanation of these diagnosis results for a farmer.
 
-Symptoms observed: {", ".join(extracted.symptoms)}
-Plant parts affected: {", ".join(extracted.plant_part)}
+Symptoms observed: {", ".join(symptoms_list)}
+Plant parts affected: {", ".join(plant_parts)}
 
-Top diagnosis: {top_disease.get("disease", {}).get("name", "Unknown")}
-Confidence: {top_disease.get("confidence", 0) * 100:.0f}%
+Top diagnosis: {disease_name}
+Confidence: {confidence_val * 100:.0f}%
 
 {"Write in Khmer language." if locale == "km" else "Write in English."}
 

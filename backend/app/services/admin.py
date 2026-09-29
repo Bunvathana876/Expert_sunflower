@@ -7,16 +7,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.errors import NotFoundError, ValidationFailedError
 from app.repositories.admin import AdminRepository
 from app.schemas.admin import (
-    AdminUserItem,
-    AdminUserListResponse,
-    AdminUserUpdateRequest,
-    PermissionItem,
-    RoleItem,
+    PaginatedUsersResponse,
+    PermissionDetail,
     RoleListResponse,
+    RolePermissionsRequest,
+    RolePermissionsResponse,
+    RoleResponse,
     RulesetActivateResponse,
-    RulesetItem,
     RulesetListResponse,
-    UpdateRolePermissionsRequest,
+    RulesetResponse,
+    UpdateUserRequest,
+    UserResponse,
 )
 
 
@@ -37,7 +38,7 @@ class AdminService:
         permissions = await self.repo.get_permissions()
 
         role_items = [
-            RoleItem(
+            RoleResponse(
                 id=r.id,
                 name=r.name,
                 description=r.description,
@@ -47,7 +48,12 @@ class AdminService:
         ]
 
         permission_items = [
-            PermissionItem(id=p.id, code=p.code, description=p.description) for p in permissions
+            PermissionDetail(
+                code=p.code,
+                description=p.description or "",
+                granted=False,
+            )
+            for p in permissions
         ]
 
         return RoleListResponse(items=role_items, permissions=permission_items)
@@ -55,15 +61,15 @@ class AdminService:
     async def update_role_permissions(
         self,
         role_id: int,
-        req: UpdateRolePermissionsRequest,
-    ) -> RoleItem:
+        req: RolePermissionsRequest,
+    ) -> RoleResponse:
         """Replace permissions for a role."""
         role = await self.repo.get_role_by_id(role_id)
         if not role:
             raise NotFoundError(detail=f"Role #{role_id} not found")
 
         updated = await self.repo.set_role_permissions(role_id, req.permission_codes)
-        return RoleItem(
+        return RoleResponse(
             id=updated.id,
             name=updated.name,
             description=updated.description,
@@ -74,28 +80,28 @@ class AdminService:
     # Users
     # -----------------------------------------------------------------------
 
-    async def list_users(self, page: int = 1, size: int = 20) -> AdminUserListResponse:
+    async def list_users(self, page: int = 1, size: int = 20) -> PaginatedUsersResponse:
         """List users paginated."""
         users, total = await self.repo.list_users(page, size)
         items = [
-            AdminUserItem(
+            UserResponse(
                 id=u.id,
                 username=u.username,
                 email=u.email,
                 role=u.role.name if u.role else "unknown",
                 role_id=u.role_id,
                 is_active=u.is_active,
-                created_at=u.created_at.isoformat(),
+                created_at=u.created_at,
             )
             for u in users
         ]
-        return AdminUserListResponse(items=items, total=total, page=page, size=size)
+        return PaginatedUsersResponse(items=items, total=total, page=page, size=size)
 
     async def update_user(
         self,
         user_id: int,
-        req: AdminUserUpdateRequest,
-    ) -> AdminUserItem:
+        req: UpdateUserRequest,
+    ) -> UserResponse:
         """Update a user's role assignment or active state."""
         user = await self.repo.get_user_by_id(user_id)
         if not user:
@@ -107,14 +113,14 @@ class AdminService:
                 raise ValidationFailedError(detail=f"Role #{req.role_id} does not exist")
 
         updated = await self.repo.update_user(user, role_id=req.role_id, is_active=req.is_active)
-        return AdminUserItem(
+        return UserResponse(
             id=updated.id,
             username=updated.username,
             email=updated.email,
             role=updated.role.name if updated.role else "unknown",
             role_id=updated.role_id,
             is_active=updated.is_active,
-            created_at=updated.created_at.isoformat(),
+            created_at=updated.created_at,
         )
 
     # -----------------------------------------------------------------------
@@ -125,13 +131,13 @@ class AdminService:
         """List all rulesets."""
         rulesets = await self.repo.list_rulesets()
         items = [
-            RulesetItem(
+            RulesetResponse(
                 id=r.id,
                 version=r.version,
                 algorithm=r.algorithm,
-                params=r.params,
+                parameters=r.params,
                 is_active=r.is_active,
-                published_at=r.published_at.isoformat() if r.published_at else None,
+                published_at=r.published_at,
                 published_by=r.published_by.username if r.published_by else None,
             )
             for r in rulesets

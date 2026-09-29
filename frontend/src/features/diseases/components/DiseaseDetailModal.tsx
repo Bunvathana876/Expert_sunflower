@@ -11,6 +11,7 @@ import {
   Leaf,
 } from "lucide-react";
 import { PercentageVisualization } from "@/components/ui/PercentageVisualization";
+import { getDiseaseImage } from "../utils/diseaseImages";
 import type { DiagnosisResult, DiseaseDetail } from "@/types/api";
 
 interface DiseaseDetailModalProps {
@@ -35,9 +36,11 @@ export function DiseaseDetailModal({
 
   if (!isOpen) return null;
 
+  const diseaseSlug = detail?.slug ?? result?.disease.slug ?? "";
   const diseaseName = result?.disease.name ?? detail?.name ?? "Disease Assessment";
   const confidence = result?.confidence ?? 0;
   const pathogenType = detail?.pathogen_type ?? "fungal";
+  const imageUrl = getDiseaseImage(diseaseSlug, detail?.image_url);
 
   const tabs = [
     { id: "overview", label: t("details.tab_overview") },
@@ -61,9 +64,9 @@ export function DiseaseDetailModal({
         {/* Header with Title, Match Badge, and Close Button */}
         <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800">
           <div className="flex items-center gap-3">
-            {detail?.image_url ? (
+            {imageUrl ? (
               <img
-                src={detail.image_url}
+                src={imageUrl}
                 alt={diseaseName}
                 className="w-14 h-14 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shadow-sm shrink-0"
               />

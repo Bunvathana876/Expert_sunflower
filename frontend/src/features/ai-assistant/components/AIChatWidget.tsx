@@ -17,6 +17,7 @@ import {
   Shield,
   Trash2,
   Sprout,
+  GripVertical,
 } from 'lucide-react';
 import { chatWithAI, adminChatWithAI, analyzeImage, type AIChatResponse } from '@/api/ai';
 import { useAuth } from '@/features/auth';
@@ -58,6 +59,144 @@ export function AIChatWidget(): React.JSX.Element | null {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Draggable button position state (persisted to localStorage)
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(() => {
+    try {
+      const saved = localStorage.getItem('sunflower_ai_button_pos');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
+          return parsed;
+        }
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+    return null;
+  });
+
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{
+    startX: number;
+    startY: number;
+    buttonX: number;
+    buttonY: number;
+    hasMoved: boolean;
+  } | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const latestPosRef = useRef<{ x: number; y: number } | null>(position);
+  latestPosRef.current = position;
+
+  // Keep button within screen bounds on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setPosition((prev) => {
+        if (!prev || !buttonRef.current) return prev;
+        const rect = buttonRef.current.getBoundingClientRect();
+        const maxX = Math.max(8, window.innerWidth - rect.width - 8);
+        const maxY = Math.max(8, window.innerHeight - rect.height - 8);
+        const clampedX = Math.max(8, Math.min(maxX, prev.x));
+        const clampedY = Math.max(8, Math.min(maxY, prev.y));
+        if (clampedX !== prev.x || clampedY !== prev.y) {
+          return { x: clampedX, y: clampedY };
+        }
+        return prev;
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    // Only primary button (left mouse click or touch)
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    if (!buttonRef.current) return;
+
+    const rect = buttonRef.current.getBoundingClientRect();
+    dragStartRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      buttonX: rect.left,
+      buttonY: rect.top,
+      hasMoved: false,
+    };
+
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Ignore if setPointerCapture is unsupported
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!dragStartRef.current || !buttonRef.current) return;
+
+    const dx = e.clientX - dragStartRef.current.startX;
+    const dy = e.clientY - dragStartRef.current.startY;
+
+    // Distinguish drag from tap/click (movement threshold: 4px)
+    if (!dragStartRef.current.hasMoved && Math.hypot(dx, dy) > 4) {
+      dragStartRef.current.hasMoved = true;
+      setIsDragging(true);
+    }
+
+    if (dragStartRef.current.hasMoved) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const maxX = Math.max(8, window.innerWidth - rect.width - 8);
+      const maxY = Math.max(8, window.innerHeight - rect.height - 8);
+
+      const targetX = dragStartRef.current.buttonX + dx;
+      const targetY = dragStartRef.current.buttonY + dy;
+
+      const clampedX = Math.max(8, Math.min(maxX, targetX));
+      const clampedY = Math.max(8, Math.min(maxY, targetY));
+
+      const newPos = { x: clampedX, y: clampedY };
+      setPosition(newPos);
+      latestPosRef.current = newPos;
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!dragStartRef.current) return;
+
+    const hadMoved = dragStartRef.current.hasMoved;
+
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // Ignore
+    }
+
+    if (hadMoved) {
+      // Save position to localStorage
+      if (latestPosRef.current) {
+        try {
+          localStorage.setItem('sunflower_ai_button_pos', JSON.stringify(latestPosRef.current));
+        } catch {
+          // Ignore
+        }
+      }
+    } else {
+      // Simple click/tap without dragging
+      setIsOpen(true);
+    }
+
+    dragStartRef.current = null;
+    setIsDragging(false);
+  };
+
+  const handlePointerCancel = (e: React.PointerEvent<HTMLButtonElement>) => {
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // Ignore
+    }
+    dragStartRef.current = null;
+    setIsDragging(false);
+  };
 
   // Check if user is admin or expert
   const isAdminOrExpert = user?.role === 'admin' || user?.role === 'agronomist';
@@ -217,24 +356,45 @@ export function AIChatWidget(): React.JSX.Element | null {
 
   return (
     <>
-      {/* Floating Button - Sunflower Botanical Design */}
+      {/* Floating Button - Sunflower Botanical Design (Draggable anywhere) */}
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 group flex items-center focus:outline-hidden"
-          aria-label={t('ai.openChat', 'Open AI Assistant')}
+          ref={buttonRef}
+          type="button"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerCancel}
+          style={
+            position
+              ? { left: `${position.x}px`, top: `${position.y}px` }
+              : { right: '1.5rem', bottom: '1.5rem' }
+          }
+          className={`fixed z-50 group flex items-center focus:outline-hidden touch-none select-none ${
+            isDragging ? 'cursor-grabbing scale-105 shadow-2xl' : 'cursor-grab hover:scale-105'
+          } ${!isDragging ? 'transition-transform duration-200' : ''}`}
+          aria-label={t('ai.openChat', 'Open AI Assistant (Drag to move)')}
+          title={isDragging ? undefined : t('ai.dragTooltip', 'Drag to move anywhere, click to open')}
         >
           {/* Subtle sunflower golden halo animation */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 opacity-60 blur-md group-hover:opacity-90 group-hover:blur-lg transition-all duration-300 animate-pulse" />
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 opacity-60 blur-md group-hover:opacity-90 group-hover:blur-lg transition-all duration-300 animate-pulse pointer-events-none" />
 
           {/* Main button pill */}
-          <div className="relative flex items-center gap-3 bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 text-white pl-4 pr-5 py-3.5 rounded-full shadow-xl shadow-amber-900/20 border border-amber-300/30 transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl">
+          <div className="relative flex items-center gap-2.5 bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 text-white pl-2.5 pr-5 py-3.5 rounded-full shadow-xl shadow-amber-900/25 border border-amber-300/35">
+            {/* Drag Grip Handle */}
+            <div
+              className="text-white/60 group-hover:text-white/90 transition-colors flex items-center -mr-1"
+              title={t('ai.dragHandle', 'Drag to move')}
+            >
+              <GripVertical className="w-4 h-4" />
+            </div>
+
             {/* Sunflower emblem avatar */}
             <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs border border-white/30 shrink-0">
               <span className="text-base select-none">🌻</span>
             </div>
 
-            <div className="flex flex-col items-start text-left">
+            <div className="flex flex-col items-start text-left pointer-events-none">
               <span className="font-bold text-xs sm:text-sm tracking-tight flex items-center gap-1.5 drop-shadow-xs">
                 {t('ai.assistant', 'AI Assistant')}
                 {isAdminOrExpert ? (
@@ -254,7 +414,33 @@ export function AIChatWidget(): React.JSX.Element | null {
       {/* Chat Window - Botanical Glassmorphism */}
       {isOpen && (
         <div
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[410px] h-[580px] max-h-[85vh] bg-white/95 dark:bg-[#1E2615]/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-stone-900/20 dark:shadow-black/60 flex flex-col overflow-hidden border border-stone-200/90 dark:border-white/15 animate-in fade-in zoom-in-95 duration-200"
+          style={
+            position && typeof window !== 'undefined' && window.innerWidth >= 640
+              ? {
+                  left:
+                    position.x < window.innerWidth / 2
+                      ? `${Math.max(16, Math.min(position.x, window.innerWidth - 426))}px`
+                      : undefined,
+                  right:
+                    position.x >= window.innerWidth / 2
+                      ? `${Math.max(16, Math.min(window.innerWidth - position.x - 220, window.innerWidth - 426))}px`
+                      : undefined,
+                  top:
+                    position.y < window.innerHeight / 2
+                      ? `${Math.max(16, position.y)}px`
+                      : undefined,
+                  bottom:
+                    position.y >= window.innerHeight / 2
+                      ? `${Math.max(16, window.innerHeight - position.y + 10)}px`
+                      : undefined,
+                }
+              : undefined
+          }
+          className={`fixed z-50 w-[calc(100vw-2rem)] sm:w-[410px] h-[580px] max-h-[85vh] bg-white/95 dark:bg-[#1E2615]/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-stone-900/20 dark:shadow-black/60 flex flex-col overflow-hidden border border-stone-200/90 dark:border-white/15 animate-in fade-in zoom-in-95 duration-200 ${
+            !position || (typeof window !== 'undefined' && window.innerWidth < 640)
+              ? 'bottom-4 right-4 left-4 sm:left-auto sm:bottom-6 sm:right-6'
+              : ''
+          }`}
           dir={isKhmer ? 'ltr' : 'ltr'}
         >
           {/* Header - Botanical Sunflower Amber to Emerald */}

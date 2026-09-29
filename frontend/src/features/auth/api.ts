@@ -1,5 +1,5 @@
 import { apiFetch } from "@/api/client";
-import type { LoginCredentials, RegisterCredentials, TokenResponse, User } from "./types";
+import type { LoginCredentials, RegisterCredentials, TokenResponse, UpdateMeCredentials, User } from "./types";
 
 export async function loginApi(credentials: LoginCredentials): Promise<TokenResponse> {
   return apiFetch<TokenResponse>("/auth/login", {
@@ -33,7 +33,7 @@ export async function getMeApi(): Promise<User> {
   });
 }
 
-export async function updateMeApi(credentials: import("./types").UpdateMeCredentials): Promise<User> {
+export async function updateMeApi(credentials: UpdateMeCredentials): Promise<User> {
   return apiFetch<User>("/users/me", {
     method: "PATCH",
     body: JSON.stringify(credentials),

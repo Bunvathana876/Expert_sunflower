@@ -45,7 +45,7 @@ os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("JWT_SECRET", "test-secret-not-for-production")
 os.environ.setdefault("ADMIN_PASSWORD", "test-admin-password")
 os.environ.setdefault("ALEMBIC_DATABASE_URL", "sqlite:///:memory:")
-os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
+os.environ.setdefault("CORS_ORIGINS", "http://localhost:5174,http://localhost:5173")
 os.environ.setdefault("MEDIA_ROOT", "/tmp/sunflower_test_media")
 
 from sqlalchemy.pool import StaticPool

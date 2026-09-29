@@ -2,6 +2,7 @@ import type React from "react";
 import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { getDiseaseImage } from "../utils/diseaseImages";
 import type { DiseaseListItem } from "@/types/api";
 
 interface DiseaseCardProps {
@@ -13,6 +14,8 @@ interface DiseaseCardProps {
  * Displays disease image (with fallback), name, pathogen type badge, and description with hover micro-animations.
  */
 export function DiseaseCard({ disease }: DiseaseCardProps): React.JSX.Element {
+  const imageUrl = getDiseaseImage(disease.slug, disease.image_url);
+
   return (
     <Link
       to={`/diseases/${disease.slug}`}
@@ -20,9 +23,9 @@ export function DiseaseCard({ disease }: DiseaseCardProps): React.JSX.Element {
     >
       {/* Image Banner */}
       <div className="relative w-full aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-stone-800/80">
-        {disease.image_url ? (
+        {imageUrl ? (
           <img
-            src={disease.image_url}
+            src={imageUrl}
             alt={disease.name}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"

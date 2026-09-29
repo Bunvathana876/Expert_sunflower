@@ -90,6 +90,7 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
   }, []);
 
   const refreshSession = useCallback(async (): Promise<string | null> => {
+    const wasLoggedIn = Boolean(tokenRef.current || getStoredToken() || getStoredUser());
     return singleFlightRefresh(
       async () => {
         const response = await refreshApi();
@@ -98,7 +99,9 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
       },
       () => {
         handleAuthClear();
-        onSessionExpired?.();
+        if (wasLoggedIn) {
+          onSessionExpired?.();
+        }
       },
     );
   }, [handleAuthSuccess, handleAuthClear, onSessionExpired]);
@@ -114,6 +117,15 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
     let mounted = true;
 
     async function restoreSession() {
+      // If there is no stored auth data in localStorage, user is a guest; don't trigger refresh
+      const hasStoredAuth = Boolean(getStoredToken() || getStoredUser());
+      if (!hasStoredAuth) {
+        if (mounted) {
+          setIsLoading(false);
+        }
+        return;
+      }
+
       try {
         const response = await refreshApi();
         if (mounted) {

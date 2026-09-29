@@ -100,3 +100,17 @@ class RulesetActivateRequest(BaseModel):
     """Request to activate a ruleset (no body needed, just the endpoint)."""
     
     pass
+
+
+class RulesetListResponse(BaseModel):
+    """List of all rulesets."""
+
+    items: list[RulesetResponse]
+
+
+class RulesetActivateResponse(BaseModel):
+    """Ruleset activation response."""
+
+    id: int
+    version: str
+    is_active: bool
