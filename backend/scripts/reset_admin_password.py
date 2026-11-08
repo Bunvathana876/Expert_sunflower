@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import asyncio
-import sys
 
 from argon2 import PasswordHasher
 from sqlalchemy import select
@@ -10,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.db.session import async_session_factory
-from app.models.auth import Role, User, Permission, RolePermission
+from app.models.auth import Permission, Role, RolePermission, User
 
 
 async def reset_admin(session: AsyncSession) -> None:
@@ -75,7 +74,7 @@ async def reset_admin(session: AsyncSession) -> None:
     print(f"   Email:    {email}")
     print(f"   Username: {username}")
     print(f"   Password: {password}")
-    print(f"   Role:     admin (with all permissions)")
+    print("   Role:     admin (with all permissions)")
     print("=" * 50)
 
 

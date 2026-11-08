@@ -1,0 +1,280 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+# Minimal least-privilege GitHub token permissions; no auto-deploy permissions.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  backend:
+    name: Backend Ruff, Alembic & Pytest (PostgreSQL 16)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci_sunflower
+          POSTGRES_PASSWORD: ci_ephemeral_pg_password
+          POSTGRES_DB: sunflower_ci_alembic
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U ci_sunflower -d sunflower_ci_alembic"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Generate masked ephemeral CI credentials
+        run: |
+          JWT_SEC="$(openssl rand -hex 32)"
+          ADM_PWD="$(openssl rand -hex 20)"
+          echo "::add-mask::${JWT_SEC}"
+          echo "::add-mask::${ADM_PWD}"
+          echo "::add-mask::ci_ephemeral_pg_password"
+          {
+            echo "JWT_SECRET=${JWT_SEC}"
+            echo "ADMIN_PASSWORD=${ADM_PWD}"
+            echo "DATABASE_URL=postgresql+asyncpg://ci_sunflower:ci_ephemeral_pg_password@127.0.0.1:5432/sunflower_ci_alembic"
+            echo "ALEMBIC_DATABASE_URL=postgresql+psycopg://ci_sunflower:ci_ephemeral_pg_password@127.0.0.1:5432/sunflower_ci_alembic"
+            echo "POSTGRES_TEST_ADMIN_URL=postgresql+psycopg://ci_sunflower:ci_ephemeral_pg_password@127.0.0.1:5432/postgres"
+          } >> "${GITHUB_ENV}"
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Run Ruff static analysis & security lint
+        working-directory: backend
+        run: ruff check .
+
+      - name: Verify Alembic upgrade, downgrade & re-upgrade on PostgreSQL 16
+        working-directory: backend
+        run: |
+          alembic upgrade head
+          alembic current | grep -q "0004"
+          alembic downgrade 0003
+          alembic current | grep -q "0003"
+          alembic upgrade head
+          alembic current | grep -q "0004"
+
+      - name: Run full pytest suite including real PostgreSQL 16 integration tests
+        working-directory: backend
+        run: pytest -v -rs
+
+  frontend:
+    name: Frontend Lint, TypeScript, Vitest & Vite Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Run TypeScript type check
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: Run Vitest unit & component tests
+        working-directory: frontend
+        run: npm run test -- --run
+
+      - name: Build production Vite + PWA bundle
+        working-directory: frontend
+        env:
+          VITE_API_BASE_URL: /api/v1
+        run: |
+          npm run build
+          test -f dist/index.html
+          test -f dist/sw.js
+
+  browser-auth-e2e:
+    name: Browser E2E Authentication Lifecycle (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [backend, frontend]
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci_sunflower
+          POSTGRES_PASSWORD: ci_ephemeral_pg_password
+          POSTGRES_DB: sunflower_ci_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U ci_sunflower -d sunflower_ci_e2e"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Generate masked ephemeral E2E credentials
+        run: |
+          JWT_SEC="$(openssl rand -hex 32)"
+          ADM_PWD="$(openssl rand -hex 20)"
+          echo "::add-mask::${JWT_SEC}"
+          echo "::add-mask::${ADM_PWD}"
+          echo "::add-mask::ci_ephemeral_pg_password"
+          {
+            echo "JWT_SECRET=${JWT_SEC}"
+            echo "ADMIN_PASSWORD=${ADM_PWD}"
+            echo "DATABASE_URL=postgresql+asyncpg://ci_sunflower:ci_ephemeral_pg_password@127.0.0.1:5432/sunflower_ci_e2e"
+            echo "ALEMBIC_DATABASE_URL=postgresql+psycopg://ci_sunflower:ci_ephemeral_pg_password@127.0.0.1:5432/sunflower_ci_e2e"
+          } >> "${GITHUB_ENV}"
+
+      - name: Migrate, seed & start FastAPI backend
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .
+          alembic upgrade head
+          python -m scripts.seed
+          nohup uvicorn app.main:app --host 127.0.0.1 --port 8000 > /tmp/sunflower-e2e-api.log 2>&1 &
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/health/ready >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Backend readiness probe did not pass in time" >&2
+          exit 1
+
+      - name: Install Playwright Chromium & build frontend
+        working-directory: frontend
+        env:
+          VITE_API_BASE_URL: /api/v1
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run build
+
+      - name: Run Playwright browser authentication lifecycle tests
+        working-directory: frontend
+        env:
+          E2E_BROWSER_CHANNEL: chromium
+          E2E_API_TARGET: http://127.0.0.1:8000
+        run: npm run test:e2e
+
+  security-audit:
+    name: Dependency Vulnerability Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Audit Python runtime dependencies (pip-audit)
+        working-directory: backend
+        run: |
+          python -m venv /tmp/audit-venv
+          /tmp/audit-venv/bin/pip install --upgrade pip pip-audit
+          /tmp/audit-venv/bin/pip install .
+          # With PyJWT modernization and updated base dependencies, no vulnerabilities remain
+          /tmp/audit-venv/bin/pip-audit --skip-editable
+
+      - name: Audit Node runtime dependencies (npm audit --omit=dev)
+        working-directory: frontend
+        run: |
+          npm ci
+          npm audit --omit=dev
+
+  docker-validation:
+    name: Docker Compose & Multi-Stage Production Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose manifests (dev & prod)
+        run: |
+          TMP_ENV="$(mktemp)"
+          trap 'rm -f "$TMP_ENV"' EXIT
+          {
+            echo "POSTGRES_USER=ci_pg_user"
+            echo "POSTGRES_PASSWORD=$(openssl rand -hex 16)"
+            echo "POSTGRES_DB=sunflower_db"
+            echo "PGADMIN_DEFAULT_EMAIL=admin@local"
+            echo "PGADMIN_DEFAULT_PASSWORD=$(openssl rand -hex 16)"
+            echo "JWT_SECRET=$(openssl rand -hex 32)"
+            echo "ADMIN_PASSWORD=$(openssl rand -hex 16)"
+          } > "$TMP_ENV"
+          docker compose --env-file "$TMP_ENV" config -q
+          docker compose --env-file "$TMP_ENV" -f docker-compose.prod.yml config -q
+          docker compose --env-file "$TMP_ENV" -f docker-compose.prod.yml -f docker-compose.caddy.yml config -q
+
+      - name: Build hardened non-root production images
+        run: |
+          docker build --target prod -t sunflower-api:ci-prod ./backend
+          docker build --target prod -t sunflower-web:ci-prod ./frontend

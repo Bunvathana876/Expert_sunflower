@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -15,11 +15,17 @@ import {
 import { useAuth } from "@/features/auth";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { AboutModal } from "./AboutModal";
 import { BottomNav } from "./BottomNav";
-import { AIChatWidget } from "@/features/ai-assistant";
 import { ThemeBackground } from "./ThemeBackground";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
+
+const LazyAboutModal = lazy(() =>
+  import("./AboutModal").then((m) => ({ default: m.AboutModal })),
+);
+
+const LazyAIChatWidget = lazy(() =>
+  import("@/features/ai-assistant").then((m) => ({ default: m.AIChatWidget })),
+);
 
 interface NavItem {
   to: string;
@@ -72,11 +78,17 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
       {/* Responsive Theme-Aware Fixed Sunflower Background */}
       <ThemeBackground />
 
-      {/* About Expert System Modal */}
-      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+      {/* About Expert System Modal (lazy-loaded on demand) */}
+      {isAboutOpen && (
+        <Suspense fallback={null}>
+          <LazyAboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+        </Suspense>
+      )}
 
-      {/* AI Chat Widget - Shows for authenticated users */}
-      <AIChatWidget />
+      {/* AI Chat Widget (deferred off critical path) */}
+      <Suspense fallback={null}>
+        <LazyAIChatWidget />
+      </Suspense>
 
       {/* Desktop Header */}
       <header className="sticky top-0 z-40 bg-white/85 dark:bg-[#202917]/85 backdrop-blur-md border-b border-stone-200/80 dark:border-white/10 transition-colors">

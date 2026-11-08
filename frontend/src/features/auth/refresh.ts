@@ -1,13 +1,28 @@
 /**
- * Single-flight token refresh manager.
- * Ensures concurrent 401 responses share a single /auth/refresh call
- * rather than initiating a stampede.
+ * Single-flight token refresh manager with cross-tab Web Locks serialization.
+ *
+ * - Deduplicates concurrent 401/mount refreshes within a tab via `inFlightRefresh`.
+ * - Serializes simultaneous multi-tab browser refreshes via `navigator.locks` when
+ *   supported so multiple tabs share updated cookies without racing rotated tokens.
  */
+
+const REFRESH_WEB_LOCK_NAME = "sunflower_auth_refresh_lock";
 
 let inFlightRefresh: Promise<string | null> | null = null;
 
 export function getInFlightRefresh(): Promise<string | null> | null {
   return inFlightRefresh;
+}
+
+async function withCrossTabLock<T>(fn: () => Promise<T>): Promise<T> {
+  if (
+    typeof navigator !== "undefined" &&
+    "locks" in navigator &&
+    typeof navigator.locks?.request === "function"
+  ) {
+    return navigator.locks.request(REFRESH_WEB_LOCK_NAME, () => fn());
+  }
+  return fn();
 }
 
 export async function singleFlightRefresh(
@@ -18,7 +33,7 @@ export async function singleFlightRefresh(
     return inFlightRefresh;
   }
 
-  inFlightRefresh = (async () => {
+  inFlightRefresh = withCrossTabLock(async () => {
     try {
       const newToken = await refreshFn();
       if (!newToken) {
@@ -32,7 +47,7 @@ export async function singleFlightRefresh(
     } finally {
       inFlightRefresh = null;
     }
-  })();
+  });
 
   return inFlightRefresh;
 }
