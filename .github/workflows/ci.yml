@@ -270,9 +270,11 @@ jobs:
             echo "JWT_SECRET=$(openssl rand -hex 32)"
             echo "ADMIN_PASSWORD=$(openssl rand -hex 16)"
           } > "$TMP_ENV"
+          touch .env
           docker compose --env-file "$TMP_ENV" config -q
           docker compose --env-file "$TMP_ENV" -f docker-compose.prod.yml config -q
           docker compose --env-file "$TMP_ENV" -f docker-compose.prod.yml -f docker-compose.caddy.yml config -q
+          rm -f .env
 
       - name: Build hardened non-root production images
         run: |
