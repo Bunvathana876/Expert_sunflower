@@ -27,10 +27,13 @@ log = structlog.get_logger(__name__)
 
 _settings = get_settings()
 
-# Configure engine with connection arguments for Supabase pooling compatibility
-connect_args = {}
-if "pooler.supabase.com" in _settings.DATABASE_URL:
-    # Disable prepared statements for Supabase transaction pooling
+# asyncpg supports statement_cache_size; psycopg does not.
+# Apply it only when the connection uses the asyncpg driver through Supabase.
+connect_args: dict[str, int] = {}
+if (
+    _settings.DATABASE_URL.startswith("postgresql+asyncpg://")
+    and "pooler.supabase.com" in _settings.DATABASE_URL
+):
     connect_args["statement_cache_size"] = 0
 
 engine: AsyncEngine = create_async_engine(
