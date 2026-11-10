@@ -34,7 +34,16 @@
       ]
     }
   ],
+
   "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://expert-sunflower.onrender.com/api/:path*"
+    },
+    {
+      "source": "/media/:path*",
+      "destination": "https://expert-sunflower.onrender.com/media/:path*"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
