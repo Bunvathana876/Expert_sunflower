@@ -26,74 +26,79 @@
 }
 
 /* -------------------------------------------------------------------------
-   Design tokens
-   All colours, spacing, and typography are defined here as CSS custom
-   properties so components stay token-based rather than using ad-hoc values.
+   Design tokens — Modern Botanical Science
+   Platform: Sunflower Studio
+   Colors:
+     - Primary:   #224D3A (forest green)
+     - Secondary: #87A774 (sage green)
+     - Accent:    #E4AD45 (sunflower yellow)
+     - Background:#F8F7F1 (warm cream)
+     - Text:      #27342D (deep green ink)
    ------------------------------------------------------------------------- */
 
 :root {
-  /* Sunflower Agricultural Brand Palette — 3 core colors:
-     🌻 Amber/Gold  = primary brand (buttons, CTAs, active states)
-     🌱 Green       = secondary (success, published, health)
-     🌊 Sky Blue    = accent (info, links, highlights) */
+  /* Primary: Forest Green */
+  --color-primary: #224D3A;        /* Deep authoritative botanical green */
+  --color-primary-hover: #193B2C;  /* Darker forest */
+  --color-primary-active: #132F23;
+  --color-primary-subtle: #EDF3EE; /* Delicate sage tint */
+  --color-primary-light: #DCE8DF;
 
-  /* Primary: Sunflower Amber / Gold */
-  --color-primary: #D97706;        /* amber-600 */
-  --color-primary-hover: #B45309;  /* amber-700 */
-  --color-primary-subtle: #FFFBEB; /* amber-50 */
-  --color-primary-light: #FEF3C7;  /* amber-100 */
+  /* Secondary: Sage Green */
+  --color-secondary: #87A774;      /* Calming botanical sage */
+  --color-secondary-hover: #739360;
+  --color-secondary-subtle: #F2F6F0;
+  --color-secondary-light: #E3EDE0;
 
-  /* Secondary: Agricultural Green */
-  --color-secondary: #16A34A;      /* green-600 */
-  --color-secondary-hover: #15803D;/* green-700 */
-  --color-secondary-subtle: #F0FDF4;/* green-50 */
+  /* Accent: Sunflower Yellow / Gold */
+  --color-accent: #E4AD45;         /* Warm sunflower golden yellow */
+  --color-accent-hover: #CF9830;
+  --color-accent-subtle: #FDF9EE;
+  --color-accent-light: #F7E7BE;
 
-  /* Accent: Sky Blue */
-  --color-accent: #0284C7;         /* sky-600 */
-  --color-accent-hover: #0369A1;   /* sky-700 */
-  --color-accent-subtle: #F0F9FF;  /* sky-50 */
-
-  /* Surface / background — warm but not yellow */
-  --color-bg: #F7F5F2;             /* Warm off-white */
-  --color-bg-subtle: #F3F0EC;      /* Slightly tinted panel background */
-  --color-bg-card: #FFFFFF;        /* Standard card surface */
+  /* Surface / Background — Warm Cream */
+  --color-bg: #F8F7F1;             /* Warm botanical cream */
+  --color-bg-subtle: #F1EEE5;      /* Tinted parchment panel */
+  --color-bg-card: #FFFFFF;        /* Standard crisp card surface */
   --color-surface: #FFFFFF;
-  --color-surface-raised: #F0EDE8; /* Warm parchment */
-  --color-border: #D6D0C8;         /* Visible warm border */
-  --color-border-subtle: #E8E3DC;  /* Softer divider border */
-  --color-border-light: #E8E3DC;
+  --color-surface-raised: #F6F4ED; /* Warm parchment raised surface */
+  --color-surface-hover: #EFECE3;
+  --color-border: #E2DCD2;         /* Refined warm stone border */
+  --color-border-subtle: #EDE9E1;  /* Soft divider border */
+  --color-border-light: #F4F2EC;
 
-  /* Text — MAXIMUM contrast in light mode */
-  --color-text: #0F172A;           /* Deep solid black/slate 900 */
-  --color-text-secondary: #1E293B; /* Slate 800 - crisp, strong contrast */
-  --color-text-muted: #334155;     /* Slate 700 - very legible */
+  /* Text — Deep Green Ink (Maximum legibility) */
+  --color-text: #27342D;           /* Deep green ink */
+  --color-text-secondary: #3F5146; /* Mid botanical slate */
+  --color-text-muted: #607366;     /* Calming botanical caption */
   --color-text-inverse: #FFFFFF;
 
-  /* Feedback */
-  --color-success: #16A34A;
-  --color-success-bg: #F0FDF4;
-  --color-warning: #D97706;
-  --color-warning-bg: #FFFBEB;
-  --color-error: #DC2626;
-  --color-error-bg: #FEF2F2;
-  --color-info: #0284C7;
-  --color-info-bg: #F0F9FF;
+  /* Semantic Feedback */
+  --color-success: #2A6E4E;
+  --color-success-bg: #EDF6F1;
+  --color-warning: #C68A1B;
+  --color-warning-bg: #FDF7EA;
+  --color-error: #C53B2F;
+  --color-error-bg: #FDF2F0;
+  --color-info: #2D6898;
+  --color-info-bg: #F0F6FA;
 
-  /* Glassmorphism & Brand Glows */
-  --glass-bg: rgba(255, 255, 255, 0.94);
-  --glass-blur: blur(16px);
-  --glass-border: rgba(203, 213, 225, 0.9);
-  --glass-border-subtle: rgba(226, 232, 240, 0.85);
-  --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
-  --glow-card: 0 12px 35px -5px rgba(217, 119, 6, 0.14), 0 4px 12px -2px rgba(22, 163, 74, 0.08);
-  --glow-primary: 0 0 20px rgba(217, 119, 6, 0.3);
-  --glow-emerald: 0 0 30px rgba(22, 163, 74, 0.2);
+  /* Botanical Glassmorphism & Subtle Accents */
+  --glass-bg: rgba(255, 255, 255, 0.90);
+  --glass-blur: blur(12px);
+  --glass-border: rgba(226, 220, 210, 0.85);
+  --glass-border-subtle: rgba(237, 233, 225, 0.75);
+  --glass-shadow: 0 4px 20px -4px rgba(39, 52, 45, 0.06), 0 2px 6px -1px rgba(39, 52, 45, 0.03);
+  --glow-card: 0 6px 20px -3px rgba(34, 77, 58, 0.08);
+  --glow-primary: 0 0 16px rgba(34, 77, 58, 0.2);
+  --glow-emerald: 0 0 20px rgba(135, 167, 116, 0.2);
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08);
-  --shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.06);
-  --shadow-lg: 0 10px 20px -3px rgb(0 0 0 / 0.12), 0 4px 8px -4px rgb(0 0 0 / 0.06);
-  --shadow-xl: 0 20px 30px -5px rgb(0 0 0 / 0.12), 0 8px 12px -6px rgb(0 0 0 / 0.06);
+  /* Shadows — Natural Ambient Depth */
+  --shadow-xs: 0 1px 2px 0 rgba(39, 52, 45, 0.04);
+  --shadow-sm: 0 2px 4px 0 rgba(39, 52, 45, 0.05);
+  --shadow-md: 0 4px 12px -2px rgba(39, 52, 45, 0.06), 0 2px 4px -2px rgba(39, 52, 45, 0.04);
+  --shadow-lg: 0 10px 24px -4px rgba(39, 52, 45, 0.08), 0 4px 8px -3px rgba(39, 52, 45, 0.04);
+  --shadow-xl: 0 20px 32px -6px rgba(39, 52, 45, 0.1), 0 8px 12px -4px rgba(39, 52, 45, 0.04);
 
   /* Typography */
   --font-sans: "Plus Jakarta Sans", "Inter", "Noto Sans", system-ui, -apple-system, sans-serif;
@@ -146,52 +151,67 @@
    ------------------------------------------------------------------------- */
 
 [data-theme="dark"] {
-  /* Primary: Sunflower Amber (bright against dark bg) */
-  --color-primary: #FBBF24;        /* amber-400 — vivid against dark */
-  --color-primary-hover: #F59E0B;  /* amber-500 */
-  --color-primary-subtle: #261700; /* very dark amber tint */
-  --color-primary-light: #352000;
+  /* Primary: Sage Green (luminous botanical contrast against dark surfaces) */
+  --color-primary: #87A774;
+  --color-primary-hover: #9BC087;
+  --color-primary-active: #779665;
+  --color-primary-subtle: #14241B;
+  --color-primary-light: #1D3327;
 
-  /* Secondary: Green */
-  --color-secondary: #34D399;      /* emerald-400 — bright in dark */
-  --color-secondary-hover: #10B981;
-  --color-secondary-subtle: #022C22;
+  /* Secondary: Soft Sage / Foliage Tint */
+  --color-secondary: #9EC08D;
+  --color-secondary-hover: #B3D2A3;
+  --color-secondary-subtle: #16241B;
+  --color-secondary-light: #22372A;
 
-  /* Accent: Sky */
-  --color-accent: #38BDF8;
-  --color-accent-hover: #0EA5E9;
-  --color-accent-subtle: #082F49;
+  /* Accent: Sunflower Golden Yellow */
+  --color-accent: #E4AD45;
+  --color-accent-hover: #EDB855;
+  --color-accent-subtle: #2A1F0B;
+  --color-accent-light: #3D2D10;
 
-  /* Dark backgrounds — solid & legible surfaces with sunflower botanical accent */
-  --color-bg: #0D1308;             /* Deep botanical dark */
-  --color-bg-subtle: rgba(26, 36, 18, 0.92);
-  --color-bg-card: rgba(24, 32, 18, 0.94);
-  --color-surface: rgba(24, 32, 18, 0.94);
-  --color-surface-raised: rgba(36, 48, 28, 0.96);
-  --color-border: rgba(255, 255, 255, 0.22);
-  --color-border-subtle: rgba(255, 255, 255, 0.14);
-  --color-border-light: rgba(255, 255, 255, 0.10);
+  /* Dark Backgrounds — Deep Nocturnal Botanical */
+  --color-bg: #0E1712;             /* Deep botanical ink */
+  --color-bg-subtle: #15221B;      /* Dark botanical slate */
+  --color-bg-card: #192720;        /* Elevated dark card */
+  --color-surface: #192720;
+  --color-surface-raised: #213329; /* Raised panel */
+  --color-surface-hover: #263C30;
+  --color-border: #2B3F33;         /* Subtle stone border */
+  --color-border-subtle: #203229;  /* Muted separator */
+  --color-border-light: #1A2821;
 
-  /* Text — MAXIMUM contrast in dark mode */
-  --color-text: #FFFFFF;           /* Pure 100% crisp white */
-  --color-text-secondary: #F1F5F9; /* Bright readable light slate (Slate 100) */
-  --color-text-muted: #CBD5E1;     /* High contrast muted text (Slate 300) */
-  --color-text-inverse: #0B1220;
+  /* Text — Maximum Contrast & Legibility */
+  --color-text: #F3F6F3;           /* Crisp botanical white */
+  --color-text-secondary: #CBD8D0; /* Light sage slate */
+  --color-text-muted: #94A79C;     /* High contrast muted sage */
+  --color-text-inverse: #0E1712;
 
-  /* Glassmorphism — high-contrast frosted glass */
-  --glass-bg: rgba(24, 32, 18, 0.92);
-  --glass-blur: blur(20px);
-  --glass-border: rgba(255, 255, 255, 0.22);
-  --glass-border-subtle: rgba(255, 255, 255, 0.14);
-  --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 4px 10px -2px rgba(0, 0, 0, 0.45);
-  --glow-card: 0 12px 35px -5px rgba(251, 191, 36, 0.25), 0 4px 12px -2px rgba(52, 211, 153, 0.15);
-  --glow-primary: 0 0 24px rgba(251, 191, 36, 0.4);
-  --glow-emerald: 0 0 30px rgba(52, 211, 153, 0.3);
+  /* Semantic Feedback */
+  --color-success: #4ADE80;
+  --color-success-bg: #0F2E1E;
+  --color-warning: #FBBF24;
+  --color-warning-bg: #2B1D06;
+  --color-error: #F87171;
+  --color-error-bg: #2E1210;
+  --color-info: #60A5FA;
+  --color-info-bg: #0E2238;
 
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4);
-  --shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
-  --shadow-lg: 0 10px 20px -3px rgb(0 0 0 / 0.5), 0 4px 8px -4px rgb(0 0 0 / 0.4);
-  --shadow-xl: 0 20px 30px -5px rgb(0 0 0 / 0.6), 0 8px 12px -6px rgb(0 0 0 / 0.5);
+  /* Botanical Glassmorphism in Dark Mode */
+  --glass-bg: rgba(25, 39, 32, 0.90);
+  --glass-blur: blur(14px);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border-subtle: rgba(255, 255, 255, 0.07);
+  --glass-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4);
+  --glow-card: 0 6px 20px -3px rgba(135, 167, 116, 0.12);
+  --glow-primary: 0 0 20px rgba(135, 167, 116, 0.25);
+  --glow-emerald: 0 0 24px rgba(135, 167, 116, 0.2);
+
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 4px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 20px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 30px -5px rgba(0, 0, 0, 0.6);
 }
 
 /* -------------------------------------------------------------------------
@@ -426,48 +446,80 @@ h1, h2, h3, h4 {
   font-weight: 600;
   font-size: 0.875rem;
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   cursor: pointer;
   transition: all var(--transition-fast);
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.125rem;
   text-decoration: none;
   white-space: nowrap;
+  letter-spacing: -0.01em;
 }
 
 .sf-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .sf-btn--primary {
-  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-  color: #1C1100;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 6px -1px rgba(34, 77, 58, 0.28), 0 1px 3px rgba(34, 77, 58, 0.15);
 }
 [data-theme="dark"] .sf-btn--primary {
-  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-  color: #1C1100;
+  background-color: var(--color-primary);
+  color: #0E1712;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.4);
 }
 .sf-btn--primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
-  box-shadow: 0 4px 16px rgba(217, 119, 6, 0.45);
+  background-color: var(--color-primary-hover);
+  box-shadow: 0 4px 14px -1px rgba(34, 77, 58, 0.35);
   transform: translateY(-1px);
 }
 .sf-btn--primary:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(217, 119, 6, 0.25);
+  background-color: var(--color-primary-active);
+  box-shadow: 0 1px 4px rgba(34, 77, 58, 0.2);
 }
 
 .sf-btn--secondary {
-  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
-  color: #052E16;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+  background-color: var(--color-primary-subtle);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+  font-weight: 600;
 }
 .sf-btn--secondary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #4ADE80 0%, #22C55E 100%);
-  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.4);
+  background-color: var(--color-primary-light);
+  border-color: var(--color-secondary);
+  color: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+[data-theme="dark"] .sf-btn--secondary {
+  background-color: var(--color-surface-raised);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+}
+[data-theme="dark"] .sf-btn--secondary:hover:not(:disabled) {
+  background-color: var(--color-primary-subtle);
+  border-color: var(--color-primary);
+  color: var(--color-primary-hover);
+}
+
+.sf-btn--accent {
+  background-color: var(--color-accent);
+  color: #27342D;
+  font-weight: 700;
+  border: 1px solid #D19A32;
+  box-shadow: 0 2px 6px -1px rgba(228, 173, 69, 0.3);
+}
+.sf-btn--accent:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+  box-shadow: 0 4px 12px -1px rgba(228, 173, 69, 0.4);
   transform: translateY(-1px);
 }
 
@@ -476,29 +528,31 @@ h1, h2, h3, h4 {
   color: var(--color-text-secondary);
 }
 .sf-btn--ghost:hover:not(:disabled) {
-  background-color: var(--color-surface-raised);
+  background-color: var(--color-bg-subtle);
   color: var(--color-text);
 }
 
 .sf-btn--danger {
   background-color: var(--color-error);
   color: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 .sf-btn--danger:hover:not(:disabled) {
-  background-color: #B91C1C;
+  background-color: #AF3328;
   box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 .sf-btn--sm {
   font-size: 0.75rem;
-  padding: 0.3125rem 0.625rem;
-  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-md);
 }
 
 .sf-btn--lg {
   font-size: 1rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-lg);
+  padding: 0.75rem 1.625rem;
+  border-radius: var(--radius-xl);
 }
 
 .sf-btn--full {
@@ -555,59 +609,87 @@ h1, h2, h3, h4 {
   display: inline-flex;
   align-items: center;
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0.125rem 0.5rem;
+  letter-spacing: 0.05em;
+  padding: 0.1875rem 0.55rem;
   border-radius: 999px;
   background-color: var(--color-surface-raised);
   color: var(--color-text-muted);
+  border: 1px solid transparent;
+  line-height: 1.25;
 }
 
 .sf-badge--fungal {
-  background-color: hsl(148 50% 92%);
-  color: hsl(148 55% 30%);
+  background-color: #EDF5EE;
+  color: #1E5433;
+  border-color: #CBE4CF;
 }
 .sf-badge--bacterial {
-  background-color: hsl(210 70% 92%);
-  color: hsl(210 80% 35%);
+  background-color: #EDF4FA;
+  color: #1C5482;
+  border-color: #C3DBF0;
 }
 .sf-badge--viral {
-  background-color: hsl(280 60% 92%);
-  color: hsl(280 55% 35%);
+  background-color: #F8F0F7;
+  color: #7A2870;
+  border-color: #E8C8E4;
 }
 .sf-badge--abiotic {
-  background-color: hsl(32 80% 92%);
-  color: hsl(32 70% 30%);
+  background-color: #FAF4E8;
+  color: #8C5814;
+  border-color: #F0DDBE;
 }
 .sf-badge--success {
-  background-color: hsl(148 50% 92%);
-  color: hsl(148 55% 30%);
+  background-color: #EDF5EE;
+  color: #1E5433;
+  border-color: #CBE4CF;
 }
 .sf-badge--warning {
-  background-color: hsl(38 90% 92%);
-  color: hsl(38 70% 30%);
+  background-color: #FDF7EA;
+  color: #925E09;
+  border-color: #F5E1B5;
 }
 .sf-badge--error {
-  background-color: hsl(4 80% 93%);
-  color: hsl(4 70% 40%);
+  background-color: #FDF2F0;
+  color: #9E261B;
+  border-color: #F5CAC5;
 }
 
 [data-theme="dark"] .sf-badge--fungal {
-  background-color: hsl(148 40% 18%);
-  color: hsl(148 50% 65%);
+  background-color: #112619;
+  color: #81D29D;
+  border-color: #1E4D30;
 }
 [data-theme="dark"] .sf-badge--bacterial {
-  background-color: hsl(210 40% 18%);
-  color: hsl(210 60% 65%);
+  background-color: #112333;
+  color: #79BAF2;
+  border-color: #1D4363;
 }
 [data-theme="dark"] .sf-badge--viral {
-  background-color: hsl(280 40% 18%);
-  color: hsl(280 50% 65%);
+  background-color: #2D142A;
+  color: #E59ED8;
+  border-color: #55244F;
 }
 [data-theme="dark"] .sf-badge--abiotic {
-  background-color: hsl(32 40% 18%);
-  color: hsl(32 60% 60%);
+  background-color: #2D200E;
+  color: #E5B473;
+  border-color: #553C19;
+}
+[data-theme="dark"] .sf-badge--success {
+  background-color: #112619;
+  color: #81D29D;
+  border-color: #1E4D30;
+}
+[data-theme="dark"] .sf-badge--warning {
+  background-color: #2D200E;
+  color: #E5B473;
+  border-color: #553C19;
+}
+[data-theme="dark"] .sf-badge--error {
+  background-color: #2D1210;
+  color: #F58D84;
+  border-color: #55211D;
 }
 
 /* -------------------------------------------------------------------------
@@ -653,10 +735,11 @@ h1, h2, h3, h4 {
   position: sticky;
   top: 0;
   z-index: 50;
-  background-color: var(--color-surface);
-  border-bottom: 2px solid #D97706;  /* Sunflower amber brand stripe */
-  box-shadow: 0 2px 12px rgba(217, 119, 6, 0.08);
-  backdrop-filter: blur(8px);
+  background-color: var(--glass-bg);
+  border-bottom: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-xs);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .sf-header__inner {
@@ -1184,12 +1267,9 @@ h1, h2, h3, h4 {
 .sf-hero__title {
   font-size: 2rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #D97706 0%, #B45309 40%, #16A34A 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-text);
   margin: 0 0 0.5rem;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 @media (min-width: 640px) {
@@ -1233,12 +1313,16 @@ h1, h2, h3, h4 {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, #F59E0B, #D97706);
-  color: #1C1100;
+  background-color: var(--color-primary);
+  color: #FFFFFF;
   font-weight: 800;
   font-size: 1.125rem;
   margin-bottom: 0.75rem;
-  box-shadow: 0 2px 10px rgba(217, 119, 6, 0.35);
+  box-shadow: 0 2px 8px rgba(34, 77, 58, 0.25);
+}
+[data-theme="dark"] .sf-step__number {
+  background-color: var(--color-primary);
+  color: #0E1712;
 }
 
 .sf-step__title {
@@ -1578,9 +1662,11 @@ h1, h2, h3, h4 {
 }
 
 .sf-admin-header {
-  background-color: var(--color-surface);
-  border-bottom: 2px solid #D97706;  /* Amber brand stripe */
-  box-shadow: 0 2px 12px rgba(217, 119, 6, 0.08);
+  background-color: var(--glass-bg);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-xs);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   position: sticky;
   top: 0;
   z-index: 40;
@@ -1889,10 +1975,16 @@ h1, h2, h3, h4 {
 }
 
 .sf-chip--active {
-  background: linear-gradient(135deg, #F59E0B, #D97706);
-  color: #1C1100;
-  border-color: #B45309;
-  box-shadow: 0 2px 12px rgba(217, 119, 6, 0.35);
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(34, 77, 58, 0.25);
+}
+
+[data-theme="dark"] .sf-chip--active {
+  background-color: var(--color-primary);
+  color: #0E1712;
+  border-color: var(--color-primary);
 }
 
 .sf-chip--removable {

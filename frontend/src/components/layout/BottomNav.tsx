@@ -23,12 +23,12 @@ export function BottomNav({ onOpenAbout }: BottomNavProps): React.JSX.Element {
     { to: "/check", labelKey: "nav.check", icon: Stethoscope },
     { to: "/diseases", labelKey: "nav.diseases", icon: BookOpen },
     { to: "/history", labelKey: "nav.history", icon: Clock, requireAuth: true },
-    { 
-      to: "/admin", 
-      labelKey: "nav.dashboard", // Will be overridden based on role
-      icon: LayoutDashboard, 
-      requireAuth: true, 
-      requirePermission: "analytics:read" 
+    {
+      to: "/admin",
+      labelKey: "nav.dashboard",
+      icon: LayoutDashboard,
+      requireAuth: true,
+      requirePermission: "analytics:read",
     },
   ];
 
@@ -39,16 +39,15 @@ export function BottomNav({ onOpenAbout }: BottomNavProps): React.JSX.Element {
   });
 
   return (
-    <div className="fixed bottom-3 inset-x-0 z-40 flex justify-center px-3 sm:px-4 lg:hidden pointer-events-none">
+    <div className="fixed bottom-3 inset-x-0 z-40 flex justify-center px-3 sm:px-4 lg:hidden pointer-events-none pb-[env(safe-area-inset-bottom)]">
       <nav
-        className="sf-glass-dock pointer-events-auto rounded-2xl px-1.5 sm:px-2 py-1.5 flex items-center justify-around gap-0.5 sm:gap-1 max-w-lg w-full shadow-lg"
+        className="pointer-events-auto rounded-2xl px-1.5 py-1.5 flex items-center justify-around gap-1 max-w-md w-full bg-[var(--color-bg-card)]/95 dark:bg-[#14221A]/95 backdrop-blur-lg border border-[var(--color-border)] shadow-lg shadow-black/10 transition-colors"
         aria-label="Mobile navigation"
       >
         {visibleItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.to);
-          
-          // Show "Admin" for admin role, "Expert" for expert role
+
           let label = t(item.labelKey);
           if (item.to === "/admin" && user) {
             label = user.role === "admin" ? t("nav.admin") : t("nav.expert");
@@ -59,14 +58,14 @@ export function BottomNav({ onOpenAbout }: BottomNavProps): React.JSX.Element {
               key={item.to}
               to={item.to}
               title={label}
-              className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all min-h-[44px] ${
+              className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all min-h-[46px] select-none ${
                 active
-                  ? "text-amber-950 dark:text-amber-300 font-bold bg-amber-500/20"
-                  : "text-gray-700 dark:text-gray-300 hover:text-gray-950 dark:hover:text-white"
+                  ? "bg-[var(--color-primary)] text-white dark:bg-[var(--color-primary)] dark:text-[#0E1712] font-bold shadow-xs"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]"
               }`}
             >
-              <Icon size={18} strokeWidth={active ? 2.5 : 2} className="shrink-0" />
-              <span className="block w-full text-[0.6rem] sm:text-[0.65rem] tracking-tight mt-0.5 leading-tight truncate text-center">
+              <Icon size={18} strokeWidth={active ? 2.4 : 1.9} className="shrink-0" />
+              <span className="block w-full text-[0.62rem] sm:text-[0.66rem] tracking-tight mt-0.5 leading-tight truncate text-center">
                 {label}
               </span>
             </Link>
@@ -79,11 +78,11 @@ export function BottomNav({ onOpenAbout }: BottomNavProps): React.JSX.Element {
             type="button"
             onClick={onOpenAbout}
             title={t("nav.about")}
-            className="flex-1 min-w-0 flex flex-col items-center justify-center py-1 px-1 rounded-xl text-gray-700 dark:text-gray-300 hover:text-gray-950 dark:hover:text-white min-h-[44px]"
+            className="flex-1 min-w-0 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)] min-h-[46px] transition-all select-none"
             aria-label={t("nav.about")}
           >
-            <Info size={18} className="shrink-0" />
-            <span className="block w-full text-[0.6rem] sm:text-[0.65rem] tracking-tight mt-0.5 leading-tight truncate text-center">
+            <Info size={18} strokeWidth={1.9} className="shrink-0" />
+            <span className="block w-full text-[0.62rem] sm:text-[0.66rem] tracking-tight mt-0.5 leading-tight truncate text-center">
               {t("nav.about")}
             </span>
           </button>
