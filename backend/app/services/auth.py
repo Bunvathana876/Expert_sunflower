@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import contextlib
+from datetime import datetime
 from typing import Any
 
+import structlog
+
+from app.core.config import get_settings
 from app.core.errors import ConflictError, ForbiddenError, UnauthorizedError
-from app.core.rate_limit import login_rate_limiter
+from app.core.rate_limit import RateLimitRule, rate_limiter
 from app.core.security import (
     create_access_token,
     create_refresh_token,
@@ -26,6 +30,8 @@ from app.schemas.auth import (
     UpdateMeRequest,
     UserResponse,
 )
+
+log = structlog.get_logger(__name__)
 
 
 def user_to_response(user: User) -> UserResponse:
@@ -48,7 +54,7 @@ class AuthService:
         self.user_repo = user_repo
 
     async def register(self, req: RegisterRequest) -> tuple[TokenResponse, str]:
-        """Register a new grower account.
+        """Register a new grower account and persist its initial refresh-token digest.
 
         Raises:
             ConflictError: if email or username is already taken.
@@ -80,7 +86,10 @@ class AuthService:
             user_resp.role,
             user_resp.permissions,
         )
-        refresh_token, _ = create_refresh_token(created_user.id)
+        refresh_token, refresh_jti = create_refresh_token(created_user.id)
+        await token_store.issue_token(self.user_repo.session, created_user.id, refresh_jti)
+        await self.user_repo.session.commit()
+        log.info("security.auth.registered", user_id=created_user.id, role=user_resp.role)
 
         token_resp = TokenResponse(
             access_token=access_token,
@@ -90,21 +99,39 @@ class AuthService:
         return token_resp, refresh_token
 
     async def login(self, req: LoginRequest, client_ip: str) -> tuple[TokenResponse, str]:
-        """Authenticate user with rate limiting and constant-time failure timing.
+        """Authenticate user with multi-worker rate limiting and constant-time failure timing.
 
         Returns:
             (TokenResponse, refresh_token_string)
         """
-        # Rate limit: 10 attempts per 15 minutes per (ip, identifier)
-        rate_key = f"{client_ip}:{req.identifier.lower()}"
-        login_rate_limiter.check_and_record(rate_key, max_attempts=10, window_seconds=900)
+        settings = get_settings()
+        normalized_ident = req.identifier.strip().lower()
+        await rate_limiter.check_limits(
+            self.user_repo.session,
+            [
+                RateLimitRule(
+                    scope="auth:login:ip_ident",
+                    identifier=f"{client_ip}:{normalized_ident}",
+                    max_attempts=settings.RATE_LIMIT_LOGIN_MAX,
+                    window_seconds=settings.RATE_LIMIT_LOGIN_WINDOW_SEC,
+                ),
+                RateLimitRule(
+                    scope="auth:login:ip",
+                    identifier=client_ip,
+                    max_attempts=settings.RATE_LIMIT_LOGIN_IP_MAX,
+                    window_seconds=settings.RATE_LIMIT_LOGIN_WINDOW_SEC,
+                ),
+            ],
+        )
 
         user = await self.user_repo.get_by_identifier(req.identifier)
         if not user:
             verify_dummy_password(req.password)
+            log.warning("security.auth.login_failed", reason="unknown_identifier")
             raise UnauthorizedError(detail="Invalid email/username or password")
 
         if not verify_password(req.password, user.password_hash):
+            log.warning("security.auth.login_failed", user_id=user.id, reason="invalid_password")
             raise UnauthorizedError(detail="Invalid email/username or password")
 
         # Transparently upgrade legacy Werkzeug hashes to Argon2id upon successful authentication
@@ -113,6 +140,7 @@ class AuthService:
             await self.user_repo.session.flush()
 
         if not user.is_active:
+            log.warning("security.auth.login_failed", user_id=user.id, reason="inactive_account")
             raise ForbiddenError(detail="User account is inactive")
 
         user_resp = user_to_response(user)
@@ -121,7 +149,10 @@ class AuthService:
             user_resp.role,
             user_resp.permissions,
         )
-        refresh_token, _ = create_refresh_token(user.id)
+        refresh_token, refresh_jti = create_refresh_token(user.id)
+        await token_store.issue_token(self.user_repo.session, user.id, refresh_jti)
+        await self.user_repo.session.commit()
+        log.info("security.auth.login_succeeded", user_id=user.id, role=user_resp.role)
 
         token_resp = TokenResponse(
             access_token=access_token,
@@ -130,33 +161,51 @@ class AuthService:
         )
         return token_resp, refresh_token
 
-    async def refresh_tokens(self, old_refresh_token: str) -> tuple[TokenResponse, str]:
-        """Validate and rotate refresh token.
+    async def refresh_tokens(
+        self,
+        old_refresh_token: str,
+        *,
+        request_started_at: datetime | None = None,
+    ) -> tuple[TokenResponse, str]:
+        """Validate and atomically rotate refresh token in persistent storage.
 
-        Revokes the old jti and returns a new access token and rotated refresh token.
+        Revokes the old token digest under row lock, detects rotated-token replay to
+        revoke compromised token families, and returns a new access & refresh token pair.
         """
         payload = decode_token(old_refresh_token)
         if payload.get("type") != "refresh":
             raise UnauthorizedError(detail="Invalid token type")
 
         jti = payload.get("jti")
-        if not jti or not token_store.is_valid(jti):
+        if not jti or not isinstance(jti, str):
             raise UnauthorizedError(detail="Refresh token has been revoked or is invalid")
-
-        # Invalidate the old token immediately
-        token_store.revoke(jti)
 
         user_id_str = payload.get("sub")
         if not user_id_str:
             raise UnauthorizedError(detail="Invalid token payload")
 
-        user = await self.user_repo.get_by_id(int(user_id_str))
+        try:
+            user_id = int(user_id_str)
+        except ValueError as exc:
+            raise UnauthorizedError(detail="Invalid token payload") from exc
+
+        user = await self.user_repo.get_by_id(user_id)
         if not user or not user.is_active:
+            await token_store.revoke_all_for_user(self.user_repo.session, user_id)
+            await self.user_repo.session.commit()
             raise UnauthorizedError(detail="User no longer active or exists")
+
+        # Atomically lock, validate, revoke old_jti, and issue single rotated refresh token
+        new_refresh, _ = await token_store.rotate_token(
+            self.user_repo.session,
+            jti,
+            user.id,
+            request_started_at=request_started_at,
+        )
+        log.info("security.auth.token_rotated", user_id=user.id)
 
         user_resp = user_to_response(user)
         new_access, _ = create_access_token(user.id, user_resp.role, user_resp.permissions)
-        new_refresh, _ = create_refresh_token(user.id)
 
         token_resp = TokenResponse(
             access_token=new_access,
@@ -165,15 +214,18 @@ class AuthService:
         )
         return token_resp, new_refresh
 
-    def logout(self, refresh_token: str | None) -> None:
-        """Revoke refresh token if valid."""
+    async def logout(self, refresh_token: str | None) -> None:
+        """Durably revoke refresh token across all workers if valid."""
         if not refresh_token:
             return
         with contextlib.suppress(Exception):
             payload: dict[str, Any] = decode_token(refresh_token)
+            if payload.get("type") != "refresh":
+                return
             jti = payload.get("jti")
-            if jti:
-                token_store.revoke(jti)
+            if jti and isinstance(jti, str):
+                revoked = await token_store.revoke_token(self.user_repo.session, jti)
+                log.info("security.auth.logout", revoked=revoked)
 
     async def update_me(self, user: User, req: UpdateMeRequest) -> UserResponse:
         """Update current user profile. Requires current_password verification."""
@@ -194,6 +246,7 @@ class AuthService:
 
         if req.new_password is not None:
             user.password_hash = hash_password(req.new_password)
+            await token_store.revoke_all_for_user(self.user_repo.session, user.id)
 
         await self.user_repo.session.flush()
         # Re-fetch with loaded relationships

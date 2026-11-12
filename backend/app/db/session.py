@@ -50,6 +50,19 @@ async_session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
 )
 
 
+def get_pool_status() -> dict[str, int]:
+    """Inspect current SQLAlchemy connection pool metrics."""
+    pool = engine.pool
+    if hasattr(pool, "size"):
+        return {
+            "size": int(pool.size()),
+            "checked_in": int(pool.checkedin()),
+            "checked_out": int(pool.checkedout()),
+            "overflow": int(pool.overflow()),
+        }
+    return {"size": 0, "checked_in": 0, "checked_out": 0, "overflow": 0}
+
+
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """FastAPI dependency that yields a transactional AsyncSession.
 

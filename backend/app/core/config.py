@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -51,14 +52,92 @@ class Settings(BaseSettings):
     # ---- Frontend (Vite) ----
     VITE_API_BASE_URL: str = "http://localhost:8000/api/v1"
 
+    # ---- Rate Limiting & Trusted Proxy Security ----
+    TRUSTED_PROXY_IPS: str = ""
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_FAIL_CLOSED: bool = False
+
+    RATE_LIMIT_LOGIN_MAX: int = 10
+    RATE_LIMIT_LOGIN_IP_MAX: int = 30
+    RATE_LIMIT_LOGIN_WINDOW_SEC: int = 900
+
+    RATE_LIMIT_REGISTER_IP_MAX: int = 10
+    RATE_LIMIT_REGISTER_WINDOW_SEC: int = 3600
+
+    RATE_LIMIT_REFRESH_IP_MAX: int = 30
+    RATE_LIMIT_REFRESH_WINDOW_SEC: int = 300
+
+    RATE_LIMIT_PROFILE_USER_MAX: int = 10
+    RATE_LIMIT_PROFILE_IP_MAX: int = 20
+    RATE_LIMIT_PROFILE_WINDOW_SEC: int = 900
+
+    RATE_LIMIT_AI_ADMIN_USER_MAX: int = 20
+    RATE_LIMIT_AI_ADMIN_IP_MAX: int = 40
+    RATE_LIMIT_AI_ADMIN_WINDOW_SEC: int = 60
+
+    RATE_LIMIT_AI_CONFIRM_USER_MAX: int = 15
+    RATE_LIMIT_AI_CONFIRM_IP_MAX: int = 30
+    RATE_LIMIT_AI_CONFIRM_WINDOW_SEC: int = 60
+
+    # ---- AI Action Proposal Security ----
+    AI_ACTION_PROPOSAL_TTL_SEC: int = 300
+
+    # ---- CSRF & Origin Security ----
+    CSRF_REQUIRE_TOKEN: bool = False
+    COOKIE_SECURE: bool | None = None
+    REFRESH_CONCURRENT_LEEWAY_MS: int = 0
+
+    # ---- Readiness & Schema Verification ----
+    REQUIRED_ALEMBIC_REVISION: str = "0004"
+
+    # ---- Metrics & Operational Security ----
+    METRICS_SECRET_KEY: str = ""
+
+    @field_validator("JWT_SECRET")
+    @classmethod
+    def validate_jwt_secret_length(cls, v: str) -> str:
+        if len(v.encode("utf-8")) < 32:
+            raise ValueError(
+                "JWT_SECRET must be at least 32 bytes (256 bits) for HS256 according to RFC 7518"
+            )
+        return v
+
+    @model_validator(mode="after")
+    def validate_production_secrets(self) -> Settings:
+        if self.is_production:
+            lower_sec = self.JWT_SECRET.lower()
+            if any(w in lower_sec for w in ("test-secret", "changeme", "placeholder", "default")):
+                raise ValueError(
+                    "JWT_SECRET contains an insecure development placeholder in production"
+                )
+        return self
+
+    # ---- Automated Maintenance Retention ----
+    MAINTENANCE_AI_ACTION_RETENTION_HOURS: int = 24
+    MAINTENANCE_REFRESH_TOKEN_RETENTION_HOURS: int = 24
+    MAINTENANCE_EXPIRED_TOKEN_GRACE_HOURS: int = 0
+    MAINTENANCE_RATE_LIMIT_RETENTION_HOURS: int = 0
+
+    @property
+    def trusted_proxy_list(self) -> list[str]:
+        """Return TRUSTED_PROXY_IPS as a list of IP/CIDR strings."""
+        return [p.strip() for p in self.TRUSTED_PROXY_IPS.split(",") if p.strip()]
+
     @property
     def cors_origins_list(self) -> list[str]:
-        """Return CORS_ORIGINS as a list, split on commas."""
-        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+        """Return normalized CORS_ORIGINS list (trailing slashes stripped)."""
+        return [o.strip().rstrip("/") for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
     @property
     def is_production(self) -> bool:
         return self.ENV.lower() == "production"
+
+    @property
+    def cookie_secure(self) -> bool:
+        """Whether auth cookies require HTTPS (`Secure`), defaulting to `is_production`."""
+        if self.COOKIE_SECURE is not None:
+            return self.COOKIE_SECURE
+        return self.is_production
 
 
 @lru_cache(maxsize=1)

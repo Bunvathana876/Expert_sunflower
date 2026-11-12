@@ -10,6 +10,7 @@ from sqlalchemy import (
     CheckConstraint,
     Enum,
     ForeignKey,
+    Index,
     Integer,
     Numeric,
     String,
@@ -32,6 +33,10 @@ class Disease(Base, TimestampMixin):
     """Botanical sunflower disease or abiotic disorder candidate."""
 
     __tablename__ = "diseases"
+    __table_args__ = (
+        Index("ix_diseases_published_slug", "is_published", "slug"),
+        Index("ix_diseases_pathogen_type", "pathogen_type"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     slug: Mapped[str] = mapped_column(String(128), unique=True, nullable=False, index=True)
@@ -97,6 +102,7 @@ class DiseaseSymptom(Base):
             "weight >= 0 AND weight <= 1",
             name="ck_disease_symptoms_weight_range",
         ),
+        Index("ix_disease_symptoms_symptom_id", "symptom_id"),
     )
 
     disease_id: Mapped[int] = mapped_column(

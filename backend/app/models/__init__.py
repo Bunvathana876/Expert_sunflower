@@ -4,8 +4,9 @@ Default relationships to lazy="raise" so N+1 loads fail loudly in tests;
 load explicitly with selectinload() in the repository layer.
 """
 
+from app.models.ai_action import PendingAIAction
 from app.models.audit import AuditLog
-from app.models.auth import Permission, Role, RolePermission, User
+from app.models.auth import Permission, RefreshToken, Role, RolePermission, User
 from app.models.diagnosis import (
     DiagnosisResult,
     DiagnosisSelectedSymptom,
@@ -21,6 +22,7 @@ from app.models.enums import (
 from app.models.feedback import Feedback
 from app.models.media import Media
 from app.models.mixins import TimestampMixin
+from app.models.rate_limit import RateLimitEvent
 from app.models.ruleset import Ruleset
 from app.models.symptom import Symptom, SymptomCategory
 from app.models.translation import Translation
@@ -38,7 +40,10 @@ __all__ = [
     "FeedbackStatus",
     "Media",
     "PathogenType",
+    "PendingAIAction",
     "Permission",
+    "RateLimitEvent",
+    "RefreshToken",
     "Role",
     "RolePermission",
     "Ruleset",

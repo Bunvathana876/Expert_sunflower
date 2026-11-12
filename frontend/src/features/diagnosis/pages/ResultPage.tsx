@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { useParams, Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -20,10 +20,15 @@ import { useSessionDetail } from "../hooks";
 import { useDiseaseDetail } from "@/features/diseases/hooks";
 import { PercentageVisualization } from "@/components/ui/PercentageVisualization";
 import { DiseaseDetailModal } from "@/features/diseases/components/DiseaseDetailModal";
-import { DiagnosticReportModal } from "../components/DiagnosticReportModal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
 import type { DiagnosisResponse, DiagnosisResult } from "@/types/api";
+
+const LazyDiagnosticReportModal = lazy(() =>
+  import("../components/DiagnosticReportModal").then((m) => ({
+    default: m.DiagnosticReportModal,
+  })),
+);
 
 export function ResultPage(): React.JSX.Element {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -101,12 +106,16 @@ export function ResultPage(): React.JSX.Element {
       />
 
       {/* Full Diagnostic PDF Report Preview & Export Modal */}
-      <DiagnosticReportModal
-        isOpen={isReportModalOpen}
-        onClose={() => setIsReportModalOpen(false)}
-        session={session ?? null}
-        results={displayData.results}
-      />
+      {isReportModalOpen && (
+        <Suspense fallback={null}>
+          <LazyDiagnosticReportModal
+            isOpen={isReportModalOpen}
+            onClose={() => setIsReportModalOpen(false)}
+            session={session ?? null}
+            results={displayData.results}
+          />
+        </Suspense>
+      )}
 
       {/* Top Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

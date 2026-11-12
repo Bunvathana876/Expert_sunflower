@@ -3,6 +3,29 @@
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 /* -------------------------------------------------------------------------
+   Locally Hosted Fonts (SIL Open Font License 1.1)
+   ------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: "Noto Sans Khmer";
+  font-style: normal;
+  font-weight: 400 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("/fonts/noto-sans-khmer.woff2") format("woff2");
+  unicode-range: U+1780-17FF, U+19E0-19FF, U+200C-200D, U+25CC;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/plus-jakarta-sans.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* -------------------------------------------------------------------------
    Design tokens
    All colours, spacing, and typography are defined here as CSS custom
    properties so components stay token-based rather than using ad-hoc values.
@@ -73,7 +96,7 @@
   --shadow-xl: 0 20px 30px -5px rgb(0 0 0 / 0.12), 0 8px 12px -6px rgb(0 0 0 / 0.06);
 
   /* Typography */
-  --font-sans: "Inter", "Noto Sans", system-ui, -apple-system, sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Inter", "Noto Sans", system-ui, -apple-system, sans-serif;
   --font-khmer: "Noto Sans Khmer", sans-serif;
 
   /* Font sizes */
@@ -2142,4 +2165,10 @@ textarea.sf-form__textarea {
 .no-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+/* Defer layout/paint of heavy below-the-fold sections while preserving scroll height */
+.sf-defer-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
 }

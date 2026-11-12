@@ -45,7 +45,10 @@ export default tseslint.config(
     ignores: [
       "src/api/generated/**",
       "dist/**",
+      "public/**",
       "node_modules/**",
+      "playwright-report/**",
+      "test-results/**",
       "*.config.js",
       "*.config.ts",
     ],

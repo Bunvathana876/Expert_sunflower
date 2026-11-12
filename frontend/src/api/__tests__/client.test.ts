@@ -1,5 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { apiFetch, ApiError, setTokenGetter, setOnRefreshNeeded } from "../client";
+import {
+  apiFetch,
+  ApiError,
+  CSRF_COOKIE_NAME,
+  CSRF_HEADER_NAME,
+  setCsrfToken,
+  setTokenGetter,
+  setOnRefreshNeeded,
+} from "../client";
 
 describe("ApiError", () => {
   it("initializes with problem detail fields", () => {
@@ -36,10 +44,15 @@ describe("apiFetch", () => {
 
   beforeEach(() => {
     setTokenGetter(() => null);
+    setOnRefreshNeeded(async () => null);
+    setCsrfToken(null);
+    document.cookie = `${CSRF_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
   });
 
   afterEach(() => {
     globalThis.fetch = originalFetch;
+    setCsrfToken(null);
+    document.cookie = `${CSRF_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
     vi.restoreAllMocks();
   });
 
@@ -77,6 +90,96 @@ describe("apiFetch", () => {
     });
 
     await apiFetch("/test");
+  });
+
+  it("attaches X-CSRF-Token from sf_csrf cookie on POST requests and omits on GET", async () => {
+    document.cookie = `${CSRF_COOKIE_NAME}=cookie-csrf-digest-123; path=/`;
+
+    const seenHeaders: Array<{ method: string; csrf: string | null }> = [];
+    globalThis.fetch = vi.fn().mockImplementation((_url, init) => {
+      const headers = init?.headers as Headers;
+      seenHeaders.push({
+        method: (init?.method as string | undefined) ?? "GET",
+        csrf: headers.get(CSRF_HEADER_NAME),
+      });
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({ ok: true }),
+      });
+    });
+
+    await apiFetch("/diseases");
+    await apiFetch("/auth/refresh", { method: "POST" });
+
+    expect(seenHeaders).toEqual([
+      { method: "GET", csrf: null },
+      { method: "POST", csrf: "cookie-csrf-digest-123" },
+    ]);
+  });
+
+  it("captures rotated X-CSRF-Token response header and clears it on logout", async () => {
+    const sentCsrfTokens: Array<string | null> = [];
+
+    globalThis.fetch = vi.fn().mockImplementation((url: string, init) => {
+      const headers = init?.headers as Headers;
+      sentCsrfTokens.push(headers.get(CSRF_HEADER_NAME));
+
+      if (url.endsWith("/auth/login")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          headers: new Headers({
+            "content-type": "application/json",
+            [CSRF_HEADER_NAME]: "rotated-csrf-token-999",
+          }),
+          json: async () => ({ access_token: "tok", token_type: "bearer" }),
+        });
+      }
+      if (url.endsWith("/auth/logout")) {
+        return Promise.resolve({
+          ok: true,
+          status: 204,
+          headers: new Headers(),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({ ok: true }),
+      });
+    });
+
+    await apiFetch("/auth/login", { method: "POST", body: JSON.stringify({}) });
+    await apiFetch("/auth/logout", { method: "POST" });
+    await apiFetch("/auth/refresh", { method: "POST" });
+
+    expect(sentCsrfTokens).toEqual([
+      null,
+      "rotated-csrf-token-999",
+      null,
+    ]);
+  });
+
+  it("prefers live sf_csrf cookie over stale in-memory header cache after sibling-tab rotation", async () => {
+    setCsrfToken("stale-tab-1-csrf-token");
+    document.cookie = `${CSRF_COOKIE_NAME}=fresh-tab-2-cookie-csrf; path=/`;
+
+    let observedCsrf: string | null = null;
+    globalThis.fetch = vi.fn().mockImplementation((_url, init) => {
+      const headers = init?.headers as Headers;
+      observedCsrf = headers.get(CSRF_HEADER_NAME);
+      return Promise.resolve({
+        ok: true,
+        status: 204,
+        headers: new Headers(),
+      });
+    });
+
+    await apiFetch("/auth/logout", { method: "POST" });
+    expect(observedCsrf).toBe("fresh-tab-2-cookie-csrf");
   });
 
   it("throws ApiError with problem+json data on error response", async () => {

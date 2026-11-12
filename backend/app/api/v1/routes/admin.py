@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db, require_permission
-from app.models.auth import User
+from app.core.errors import BadRequestError, NotFoundError
+from app.core.security import token_store
+from app.models.auth import Role, User
 from app.repositories.admin import AdminRepository
 from app.schemas.admin import (
     PaginatedUsersResponse,
@@ -19,6 +22,7 @@ from app.schemas.admin import (
     UpdateUserRequest,
     UserResponse,
 )
+from app.services.audit import AuditService
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -77,24 +81,80 @@ async def update_user(
     
     user = await repo.get_user_by_id(user_id)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with ID {user_id} not found",
-        )
+        raise NotFoundError(detail=f"User with ID {user_id} not found")
     
     # Prevent admin from deactivating themselves
     if user.id == current_user.id and request.is_active is False:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cannot deactivate your own account",
+        raise BadRequestError(detail="Cannot deactivate your own account")
+
+    # Prevent admin from modifying their own role (self-demotion or self-escalation)
+    if (
+        user.id == current_user.id
+        and request.role_id is not None
+        and request.role_id != user.role_id
+    ):
+        raise BadRequestError(
+            detail="Cannot modify your own role. Another administrator must perform this action."
         )
-    
+
+    # Validate that target role exists if role_id is specified
+    target_role = None
+    if request.role_id is not None:
+        target_role = await repo.get_role_by_id(request.role_id)
+        if not target_role:
+            raise BadRequestError(detail=f"Role with ID {request.role_id} does not exist")
+
+    # Protect against deactivating or demoting the last active administrator
+    admin_role_stmt = select(Role.id).where(Role.name == "admin")
+    admin_role_id = await db.scalar(admin_role_stmt)
+    is_demoting_admin = (
+        user.role_id == admin_role_id
+        and request.role_id is not None
+        and request.role_id != admin_role_id
+    )
+    is_deactivating_admin = (
+        user.role_id == admin_role_id
+        and request.is_active is False
+    )
+    if is_demoting_admin or is_deactivating_admin:
+        active_admins_stmt = select(func.count(User.id)).where(
+            User.role_id == admin_role_id,
+            User.is_active == True,  # noqa: E712
+            User.id != user.id,
+        )
+        remaining_admins = await db.scalar(active_admins_stmt) or 0
+        if remaining_admins == 0:
+            raise BadRequestError(
+                detail="Cannot deactivate or demote the sole active administrator."
+            )
+
+    diff: dict[str, Any] = {}
+    if request.role_id is not None and request.role_id != user.role_id:
+        old_role_name = user.role.name if user.role else str(user.role_id)
+        new_role_name = target_role.name if target_role else str(request.role_id)
+        diff["role"] = {"old": old_role_name, "new": new_role_name}
+    if request.is_active is not None and request.is_active != user.is_active:
+        diff["is_active"] = {"old": user.is_active, "new": request.is_active}
+
     updated_user = await repo.update_user(
         user=user,
         role_id=request.role_id,
         is_active=request.is_active,
     )
-    await db.commit()
+
+    if request.is_active is False:
+        await token_store.revoke_all_for_user(db, updated_user.id)
+
+    if diff:
+        audit = AuditService(db)
+        await audit.record(
+            actor_id=current_user.id,
+            action="user:update",
+            entity_type="user",
+            entity_id=user.id,
+            diff=diff,
+        )
+    await db.flush()
     
     return UserResponse(
         id=updated_user.id,
@@ -160,10 +220,7 @@ async def get_role_permissions(
     
     role = await repo.get_role_by_id(role_id)
     if not role:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Role with ID {role_id} not found",
-        )
+        raise NotFoundError(detail=f"Role with ID {role_id} not found")
     
     all_permissions = await repo.get_permissions()
     role_permission_codes = {p.code for p in role.permissions}
@@ -198,15 +255,41 @@ async def update_role_permissions(
     
     role = await repo.get_role_by_id(role_id)
     if not role:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Role with ID {role_id} not found",
-        )
+        raise NotFoundError(detail=f"Role with ID {role_id} not found")
+
+    all_permissions = await repo.get_permissions()
+    valid_codes = {p.code for p in all_permissions}
+    invalid_codes = [c for c in request.permission_codes if c not in valid_codes]
+    if invalid_codes:
+        raise BadRequestError(detail=f"Invalid permission code(s): {', '.join(invalid_codes)}")
+
+    # Admin role lockout protection: ensure administrative control permissions are never stripped
+    if role.name == "admin":
+        essential_permissions = {"rbac:manage", "user:manage"}
+        missing_essential = essential_permissions - set(request.permission_codes)
+        if missing_essential:
+            missing_str = ", ".join(sorted(missing_essential))
+            msg = (
+                f"Cannot remove essential permission(s) from administrator role: {missing_str}"
+            )
+            raise BadRequestError(detail=msg)
+
+    old_codes = sorted([p.code for p in role.permissions])
+    new_codes = sorted(request.permission_codes)
     
     updated_role = await repo.set_role_permissions(role_id, request.permission_codes)
-    await db.commit()
+
+    if old_codes != new_codes:
+        audit = AuditService(db)
+        await audit.record(
+            actor_id=current_user.id,
+            action="rbac:update_role_permissions",
+            entity_type="role",
+            entity_id=role.id,
+            diff={"role": role.name, "old_permissions": old_codes, "new_permissions": new_codes},
+        )
+    await db.flush()
     
-    all_permissions = await repo.get_permissions()
     role_permission_codes = {p.code for p in updated_role.permissions}
     
     return RolePermissionsResponse(
@@ -272,13 +355,22 @@ async def activate_ruleset(
     
     ruleset = await repo.get_ruleset_by_id(ruleset_id)
     if not ruleset:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Ruleset with ID {ruleset_id} not found",
-        )
+        raise NotFoundError(detail=f"Ruleset with ID {ruleset_id} not found")
     
     activated_ruleset = await repo.activate_ruleset(ruleset_id, current_user.id)
-    await db.commit()
+
+    audit = AuditService(db)
+    await audit.record(
+        actor_id=current_user.id,
+        action="ruleset:activate",
+        entity_type="ruleset",
+        entity_id=activated_ruleset.id,
+        diff={
+            "version": activated_ruleset.version,
+            "algorithm": activated_ruleset.algorithm,
+        },
+    )
+    await db.flush()
     
     return RulesetResponse(
         id=activated_ruleset.id,
@@ -287,5 +379,9 @@ async def activate_ruleset(
         parameters=activated_ruleset.params,
         is_active=activated_ruleset.is_active,
         published_at=activated_ruleset.published_at,
-        published_by=activated_ruleset.published_by.username if activated_ruleset.published_by else None,
+        published_by=(
+            activated_ruleset.published_by.username
+            if activated_ruleset.published_by
+            else None
+        ),
     )
