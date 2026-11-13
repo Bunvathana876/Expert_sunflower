@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { createBrowserRouter, Outlet } from "react-router";
 import { AppLayout } from "./components/layout/AppLayout";
+import { ThemeBackground } from "./components/layout/ThemeBackground";
 import { Skeleton } from "./components/ui/Skeleton";
 
 // Public / Grower pages
@@ -101,6 +102,7 @@ function AdminRootLayout(): React.JSX.Element {
     <Suspense
       fallback={
         <div style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
+          <ThemeBackground />
           <div className="sf-spinner" aria-label="Loading admin portal..." />
         </div>
       }

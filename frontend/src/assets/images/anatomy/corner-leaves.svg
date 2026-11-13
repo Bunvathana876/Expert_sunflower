@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none" aria-hidden="true">
+  <!-- Subtle botanical corner foliage for Sunflower Studio -->
+  <g opacity="0.85">
+    <!-- Main stem arching from top-left corner -->
+    <path
+      d="M-10 -10 C30 40 70 85 110 120 C140 145 180 165 210 175"
+      stroke="#87A774"
+      stroke-width="3"
+      stroke-linecap="round"
+      fill="none"
+      opacity="0.8"
+    />
+    <!-- Secondary delicate twig -->
+    <path
+      d="M45 55 C70 45 105 50 135 60"
+      stroke="#87A774"
+      stroke-width="2"
+      stroke-linecap="round"
+      fill="none"
+      opacity="0.6"
+    />
+    <!-- Third delicate twig -->
+    <path
+      d="M95 105 C115 125 130 155 140 185"
+      stroke="#87A774"
+      stroke-width="2"
+      stroke-linecap="round"
+      fill="none"
+      opacity="0.6"
+    />
+
+    <!-- Leaf 1: Top-left small accent leaf -->
+    <path
+      d="M15 10 C35 5 50 20 52 35 C53 48 35 45 22 35 C15 28 12 18 15 10 Z"
+      fill="#87A774"
+      opacity="0.75"
+    />
+    <path d="M15 10 C30 25 42 35 52 35" stroke="#224D3A" stroke-width="1" opacity="0.4" fill="none" />
+
+    <!-- Leaf 2: Upward arching leaf -->
+    <path
+      d="M45 55 C70 30 105 32 125 42 C120 58 95 68 70 65 C55 62 48 58 45 55 Z"
+      fill="#87A774"
+      opacity="0.85"
+    />
+    <path d="M45 55 C80 46 110 44 125 42" stroke="#224D3A" stroke-width="1" opacity="0.45" fill="none" />
+
+    <!-- Leaf 3: Downward drooping leaf -->
+    <path
+      d="M65 75 C60 105 75 135 90 150 C98 135 95 105 85 90 C78 80 70 76 65 75 Z"
+      fill="#87A774"
+      opacity="0.7"
+    />
+    <path d="M65 75 C75 105 85 135 90 150" stroke="#224D3A" stroke-width="1" opacity="0.4" fill="none" />
+
+    <!-- Leaf 4: Large prominent middle leaf -->
+    <path
+      d="M95 105 C130 95 165 110 185 128 C172 145 140 150 115 138 C102 130 96 118 95 105 Z"
+      fill="#87A774"
+      opacity="0.9"
+    />
+    <path d="M95 105 C135 112 165 120 185 128" stroke="#224D3A" stroke-width="1.2" opacity="0.5" fill="none" />
+
+    <!-- Leaf 5: Lower hanging tip leaf -->
+    <path
+      d="M135 140 C145 170 160 195 175 205 C180 190 175 168 162 152 C152 142 142 138 135 140 Z"
+      fill="#87A774"
+      opacity="0.75"
+    />
+    <path d="M135 140 C150 165 165 190 175 205" stroke="#224D3A" stroke-width="1" opacity="0.4" fill="none" />
+
+    <!-- Leaf 6: Terminal leaf at branch end -->
+    <path
+      d="M200 170 C220 178 235 192 240 205 C230 208 212 202 202 192 C196 184 198 174 200 170 Z"
+      fill="#87A774"
+      opacity="0.8"
+    />
+    <path d="M200 170 C215 185 230 198 240 205" stroke="#224D3A" stroke-width="1" opacity="0.45" fill="none" />
+  </g>
+</svg>

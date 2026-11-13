@@ -10,6 +10,7 @@ import {
   MessageSquare,
   ShieldCheck,
   CheckCircle2,
+  Leaf,
 } from "lucide-react";
 
 interface AppFooterProps {
@@ -21,99 +22,93 @@ export function AppFooter({ onOpenAbout }: AppFooterProps): React.JSX.Element {
   const isKhmer = i18n.language === "km";
 
   return (
-    <footer className="w-full border-t border-[var(--color-border)] bg-[var(--color-bg-card)]/80 backdrop-blur-md text-[var(--color-text)] transition-colors mt-auto">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-10">
-        {/* Top Grid */}
+    <footer className="w-full border-t border-[var(--color-border)] bg-[var(--color-bg-card)]/90 backdrop-blur-md text-[var(--color-text)] transition-colors mt-auto">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-10 sm:py-14 space-y-8">
+
+        {/* ── Top Grid ─────────────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
-          {/* Brand & Mission (5 cols) */}
-          <div className="md:col-span-5 space-y-4">
-            <Link to="/" className="inline-flex items-center gap-2.5 group">
-              <span className="text-2xl transition-transform group-hover:scale-105" aria-hidden="true">
-                🌻
-              </span>
-              <div className="flex flex-col">
-                <span className="font-extrabold text-base sm:text-lg tracking-tight text-[var(--color-primary)] dark:text-[var(--color-text)] leading-tight">
+
+          {/* Brand column (5 cols) */}
+          <div className="md:col-span-5 space-y-5">
+            <Link to="/" className="inline-flex items-center gap-3 group" aria-label="Sunflower Studio home">
+              <div className="w-9 h-9 rounded-xl bg-[var(--color-primary-subtle)] border border-[var(--color-secondary)]/25 flex items-center justify-center shrink-0 motion-safe:transition-transform group-hover:scale-105">
+                <Leaf size={17} className="text-[var(--color-primary)]" aria-hidden="true" />
+              </div>
+              <div className="flex flex-col leading-none">
+                <span className="font-extrabold text-base tracking-tight text-[var(--color-primary)] dark:text-[var(--color-text)]">
                   Sunflower Studio
                 </span>
-                <span className="text-[0.65rem] font-bold text-[var(--color-secondary)] uppercase tracking-wider">
+                <span className="text-[0.62rem] font-bold text-[var(--color-secondary)] uppercase tracking-widest mt-0.5">
                   {isKhmer ? "វេទិការោគវិនិច្ឆ័យកសិកម្ម" : "Botanical Science Platform"}
                 </span>
               </div>
             </Link>
 
-            <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] leading-relaxed max-w-sm">
+            <p className="text-xs sm:text-[0.825rem] text-[var(--color-text-secondary)] leading-[1.75] max-w-sm">
               {isKhmer
                 ? "វេទិកាធ្វើរោគវិនិច្ឆ័យជំងឺដំណាំផ្កាឈូករ័ត្នបែបទំនើប សម្រាប់កសិករ អ្នកជំនាញក្សេត្រសាស្ត្រ និងមន្ត្រីផ្សព្វផ្សាយកសិកម្មនៅកម្ពុជា។"
-                : "Modern agricultural disease diagnosis and crop protection platform empowering Cambodian sunflower growers, agronomists, and researchers with rapid, evidence-based pathogen identification."}
+                : "Modern agricultural disease diagnosis and crop-protection platform, empowering Cambodian sunflower growers, agronomists, and researchers with rapid, evidence-based pathogen identification."}
             </p>
 
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-primary-subtle)] border border-[var(--color-secondary)]/30 text-xs font-semibold text-[var(--color-primary)] dark:text-[var(--color-primary)]">
-              <span className="w-2 h-2 rounded-full bg-[var(--color-secondary)] animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-primary-subtle)] border border-[var(--color-secondary)]/25 text-xs font-semibold text-[var(--color-primary)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-secondary)] animate-pulse shrink-0" aria-hidden="true" />
               <span>
-                {isKhmer ? "ប្រព័ន្ធវិនិច្ឆ័យដំណើរការធម្មតា" : "Diagnostic Inference Engine Active"}
+                {isKhmer ? "ប្រព័ន្ធវិនិច្ឆ័យដំណើរការ" : "Diagnostic Engine Active"}
               </span>
             </div>
           </div>
 
-          {/* Diagnostic Tools (3 cols) */}
+          {/* Diagnostic tools (3 cols) */}
           <div className="md:col-span-3 space-y-3">
-            <h4 className="text-xs font-bold text-[var(--color-text)] uppercase tracking-wider font-mono">
+            <h4 className="text-[0.68rem] font-bold text-[var(--color-text)] uppercase tracking-widest">
               {isKhmer ? "ឧបករណ៍វិនិច្ឆ័យ" : "Diagnostic Suite"}
             </h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
-              <li>
-                <Link
-                  to="/check"
-                  className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] flex items-center gap-1.5 transition-colors"
-                >
-                  <Stethoscope size={14} className="text-[var(--color-secondary)]" />
-                  <span>{t("nav.check")}</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/diseases"
-                  className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] flex items-center gap-1.5 transition-colors"
-                >
-                  <BookOpen size={14} className="text-[var(--color-secondary)]" />
-                  <span>{t("nav.diseases")}</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/diseases/compare"
-                  className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] flex items-center gap-1.5 transition-colors"
-                >
-                  <GitCompare size={14} className="text-[var(--color-secondary)]" />
-                  <span>{isKhmer ? "ប្រៀបធៀបជំងឺ" : "Compare Pathogens"}</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/history"
-                  className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] flex items-center gap-1.5 transition-colors"
-                >
-                  <Clock size={14} className="text-[var(--color-secondary)]" />
-                  <span>{t("nav.history")}</span>
-                </Link>
-              </li>
+            <ul className="space-y-2.5">
+              {[
+                { to: "/check", icon: Stethoscope, label: t("nav.check") },
+                { to: "/diseases", icon: BookOpen, label: t("nav.diseases") },
+                {
+                  to: "/diseases/compare",
+                  icon: GitCompare,
+                  label: isKhmer ? "ប្រៀបធៀបជំងឺ" : "Compare Pathogens",
+                },
+                { to: "/history", icon: Clock, label: t("nav.history") },
+              ].map(({ to, icon: Icon, label }) => (
+                <li key={to}>
+                  <Link
+                    to={to}
+                    className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] flex items-center gap-2 text-xs sm:text-[0.825rem] motion-safe:transition-colors group focus-visible:outline-none focus-visible:underline"
+                  >
+                    <Icon
+                      size={13}
+                      className="text-[var(--color-secondary)] shrink-0 group-hover:text-[var(--color-primary)] motion-safe:transition-colors"
+                      aria-hidden="true"
+                    />
+                    <span>{label}</span>
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Platform & Support (4 cols) */}
+          {/* Platform & support (4 cols) */}
           <div className="md:col-span-4 space-y-3">
-            <h4 className="text-xs font-bold text-[var(--color-text)] uppercase tracking-wider font-mono">
-              {isKhmer ? "ព័ត៌មានប្រព័ន្ធ & ជំនួយ" : "Platform & Agronomy"}
+            <h4 className="text-[0.68rem] font-bold text-[var(--color-text)] uppercase tracking-widest">
+              {isKhmer ? "ព័ត៌មានប្រព័ន្ធ" : "Platform & Support"}
             </h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
+            <ul className="space-y-2.5">
               {onOpenAbout && (
                 <li>
                   <button
                     type="button"
                     onClick={onOpenAbout}
-                    className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] flex items-center gap-1.5 transition-colors text-left"
+                    className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] flex items-center gap-2 text-xs sm:text-[0.825rem] motion-safe:transition-colors group text-left focus-visible:outline-none focus-visible:underline"
                   >
-                    <Info size={14} className="text-[var(--color-secondary)]" />
+                    <Info
+                      size={13}
+                      className="text-[var(--color-secondary)] shrink-0 group-hover:text-[var(--color-primary)] motion-safe:transition-colors"
+                      aria-hidden="true"
+                    />
                     <span>{t("nav.about")}</span>
                   </button>
                 </li>
@@ -121,55 +116,60 @@ export function AppFooter({ onOpenAbout }: AppFooterProps): React.JSX.Element {
               <li>
                 <Link
                   to="/feedback"
-                  className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] flex items-center gap-1.5 transition-colors"
+                  className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] flex items-center gap-2 text-xs sm:text-[0.825rem] motion-safe:transition-colors group focus-visible:outline-none focus-visible:underline"
                 >
-                  <MessageSquare size={14} className="text-[var(--color-secondary)]" />
-                  <span>{isKhmer ? "មតិកែលម្អកសិករ" : "Grower Field Feedback"}</span>
+                  <MessageSquare
+                    size={13}
+                    className="text-[var(--color-secondary)] shrink-0 group-hover:text-[var(--color-primary)] motion-safe:transition-colors"
+                    aria-hidden="true"
+                  />
+                  <span>{isKhmer ? "មតិកែលម្អ" : "Grower Feedback"}</span>
                 </Link>
               </li>
-              <li className="flex items-center gap-1.5 text-[var(--color-text-muted)] text-xs pt-1">
-                <CheckCircle2 size={13} className="text-[var(--color-secondary)] shrink-0" />
-                <span>
-                  {isKhmer
-                    ? "គាំទ្រដំណើរការក្រៅបណ្តាញ (PWA Offline Mode)"
-                    : "Offline Field PWA Enabled"}
-                </span>
-              </li>
-              <li className="flex items-center gap-1.5 text-[var(--color-text-muted)] text-xs">
-                <ShieldCheck size={13} className="text-[var(--color-secondary)] shrink-0" />
-                <span>
-                  {isKhmer
-                    ? "ការវិភាគផ្អែកលើច្បាប់ក្សេត្រសាស្ត្រ Bayesian"
-                    : "Bayesian Agricultural Rule Engine"}
-                </span>
-              </li>
             </ul>
+
+            {/* Capability badges */}
+            <div className="pt-2 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-[0.7rem] text-[var(--color-text-muted)]">
+                <CheckCircle2 size={12} className="text-[var(--color-secondary)] shrink-0" aria-hidden="true" />
+                <span>{isKhmer ? "PWA ក្រៅបណ្តាញ" : "Offline Field PWA Enabled"}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[0.7rem] text-[var(--color-text-muted)]">
+                <ShieldCheck size={12} className="text-[var(--color-secondary)] shrink-0" aria-hidden="true" />
+                <span>{isKhmer ? "ម៉ាស៊ីន Bayesian" : "Bayesian Rule Engine"}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Advisory Notice */}
-        <div className="p-3.5 sm:p-4 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-xs leading-relaxed text-[var(--color-text-secondary)] flex items-start gap-2.5">
-          <ShieldCheck size={16} className="text-[var(--color-primary)] dark:text-[var(--color-secondary)] shrink-0 mt-0.5" />
+        {/* ── Advisory notice ──────────────────────────────── */}
+        <div className="p-4 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border-subtle)] text-[0.72rem] leading-relaxed text-[var(--color-text-secondary)] flex items-start gap-2.5">
+          <ShieldCheck
+            size={15}
+            className="text-[var(--color-primary)] dark:text-[var(--color-secondary)] shrink-0 mt-0.5"
+            aria-hidden="true"
+          />
           <p>
-            <strong>{isKhmer ? "សេចក្តីជូនដំណឹងគាំទ្រការសម្រេចចិត្ត៖" : "Clinical Agronomy Notice:"}</strong>{" "}
+            <strong className="text-[var(--color-text)]">
+              {isKhmer ? "សេចក្តីជូនដំណឹង៖" : "Advisory Notice:"}
+            </strong>{" "}
             {isKhmer
-              ? "Sunflower Studio ផ្តល់នូវជំនួយការសម្រេចចិត្តផ្អែកលើរោគសញ្ញាដែលបានសង្កេតឃើញនៅក្នុងចំការ។ សម្រាប់ជំងឺរាតត្បាតធ្ងន់ធ្ងរ ឬការប្រើប្រាស់ថ្នាំកសិកម្មទ្រង់ទ្រាយធំ សូមពិគ្រោះជាមួយមន្ត្រីកសិកម្មស្រុក ឬអ្នកជំនាញការពារដំណាំ។"
-              : "Sunflower Studio provides decision-support guidance based on visible crop symptom indicators. For widespread outbreaks or heavy fungicide treatments, always verify with your local agricultural extension service."}
+              ? "Sunflower Studio ផ្តល់ជំនួយការសម្រេចចិត្តផ្អែកលើរោគសញ្ញា។ សម្រាប់ការផ្ទុះជំងឺធ្ងន់ ឬប្រើថ្នាំទ្រង់ទ្រាយធំ សូមពិគ្រោះជាមួយអ្នកជំនាញ។"
+              : "Sunflower Studio provides decision-support based on visible symptoms. For widespread outbreaks or large-scale treatments, verify with your local agricultural extension service."}
           </p>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-6 border-t border-[var(--color-border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--color-text-muted)]">
+        {/* ── Bottom bar ───────────────────────────────────── */}
+        <div className="pt-4 border-t border-[var(--color-border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-2 text-[0.7rem] text-[var(--color-text-muted)]">
           <p>
-            © {new Date().getFullYear()} <strong>Sunflower Studio</strong>.{" "}
+            &copy; {new Date().getFullYear()}{" "}
+            <strong className="text-[var(--color-text-secondary)]">Sunflower Studio</strong>.{" "}
             {isKhmer ? "រក្សាសិទ្ធិគ្រប់យ៉ាង។" : "All rights reserved."}
           </p>
-          <div className="flex items-center gap-3">
-            <span>
-              {isKhmer ? "ភាសាខ្មែរ & English" : "Bilingual (Khmer / English)"}
-            </span>
-            <span aria-hidden="true">•</span>
-            <span className="font-mono text-[0.7rem]">v1.0.0</span>
+          <div className="flex items-center gap-2.5">
+            <span>{isKhmer ? "ភាសាខ្មែរ & English" : "Khmer / English"}</span>
+            <span aria-hidden="true">·</span>
+            <span className="font-mono text-[0.65rem]">v1.0.0</span>
           </div>
         </div>
       </div>
