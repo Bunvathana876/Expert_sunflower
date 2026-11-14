@@ -11,7 +11,6 @@ from app.schemas.admin import (
     PermissionDetail,
     RoleListResponse,
     RolePermissionsRequest,
-    RolePermissionsResponse,
     RoleResponse,
     RulesetActivateResponse,
     RulesetListResponse,

@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { Suspense, lazy } from "react";
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -15,18 +15,21 @@ import {
 import { useAuth } from "@/features/auth";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { AboutModal } from "./AboutModal";
 import { BottomNav } from "./BottomNav";
-import { AIChatWidget } from "@/features/ai-assistant";
+import { AppFooter } from "./AppFooter";
 import { ThemeBackground } from "./ThemeBackground";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
+
+const LazyAIChatWidget = lazy(() =>
+  import("@/features/ai-assistant").then((m) => ({ default: m.AIChatWidget })),
+);
 
 interface NavItem {
   to: string;
   labelKey: string;
   icon: typeof Home;
   requireAuth?: boolean;
-  requirePermission?: string; // Any permission from a list
+  requirePermission?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -36,21 +39,21 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/history", labelKey: "nav.history", icon: Clock, requireAuth: true },
   {
     to: "/admin",
-    labelKey: "nav.dashboard", // Will show "Admin" or "Expert" based on role
+    labelKey: "nav.dashboard",
     icon: LayoutDashboard,
     requireAuth: true,
-    requirePermission: "analytics:read", // Any admin/expert permission
+    requirePermission: "analytics:read",
   },
 ];
 
 /**
- * Main application layout with frosted glass header and mobile floating dock.
+ * Main application layout with botanical header, responsive navigation, and footer.
  */
 export function AppLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isAuthenticated, logout, user, hasPermission } = useAuth();
   const location = useLocation();
-  const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const isKhmer = i18n.language === "km";
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
@@ -58,57 +61,51 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
   };
 
   const visibleNav = NAV_ITEMS.filter((item) => {
-    // Check authentication requirement
     if (item.requireAuth && !isAuthenticated) return false;
-
-    // Check permission requirement
     if (item.requirePermission && !hasPermission(item.requirePermission)) return false;
-
     return true;
   });
 
   return (
     <div className="sf-layout min-h-screen flex flex-col relative text-[var(--color-text)]">
-      {/* Responsive Theme-Aware Fixed Sunflower Background */}
+      {/* Responsive Theme-Aware Botanical Ambient Background */}
       <ThemeBackground />
 
-      {/* About Expert System Modal */}
-      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+      {/* AI Chat Widget (deferred off critical path) */}
+      <Suspense fallback={null}>
+        <LazyAIChatWidget />
+      </Suspense>
 
-      {/* AI Chat Widget - Shows for authenticated users */}
-      <AIChatWidget />
-
-      {/* Desktop Header */}
-      <header className="sticky top-0 z-40 bg-white/85 dark:bg-[#202917]/85 backdrop-blur-md border-b border-stone-200/80 dark:border-white/10 transition-colors">
-        <div className="max-w-6xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
+      {/* Modern Botanical Header */}
+      <header className="sticky top-0 z-40 bg-[var(--color-bg-card)]/90 dark:bg-[#111C15]/90 backdrop-blur-md border-b border-[var(--color-border)] transition-colors shadow-2xs">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           {/* Brand */}
           <Link
             to="/"
-            className="flex items-center gap-2 text-decoration-none shrink min-w-0 group"
+            className="flex items-center gap-2.5 text-decoration-none shrink min-w-0 group"
           >
-            <span
-              className="text-2xl transition-transform group-hover:scale-110 shrink-0"
-              aria-hidden="true"
-            >
+            <div className="w-9 h-9 rounded-xl bg-[var(--color-primary-subtle)] border border-[var(--color-secondary)]/40 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
               🌻
-            </span>
+            </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-bold text-sm sm:text-base tracking-tight text-gray-900 dark:text-white leading-tight truncate">
-                {t("app.title")}
+              <span className="font-extrabold text-sm sm:text-base tracking-tight text-[var(--color-primary)] dark:text-[var(--color-text)] leading-tight truncate">
+                Sunflower Studio
               </span>
-              <span className="text-[0.62rem] sm:text-[0.65rem] font-bold text-amber-900 dark:text-amber-400 tracking-wider uppercase font-mono truncate">
-                AI Expert System
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-secondary)]" aria-hidden="true" />
+                <span className="text-[0.62rem] sm:text-[0.66rem] font-bold text-[var(--color-text-muted)] tracking-wider uppercase font-mono truncate">
+                  {isKhmer ? "វេទិការោគវិនិច្ឆ័យកសិកម្ម" : "Agricultural Diagnostics"}
+                </span>
+              </div>
             </div>
           </Link>
 
-          {/* Desktop Navigation - active on lg screens where all text fits without overflow */}
+          {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1 shrink-0" aria-label="Main navigation">
             {visibleNav.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.to);
 
-              // Show "Admin" for admin role, "Expert" for expert role
               let label = t(item.labelKey);
               if (item.to === "/admin" && user) {
                 label = user.role === "admin" ? t("nav.admin") : t("nav.expert");
@@ -118,10 +115,10 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap ${
                     active
-                      ? "bg-amber-500/20 text-amber-950 dark:text-amber-200 border border-amber-500/40 shadow-xs font-bold"
-                      : "text-gray-700 dark:text-gray-200 hover:bg-amber-500/10 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white"
+                      ? "bg-[var(--color-primary)] text-white dark:bg-[var(--color-primary)] dark:text-[#0E1712] font-bold shadow-2xs"
+                      : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]"
                   }`}
                 >
                   <Icon size={15} className="shrink-0" />
@@ -130,15 +127,15 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
               );
             })}
 
-            {/* About Modal Trigger */}
-            <button
-              type="button"
-              onClick={() => setIsAboutOpen(true)}
-              className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-500/10 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white flex items-center gap-1.5 transition-all whitespace-nowrap"
+            {/* About is a dedicated page, not a popup. */}
+            <Link
+              to="/about"
+              aria-current={isActive("/about") ? "page" : undefined}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap ${isActive("/about") ? "bg-[var(--color-primary)] text-white dark:text-[#0E1712] shadow-2xs" : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]"}`}
             >
-              <Info size={15} className="shrink-0" />
+              <Info size={15} className="shrink-0" aria-hidden="true" />
               <span>{t("nav.about")}</span>
-            </button>
+            </Link>
           </nav>
 
           {/* Right Controls: Theme + Language + Auth */}
@@ -147,13 +144,13 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
             <LanguageToggle />
 
             {isAuthenticated ? (
-              <div className="flex items-center gap-1.5 sm:gap-2 pl-1 sm:pl-2 border-l border-gray-200 dark:border-white/10 shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2.5 border-l border-[var(--color-border)] shrink-0">
                 <Link
                   to="/profile"
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-stone-100 dark:hover:bg-white/5 hover:text-amber-800 dark:hover:text-amber-300 transition-all max-w-[140px]"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-primary)] transition-all max-w-[140px] border border-[var(--color-border)]/60"
                   title={t("nav.profile")}
                 >
-                  <div className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-950 dark:text-amber-300 flex items-center justify-center font-bold text-[0.65rem] uppercase shrink-0 border border-amber-500/30">
+                  <div className="w-5 h-5 rounded-full bg-[var(--color-primary-subtle)] text-[var(--color-primary)] flex items-center justify-center font-bold text-[0.65rem] uppercase shrink-0 border border-[var(--color-secondary)]/30">
                     {user?.username?.slice(0, 1)}
                   </div>
                   <span className="hidden sm:inline truncate">{user?.username}</span>
@@ -161,7 +158,7 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
                 <button
                   type="button"
                   onClick={() => void logout()}
-                  className="sf-btn sf-btn--ghost sf-btn--sm text-xs flex items-center gap-1 text-gray-600 hover:text-rose-600 dark:text-gray-300 dark:hover:text-rose-400 whitespace-nowrap"
+                  className="sf-btn sf-btn--ghost sf-btn--sm text-xs flex items-center gap-1 text-[var(--color-text-muted)] hover:text-[var(--color-error)] whitespace-nowrap"
                   title={t("nav.logout")}
                   aria-label={t("nav.logout")}
                 >
@@ -172,7 +169,7 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
             ) : (
               <Link
                 to="/login"
-                className="sf-btn sf-btn--primary sf-btn--sm text-xs flex items-center gap-1 whitespace-nowrap shrink-0"
+                className="sf-btn sf-btn--primary sf-btn--sm text-xs flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-2xs"
               >
                 <LogIn size={14} className="shrink-0" />
                 <span>{t("nav.login")}</span>
@@ -186,12 +183,15 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
       <OfflineBanner />
 
       {/* Main Content Viewport */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-12">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 pb-28 md:pb-16">
         {children}
       </main>
 
+      {/* Comprehensive Botanical Footer */}
+      <AppFooter />
+
       {/* Mobile Floating Bottom Dock */}
-      <BottomNav onOpenAbout={() => setIsAboutOpen(true)} />
+      <BottomNav />
     </div>
   );
 }

@@ -196,7 +196,7 @@ async def test_expired_token(client: AsyncClient) -> None:
     """Expired access token returns 401 Unauthorized."""
     import time
 
-    from jose import jwt
+    import jwt
 
     from app.core.config import get_settings
 

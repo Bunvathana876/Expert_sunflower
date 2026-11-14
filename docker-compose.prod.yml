@@ -1,0 +1,122 @@
+# Production Docker Compose topology for Sunflower Expert System.
+#
+# Startup ordering:
+#   1. db      (postgres:16-alpine, persistent pgdata volume, internal network only)
+#   2. migrate (one-shot `alembic upgrade head`, runs as non-root UID 10001 after db is healthy)
+#   3. api     (non-root FastAPI + Uvicorn, starts after migrate succeeds; /health/ready verifies 0004)
+#   4. web     (non-root Nginx reverse proxy + static SPA, starts after api is healthy)
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  migrate:
+    build:
+      context: ./backend
+      target: prod
+    restart: "no"
+    environment:
+      ENV: production
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      ALEMBIC_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend-net
+    command: ["alembic", "upgrade", "head"]
+
+  api:
+    build:
+      context: ./backend
+      target: prod
+    restart: unless-stopped
+    environment:
+      ENV: production
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      ALEMBIC_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      CSRF_REQUIRE_TOKEN: "true"
+      RATE_LIMIT_ENABLED: "true"
+      RATE_LIMIT_FAIL_CLOSED: ${RATE_LIMIT_FAIL_CLOSED:-true}
+      METRICS_SECRET_KEY: ${METRICS_SECRET_KEY:-}
+      TRUSTED_PROXY_IPS: ${TRUSTED_PROXY_IPS:-172.28.2.0/24,127.0.0.1/32}
+      MEDIA_ROOT: /var/lib/sunflower/media
+      MEDIA_PUBLIC_URL: ${MEDIA_PUBLIC_URL:-/media}
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
+      AI_ENABLED: ${AI_ENABLED:-true}
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - media:/var/lib/sunflower/media
+    networks:
+      - backend-net
+      - edge-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/health/ready || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  web:
+    build:
+      context: ./frontend
+      target: prod
+      args:
+        VITE_API_BASE_URL: /api/v1
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_BIND_HOST:-127.0.0.1}:${WEB_PORT:-8080}:8080"
+    networks:
+      - edge-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/health/live || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  backend-net:
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.28.1.0/24
+  edge-net:
+    ipam:
+      config:
+        - subnet: 172.28.2.0/24
+
+volumes:
+  pgdata:
+  media:

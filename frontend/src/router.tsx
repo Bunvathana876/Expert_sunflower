@@ -1,11 +1,15 @@
 import React, { Suspense, lazy } from "react";
 import { createBrowserRouter, Outlet } from "react-router";
 import { AppLayout } from "./components/layout/AppLayout";
+import { ThemeBackground } from "./components/layout/ThemeBackground";
 import { Skeleton } from "./components/ui/Skeleton";
 
 // Public / Grower pages
 const LandingPage = lazy(() =>
   import("./features/landing/LandingPage").then((m) => ({ default: m.LandingPage })),
+);
+const AboutPage = lazy(() =>
+  import("./features/about/AboutPage").then((m) => ({ default: m.AboutPage })),
 );
 const DiseasesPage = lazy(() =>
   import("./features/diseases/pages/DiseasesPage").then((m) => ({ default: m.DiseasesPage })),
@@ -101,6 +105,7 @@ function AdminRootLayout(): React.JSX.Element {
     <Suspense
       fallback={
         <div style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
+          <ThemeBackground />
           <div className="sf-spinner" aria-label="Loading admin portal..." />
         </div>
       }
@@ -117,6 +122,10 @@ export const router = createBrowserRouter([
       {
         path: "/",
         element: <LandingPage />,
+      },
+      {
+        path: "/about",
+        element: <AboutPage />,
       },
       {
         path: "/diseases",

@@ -48,6 +48,8 @@ async def get_current_user(
 
     token = parts[1]
     payload = decode_token(token)
+    if payload.get("type") != "access":
+        raise UnauthorizedError(detail="Invalid token type")
 
     user_id_str = payload.get("sub")
     if not user_id_str:
@@ -81,6 +83,8 @@ async def get_optional_current_user(
         if len(parts) != 2 or parts[0].lower() != "bearer":
             return None
         payload = decode_token(parts[1])
+        if payload.get("type") != "access":
+            return None
         user_id_str = payload.get("sub")
         if not user_id_str:
             return None

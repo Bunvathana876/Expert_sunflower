@@ -12,6 +12,37 @@ export interface AIChatRequest {
   conversation_id?: string;
 }
 
+export interface ProposedActionDTO {
+  action_id: string;
+  confirmation_token: string;
+  action_type: string;
+  summary: string;
+  details: Record<string, unknown>;
+  affected_records: Array<Record<string, unknown>>;
+  expires_at: string;
+  requires_confirmation: boolean;
+}
+
+export interface ActionConfirmRequest {
+  action_id: string;
+  confirmation_token: string;
+  locale?: string;
+}
+
+export interface ActionCancelRequest {
+  action_id: string;
+  confirmation_token?: string;
+  locale?: string;
+}
+
+export interface ActionExecutionResponse {
+  success: boolean;
+  message: string;
+  action_id: string;
+  action_type: string;
+  actions_taken: Array<Record<string, unknown>>;
+}
+
 export interface AIChatResponse {
   message: string;
   conversation_id: string;
@@ -28,6 +59,8 @@ export interface AIChatResponse {
     severity?: string;
     confidence: number;
   };
+  actions_taken?: unknown[];
+  proposed_action?: ProposedActionDTO;
 }
 
 export interface SymptomExtractionRequest {
@@ -148,6 +181,30 @@ export async function analyzeImage(
   request: ImageAnalysisRequest
 ): Promise<ImageAnalysisResponse> {
   return apiFetch<ImageAnalysisResponse>('/ai/analyze-image', {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+}
+
+/**
+ * Confirm and execute an AI-proposed administrative database action
+ */
+export async function confirmAdminAction(
+  request: ActionConfirmRequest
+): Promise<ActionExecutionResponse> {
+  return apiFetch<ActionExecutionResponse>('/ai/admin/actions/confirm', {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+}
+
+/**
+ * Cancel an AI-proposed administrative database action
+ */
+export async function cancelAdminAction(
+  request: ActionCancelRequest
+): Promise<ActionExecutionResponse> {
+  return apiFetch<ActionExecutionResponse>('/ai/admin/actions/cancel', {
     method: 'POST',
     body: JSON.stringify(request),
   });

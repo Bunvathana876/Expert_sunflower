@@ -1,0 +1,100 @@
+# Production Caddy Reverse Proxy Configuration for Expert_sunflower
+#
+# Provides:
+# - Automated HTTPS (ACME / Let's Encrypt / ZeroSSL)
+# - Automatic HTTP -> HTTPS redirection on port 80 -> 443
+# - Modern TLS 1.3 & 1.2 with strong AEAD ciphers
+# - HTTP Strict Transport Security (HSTS) with preloading
+# - Native WebSocket upgrading for /api/ routes
+# - Preserved client IP / trusted proxy headers for rate limiting and audit logs
+# - Same-origin reverse proxy to FastAPI backend and Nginx static web service
+#
+# Usage:
+#   Set DOMAIN (e.g. DOMAIN=diagnosis.sunflower.org) and ACME_EMAIL in your .env.prod
+
+{$DOMAIN:localhost} {
+    # TLS Configuration: enforces modern TLS versions with staging/production separation
+    # Set ACME_CA in your environment to select ACME issuer:
+    #   Production:  https://acme-v02.api.letsencrypt.org/directory (default if ACME_EMAIL set)
+    #   Staging:     https://acme-staging-v02.api.letsencrypt.org/directory
+    #   Internal:    internal (self-signed for local testing without contacting Let's Encrypt)
+    tls {$ACME_EMAIL:internal} {
+        ca {$ACME_CA:https://acme-staging-v02.api.letsencrypt.org/directory}
+        protocols tls1.2 tls1.3
+    }
+
+    # Global Security & Hardening Headers
+    # Note: Preload is omitted by default until domain readiness is verified in staging
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), geolocation=(), microphone=(), payment=(), usb=()"
+        Cross-Origin-Opener-Policy "same-origin-allow-popups"
+        -Server
+    }
+
+    # Request body size limit matching backend MEDIA_MAX_BYTES (5 MB) + form overhead
+    request_body {
+        max_size 6MB
+    }
+
+    # Enable modern Gzip and Zstandard compression
+    encode zstd gzip
+
+    # 1. API routes (same-origin, preserving cookies & CSRF tokens)
+    handle /api/* {
+        reverse_proxy api:8000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto https
+            header_up X-Forwarded-Host {host}
+        }
+    }
+
+    # 2. Uploaded / disease media files
+    handle /media/* {
+        reverse_proxy api:8000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto https
+        }
+    }
+
+    # 3. Block public access to internal metrics endpoint; allow only trusted/internal IPs
+    handle /health/metrics {
+        @internal_metrics remote_ip 127.0.0.1 ::1 172.28.2.0/24
+        handle @internal_metrics {
+            reverse_proxy api:8000 {
+                header_up Host {host}
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
+                header_up X-Forwarded-Proto https
+            }
+        }
+        respond "Access denied" 403
+    }
+
+    # 4. Public operational liveness and readiness health probes
+    handle /health* {
+        reverse_proxy api:8000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto https
+        }
+    }
+
+    # 5. Frontend Single Page Application & static assets
+    handle {
+        reverse_proxy web:8080 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto https
+        }
+    }
+}

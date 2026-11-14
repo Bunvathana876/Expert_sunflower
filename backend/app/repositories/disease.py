@@ -88,7 +88,7 @@ class DiseaseRepository:
         # Full-text search
         if q and q.strip():
             query_term = q.strip()
-            bind = self.session.bind
+            bind = self.session.get_bind()
             is_postgres = bind is not None and bind.dialect.name == "postgresql"
 
             if is_postgres:
