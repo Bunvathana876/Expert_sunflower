@@ -1,6 +1,7 @@
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { X, Sparkles, ShieldCheck, Smartphone, Languages } from "lucide-react";
+import { SunflowerIcon } from "@/components/ui/SunflowerIcon";
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -24,10 +25,10 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps): React.JSX.Elem
     >
       <div className="sf-modal-sheet" style={{ maxWidth: "36rem", padding: "1.75rem" }}>
         <div className="flex items-center justify-between pb-4 border-b border-slate-200/80 dark:border-slate-800">
-          <div className="flex items-center gap-2.5">
-            <span className="text-2xl" aria-hidden="true">
-              🌻
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/15 dark:bg-amber-400/15 border border-amber-500/30 flex items-center justify-center p-1.5 shrink-0 shadow-2xs">
+              <SunflowerIcon name="brand" size={28} className="w-full h-full object-contain" alt="" />
+            </div>
             <div>
               <h2
                 id="about-modal-title"

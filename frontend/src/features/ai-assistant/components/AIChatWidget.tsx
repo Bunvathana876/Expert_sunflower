@@ -16,11 +16,11 @@ import {
   Sparkles,
   Shield,
   Trash2,
-  Sprout,
   GripVertical,
   AlertTriangle,
   CheckCircle2,
 } from 'lucide-react';
+import { SunflowerIcon } from '@/components/ui/SunflowerIcon';
 import {
   chatWithAI,
   adminChatWithAI,
@@ -483,8 +483,8 @@ export function AIChatWidget(): React.JSX.Element | null {
             </div>
 
             {/* Sunflower emblem avatar */}
-            <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs border border-white/30 shrink-0">
-              <span className="text-base select-none">🌻</span>
+            <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs border border-white/30 p-1 shrink-0 overflow-hidden shadow-2xs">
+              <SunflowerIcon name="ai-assistant" size={24} className="w-full h-full object-contain" alt="" />
             </div>
 
             <div className="flex flex-col items-start text-left pointer-events-none">
@@ -540,8 +540,8 @@ export function AIChatWidget(): React.JSX.Element | null {
           <div className="relative bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 text-white px-4.5 py-4 flex items-center justify-between border-b border-amber-400/20 shadow-xs">
             <div className="flex items-center gap-3 min-w-0 flex-1">
               {/* Avatar */}
-              <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/25 shadow-xs shrink-0">
-                <span className="text-xl select-none">🌻</span>
+              <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/25 p-1.5 shadow-xs shrink-0 overflow-hidden">
+                <SunflowerIcon name="ai-assistant" size={28} className="w-full h-full object-contain drop-shadow-xs" alt="" />
                 {/* Live Online Badge */}
                 <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-amber-600" />
               </div>
@@ -595,8 +595,8 @@ export function AIChatWidget(): React.JSX.Element | null {
             {messages.length === 0 && (
               <div className="text-center py-6 px-2 space-y-4">
                 {/* Botanical Icon */}
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs">
-                  <Sprout className="w-7 h-7" />
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/15 to-emerald-500/15 border border-amber-500/25 p-2.5 shadow-xs">
+                  <SunflowerIcon name="ai-assistant" size={44} className="w-full h-full object-contain drop-shadow-xs" alt="" />
                 </div>
 
                 <div className="space-y-1">
@@ -645,8 +645,8 @@ export function AIChatWidget(): React.JSX.Element | null {
                 {/* Assistant botanical badge */}
                 {message.role === 'assistant' && (
                   <div className="mr-2 shrink-0 self-end mb-1">
-                    <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center border border-amber-500/30 text-xs select-none">
-                      🌻
+                    <div className="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center p-0.5 select-none overflow-hidden shadow-2xs">
+                      <SunflowerIcon name="ai-assistant" size={18} className="w-full h-full object-contain" alt="" />
                     </div>
                   </div>
                 )}

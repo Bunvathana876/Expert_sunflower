@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router";
 import { LogIn, User, Lock, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
+import { SunflowerIcon } from "@/components/ui/SunflowerIcon";
 import { useAuth } from "../context";
 import { loginSchema, type LoginFormData } from "../schemas";
 
@@ -47,8 +48,8 @@ export function LoginPage(): React.JSX.Element {
         />
 
         <div className="text-center space-y-2 relative">
-          <div className="w-14 h-14 rounded-2xl bg-amber-500/15 dark:bg-amber-400/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto text-2xl shadow-inner border border-amber-500/25">
-            🌻
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/15 dark:bg-amber-400/15 flex items-center justify-center mx-auto p-2.5 shadow-inner border border-amber-500/25">
+            <SunflowerIcon name="brand" size={40} className="w-full h-full object-contain drop-shadow-xs" alt="" />
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
             {t("auth.login_title")}

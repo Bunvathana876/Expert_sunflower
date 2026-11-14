@@ -15,6 +15,7 @@ import {
 import { useAuth } from "@/features/auth";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { SunflowerIcon } from "@/components/ui/SunflowerIcon";
 import { BottomNav } from "./BottomNav";
 import { AppFooter } from "./AppFooter";
 import { ThemeBackground } from "./ThemeBackground";
@@ -84,8 +85,8 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
             to="/"
             className="flex items-center gap-2.5 text-decoration-none shrink min-w-0 group"
           >
-            <div className="w-9 h-9 rounded-xl bg-[var(--color-primary-subtle)] border border-[var(--color-secondary)]/40 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
-              🌻
+            <div className="w-9 h-9 rounded-xl bg-[var(--color-primary-subtle)] border border-[var(--color-secondary)]/30 flex items-center justify-center p-1 shrink-0 group-hover:scale-105 transition-transform overflow-hidden shadow-2xs">
+              <SunflowerIcon name="brand" size={28} className="w-full h-full object-contain" alt="" />
             </div>
             <div className="flex flex-col min-w-0">
               <span className="font-extrabold text-sm sm:text-base tracking-tight text-[var(--color-primary)] dark:text-[var(--color-text)] leading-tight truncate">

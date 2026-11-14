@@ -7,8 +7,6 @@ import {
   Sprout,
   BookOpen,
   ArrowRight,
-  Microscope,
-  LayoutGrid,
   Search,
   ListChecks,
   FileText,
@@ -18,6 +16,7 @@ import {
 } from "lucide-react";
 import { useDiseases } from "@/features/diseases/hooks";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { SunflowerIcon } from "@/components/ui/SunflowerIcon";
 import { apiFetch } from "@/api/client";
 
 // High-resolution botanical assets tailored to the GreenNest reference
@@ -81,13 +80,20 @@ function SectionHeading({
   title,
   subtitle,
   centered = true,
+  icon,
 }: {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   centered?: boolean;
+  icon?: React.ReactNode;
 }): React.JSX.Element {
   return (
     <div className={`space-y-2 max-w-xl ${centered ? "mx-auto text-center" : ""}`}>
+      {icon && (
+        <div className={`flex items-center ${centered ? "justify-center" : "justify-start"} mb-1`}>
+          {icon}
+        </div>
+      )}
       <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1B3B2B] dark:text-[#F3F6F3] tracking-tight leading-tight">
         {title}
       </h2>
@@ -244,7 +250,7 @@ export function LandingPage(): React.JSX.Element {
           <div className="lg:col-span-7 flex flex-col justify-center px-6 py-10 sm:px-10 sm:py-12 lg:px-12 lg:py-14 space-y-7">
             {/* Badge pill */}
             <div className="inline-flex items-center gap-2 self-start px-3.5 py-1.5 rounded-full bg-white/85 dark:bg-[#1A2C22]/85 backdrop-blur-sm border border-[#87A774]/30 dark:border-[#87A774]/20 text-[#224D3A] dark:text-[#87A774] text-xs font-bold shadow-xs tracking-wide">
-              <Leaf size={13} className="shrink-0" aria-hidden="true" />
+              <SunflowerIcon name="diagnosis" size={16} className="w-4 h-4 object-contain" alt="" />
               <span>{isKhmer ? "ការធ្វើរោគវិនិច្ឆ័យដោយ AI" : "AI-Powered Plant Diagnosis"}</span>
             </div>
 
@@ -370,8 +376,8 @@ export function LandingPage(): React.JSX.Element {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5">
           {/* Card 1: Published Diseases */}
           <div className="bg-white dark:bg-[#192720] rounded-2xl p-5 sm:p-6 shadow-md shadow-emerald-950/[0.06] border border-stone-200/70 dark:border-white/[0.08] flex items-center gap-4 motion-safe:transition-transform motion-safe:hover:-translate-y-0.5">
-            <div className="w-11 h-11 rounded-xl bg-[#EDF5EE] dark:bg-[#0F2018] text-[#224D3A] dark:text-[#87A774] flex items-center justify-center shrink-0 border border-[#87A774]/25" aria-hidden="true">
-              <Sprout size={22} />
+            <div className="w-12 h-12 rounded-xl bg-[#EDF5EE] dark:bg-[#0F2018] flex items-center justify-center p-2 shrink-0 border border-[#87A774]/25 shadow-2xs" aria-hidden="true">
+              <SunflowerIcon name="disease-library" size={28} className="w-full h-full object-contain" alt="" />
             </div>
             <div className="min-w-0">
               <div className="text-2xl sm:text-3xl font-extrabold text-[#1B3B2B] dark:text-[#EFF5EF] font-mono leading-none tabular-nums">
@@ -389,8 +395,8 @@ export function LandingPage(): React.JSX.Element {
 
           {/* Card 2: Symptom Indicators */}
           <div className="bg-white dark:bg-[#192720] rounded-2xl p-5 sm:p-6 shadow-md shadow-emerald-950/[0.06] border border-stone-200/70 dark:border-white/[0.08] flex items-center gap-4 motion-safe:transition-transform motion-safe:hover:-translate-y-0.5">
-            <div className="w-11 h-11 rounded-xl bg-[#EDF5EE] dark:bg-[#0F2018] text-[#224D3A] dark:text-[#87A774] flex items-center justify-center shrink-0 border border-[#87A774]/25" aria-hidden="true">
-              <Microscope size={22} />
+            <div className="w-12 h-12 rounded-xl bg-[#EDF5EE] dark:bg-[#0F2018] flex items-center justify-center p-2 shrink-0 border border-[#87A774]/25 shadow-2xs" aria-hidden="true">
+              <SunflowerIcon name="diagnosis" size={28} className="w-full h-full object-contain" alt="" />
             </div>
             <div className="min-w-0">
               <div className="text-2xl sm:text-3xl font-extrabold text-[#1B3B2B] dark:text-[#EFF5EF] font-mono leading-none tabular-nums">
@@ -408,8 +414,8 @@ export function LandingPage(): React.JSX.Element {
 
           {/* Card 3: Plant Anatomy Zones */}
           <div className="bg-white dark:bg-[#192720] rounded-2xl p-5 sm:p-6 shadow-md shadow-emerald-950/[0.06] border border-stone-200/70 dark:border-white/[0.08] flex items-center gap-4 motion-safe:transition-transform motion-safe:hover:-translate-y-0.5">
-            <div className="w-11 h-11 rounded-xl bg-[#FBF4E2] dark:bg-[#1E1500] text-[#9A6B1A] dark:text-[#E4AD45] flex items-center justify-center shrink-0 border border-[#E4AD45]/30" aria-hidden="true">
-              <LayoutGrid size={22} />
+            <div className="w-12 h-12 rounded-xl bg-[#FBF4E2] dark:bg-[#1E1500] flex items-center justify-center p-2 shrink-0 border border-[#E4AD45]/30 shadow-2xs" aria-hidden="true">
+              <SunflowerIcon name="plant-anatomy" size={28} className="w-full h-full object-contain" alt="" />
             </div>
             <div className="min-w-0">
               <div className="text-2xl sm:text-3xl font-extrabold text-[#1B3B2B] dark:text-[#EFF5EF] font-mono leading-none tabular-nums">
@@ -428,6 +434,12 @@ export function LandingPage(): React.JSX.Element {
          ========================================================================= */}
       <section className="space-y-8" aria-labelledby="anatomy-heading">
         <SectionHeading
+          icon={
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EDF5EE] dark:bg-[#0F2018] border border-[#87A774]/30 text-xs font-bold text-[#224D3A] dark:text-[#87A774] shadow-2xs">
+              <SunflowerIcon name="plant-anatomy" size={18} className="w-4.5 h-4.5 object-contain" alt="" />
+              <span>{isKhmer ? "កាយវិភាគវិទ្យាដំណាំ" : "Botanical Anatomy"}</span>
+            </div>
+          }
           title={
             <span id="anatomy-heading">
               {isKhmer ? "ស្វែងយល់ផ្នែកកាយវិភាគ" : "Explore Plant Anatomy"}
@@ -485,66 +497,79 @@ export function LandingPage(): React.JSX.Element {
       </section>
 
       {/* =========================================================================
-         4. HOW IT WORKS — Consistent cards, no overlapping connector lines
+         4. HOW IT WORKS — Consistent 3-step process cards
          ========================================================================= */}
       <section className="space-y-8" aria-labelledby="process-heading">
         <SectionHeading
-          title={<span id="process-heading">{isKhmer ? "របៀបដំណើរការវិនិច្ឆ័យ" : "How the Diagnosis Works"}</span>}
+          title={
+            <span id="process-heading">
+              {isKhmer ? "របៀបដំណើរការវិនិច្ឆ័យ" : "How the Diagnosis Works"}
+            </span>
+          }
           subtitle={t("landing.how_it_works_subtitle")}
         />
-        <ol className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 list-none p-0 m-0 items-stretch">
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
           {[
             {
               number: 1,
-              Icon: Search,
+              icon: Search,
               title: isKhmer ? "សង្កេតរោគសញ្ញា" : "Observe Symptoms",
-              description: isKhmer
+              desc: isKhmer
                 ? "ពិនិត្យដំណាំផ្កាឈូករ័ត្នរបស់អ្នក និងកត់សម្គាល់រោគសញ្ញាដែលមើលឃើញ (អុចស្លឹក ដំបៅ ក្រៀមស្វិត)។"
                 : "Inspect your sunflower plant and note visible symptoms — spots, lesions, or wilting.",
             },
             {
               number: 2,
-              Icon: ListChecks,
+              icon: ListChecks,
               title: isKhmer ? "ជ្រើសរើសរោគសញ្ញា" : "Select Symptoms",
-              description: isKhmer
+              desc: isKhmer
                 ? "ជ្រើសរើសរោគសញ្ញាដែលត្រូវគ្នាពីបញ្ជីណែនាំតាមផ្នែកដំណាំ (ស្លឹក ដើម ក្បាលផ្កា ឬឫស)។"
                 : "Pick matching symptoms from our guided list by plant part — leaf, stem, flower head, or root.",
             },
             {
               number: 3,
-              Icon: FileText,
+              icon: FileText,
               title: isKhmer ? "ទទួលបានលទ្ធផល" : "Get Your Diagnosis",
-              description: isKhmer
+              desc: isKhmer
                 ? "ទទួលបានលទ្ធផលរោគវិនិច្ឆ័យជាមួយកម្រិតទំនុកចិត្ត និងការណែនាំគ្រប់គ្រងជាក់ស្តែង។"
                 : "Receive possible diseases with confidence scores and actionable management recommendations.",
             },
-          ].map(({ number, Icon, title, description }) => (
-            <li
+          ].map(({ number, icon: StepIcon, title, desc }) => (
+            <div
               key={number}
-              className="relative flex min-h-[218px] flex-col gap-5 rounded-2xl border border-stone-200/80 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#192720] sm:p-7"
+              className="bg-white dark:bg-[#192720] rounded-2xl p-6 sm:p-7 border border-stone-200/80 dark:border-white/[0.08] shadow-xs hover:shadow-md hover:border-[#87A774]/40 dark:hover:border-[#87A774]/30 motion-safe:transition-all flex flex-col justify-between h-full"
             >
-              <div className="flex items-center gap-3">
-                <span
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#224D3A] text-base font-bold text-white dark:bg-[#87A774] dark:text-[#0E1712]"
-                  aria-hidden="true"
-                >
-                  {number}
-                </span>
-                <span
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#87A774]/25 bg-[#EDF5EE] text-[#224D3A] dark:bg-[#0F2018] dark:text-[#A7CA98]"
-                  aria-hidden="true"
-                >
-                  <Icon size={21} strokeWidth={1.9} />
-                </span>
-                <div className="ml-auto h-px w-10 bg-[#87A774]/30" aria-hidden="true" />
+              <div className="space-y-4">
+                {/* Top row: Number badge + Lucide icon */}
+                <div className="flex items-center gap-3.5">
+                  <span
+                    className="w-10 h-10 rounded-full bg-[#224D3A] dark:bg-[#87A774] text-white dark:text-[#0E1712] font-black text-sm flex items-center justify-center shadow-xs shrink-0 select-none"
+                    aria-hidden="true"
+                  >
+                    {number}
+                  </span>
+                  <div
+                    className="w-10 h-10 rounded-xl bg-[#EDF5EE] dark:bg-[#0F2018] text-[#224D3A] dark:text-[#87A774] flex items-center justify-center border border-[#87A774]/25 shrink-0"
+                    aria-hidden="true"
+                  >
+                    <StepIcon size={20} strokeWidth={2} />
+                  </div>
+                </div>
+
+                {/* Middle: Step title */}
+                <h3 className="text-base sm:text-lg font-bold text-[#1B3B2B] dark:text-[#EFF5EF] leading-snug">
+                  {title}
+                </h3>
+
+                {/* Bottom: Short description */}
+                <p className="text-xs sm:text-sm text-[#4A584E] dark:text-[#9BB5A8] leading-relaxed">
+                  {desc}
+                </p>
               </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold leading-snug text-[#1B3B2B] dark:text-[#EFF5EF]">{title}</h3>
-                <p className="text-sm leading-7 text-[#4A584E] dark:text-[#B5C9BC]">{description}</p>
-              </div>
-            </li>
+            </div>
           ))}
-        </ol>
+        </div>
       </section>
 
       {/* =========================================================================
@@ -554,12 +579,17 @@ export function LandingPage(): React.JSX.Element {
         {/* Section header row */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-1">
-            <h2
-              id="diseases-heading"
-              className="text-2xl sm:text-3xl font-extrabold text-[#1B3B2B] dark:text-[#EFF5EF] tracking-tight"
-            >
-              {isKhmer ? "ជំងឺផ្កាឈូករ័ត្នចម្បងៗ" : "Featured Sunflower Diseases"}
-            </h2>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#EDF5EE] dark:bg-[#0F2018] border border-[#87A774]/30 flex items-center justify-center p-1.5 shrink-0 shadow-2xs">
+                <SunflowerIcon name="disease-library" size={26} className="w-full h-full object-contain" alt="" />
+              </div>
+              <h2
+                id="diseases-heading"
+                className="text-2xl sm:text-3xl font-extrabold text-[#1B3B2B] dark:text-[#EFF5EF] tracking-tight"
+              >
+                {isKhmer ? "ជំងឺផ្កាឈូករ័ត្នចម្បងៗ" : "Featured Sunflower Diseases"}
+              </h2>
+            </div>
             <BotanicalFlourish />
             <p className="text-sm text-[#4A584E] dark:text-[#9BB5A8]">
               {isKhmer
@@ -693,8 +723,8 @@ export function LandingPage(): React.JSX.Element {
         {/* CTA content */}
         <div className="relative z-10 max-w-lg px-7 py-10 sm:px-10 sm:py-12 lg:px-12 lg:py-14 space-y-5">
           {/* Icon */}
-          <div className="w-10 h-10 rounded-xl bg-white/[0.12] text-[#87A774] flex items-center justify-center border border-white/[0.15]">
-            <Leaf size={18} aria-hidden="true" />
+          <div className="w-12 h-12 rounded-xl bg-white/[0.15] border border-white/[0.25] flex items-center justify-center p-2 shadow-sm backdrop-blur-xs">
+            <SunflowerIcon name="diagnosis" size={32} className="w-full h-full object-contain drop-shadow-sm" alt="" />
           </div>
 
           <h2 className="text-2xl sm:text-3xl lg:text-[2.1rem] font-extrabold tracking-tight text-white leading-[1.14]">
@@ -719,7 +749,7 @@ export function LandingPage(): React.JSX.Element {
               to="/check"
               className="inline-flex items-center gap-2 bg-white hover:bg-stone-100 text-[#1B3B2B] font-bold text-sm px-6 py-3 rounded-full shadow-md hover:shadow-lg motion-safe:transition-all motion-safe:hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1B3B2B]"
             >
-              <Leaf size={15} className="text-[#224D3A] shrink-0" aria-hidden="true" />
+              <SunflowerIcon name="diagnosis" size={18} className="w-4.5 h-4.5 object-contain shrink-0" alt="" />
               <span>{isKhmer ? "ចាប់ផ្តើមវិនិច្ឆ័យឥឡូវនេះ" : "Start Diagnosis Now"}</span>
               <ArrowRight size={14} className="shrink-0" aria-hidden="true" />
             </Link>

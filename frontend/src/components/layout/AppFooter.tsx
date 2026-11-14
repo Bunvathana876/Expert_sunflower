@@ -10,8 +10,8 @@ import {
   MessageSquare,
   ShieldCheck,
   CheckCircle2,
-  Leaf,
 } from "lucide-react";
+import { SunflowerIcon } from "@/components/ui/SunflowerIcon";
 
 export function AppFooter(): React.JSX.Element {
   const { t, i18n } = useTranslation();
@@ -27,8 +27,8 @@ export function AppFooter(): React.JSX.Element {
           {/* Brand column (5 cols) */}
           <div className="md:col-span-5 space-y-5">
             <Link to="/" className="inline-flex items-center gap-3 group" aria-label="Sunflower Studio home">
-              <div className="w-9 h-9 rounded-xl bg-[var(--color-primary-subtle)] border border-[var(--color-secondary)]/25 flex items-center justify-center shrink-0 motion-safe:transition-transform group-hover:scale-105">
-                <Leaf size={17} className="text-[var(--color-primary)]" aria-hidden="true" />
+              <div className="w-9 h-9 rounded-xl bg-[var(--color-primary-subtle)] border border-[var(--color-secondary)]/25 flex items-center justify-center p-1 shrink-0 motion-safe:transition-transform group-hover:scale-105 overflow-hidden shadow-2xs">
+                <SunflowerIcon name="brand" size={26} className="w-full h-full object-contain" alt="" />
               </div>
               <div className="flex flex-col leading-none">
                 <span className="font-extrabold text-base tracking-tight text-[var(--color-primary)] dark:text-[var(--color-text)]">

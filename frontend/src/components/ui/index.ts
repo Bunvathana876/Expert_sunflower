@@ -10,3 +10,4 @@ export * from "./LanguageToggle";
 export * from "./ThemeToggle";
 export * from "./ConfirmDialog";
 export * from "./OfflineBanner";
+export * from "./SunflowerIcon";

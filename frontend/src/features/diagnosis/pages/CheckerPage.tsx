@@ -24,6 +24,7 @@ import { LiveCandidateList } from "../components/LiveCandidateList";
 import { AnalysisProgressModal } from "../components/AnalysisProgressModal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { SunflowerIcon } from "@/components/ui/SunflowerIcon";
 import type { Answer, DiagnosisResponse, SymptomItem } from "@/types/api";
 
 export function CheckerPage(): React.JSX.Element {
@@ -313,7 +314,7 @@ export function CheckerPage(): React.JSX.Element {
           <section className="rounded-2xl border border-[#DEE7DA] bg-white/90 p-5 shadow-sm dark:border-white/10 dark:bg-[#192B21] sm:p-6" aria-label={t("checker.select_plant_part")}>
             <div className="mb-5 flex items-start gap-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E9F1E5] text-[#2E6446] dark:bg-[#263F2C] dark:text-[#B8D4AD]">
-                <Leaf size={20} aria-hidden="true" />
+                <SunflowerIcon name="plant-anatomy" size={20} alt="" />
               </span>
               <div className="space-y-1">
                 <h2 className="text-lg font-bold text-[#1F422F] dark:text-[#F2F5EF]">{t("checker.select_plant_part")}</h2>

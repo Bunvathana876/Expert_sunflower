@@ -12,6 +12,7 @@ import {
   Loader2,
   CopyCheck,
 } from "lucide-react";
+import { SunflowerIcon } from "@/components/ui/SunflowerIcon";
 import { generatePdfFromElement, shareDiagnosticReport } from "../utils/exportPdf";
 import { useDiseaseDetail } from "@/features/diseases/hooks";
 import type { DiagnosisResult, DiagnosisSessionDetail, DiseaseDetail } from "@/types/api";
@@ -189,9 +190,9 @@ export function DiagnosticReportModal({
             {/* Branded Header */}
             <div className="border-b-2 border-amber-500 pb-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <span className="text-4xl" aria-hidden="true">
-                  🌻
-                </span>
+                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center p-1.5 shrink-0 shadow-2xs">
+                  <SunflowerIcon name="brand" size={36} className="w-full h-full object-contain" alt="" />
+                </div>
                 <div>
                   <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-950 uppercase font-sans">
                     {t("report.header_title")}

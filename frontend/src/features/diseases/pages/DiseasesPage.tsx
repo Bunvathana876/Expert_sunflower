@@ -2,7 +2,8 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Search, BookOpen, X, ChevronLeft, ChevronRight, Layers } from "lucide-react";
+import { Search, X, ChevronLeft, ChevronRight, Layers } from "lucide-react";
+import { SunflowerIcon } from "@/components/ui/SunflowerIcon";
 import { useDiseases } from "../hooks";
 import { DiseaseCard } from "../components/DiseaseCard";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -50,15 +51,19 @@ export function DiseasesPage(): React.JSX.Element {
       <div className="sf-glass-card p-5 sm:p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <BookOpen size={24} className="text-amber-500" />
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-                {t("diseases.title")}
-              </h1>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="w-11 h-11 rounded-xl bg-amber-500/15 dark:bg-amber-400/15 border border-amber-500/30 flex items-center justify-center p-1.5 shrink-0 shadow-xs">
+                <SunflowerIcon name="disease-library" size={28} className="w-full h-full object-contain" alt="" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+                  {t("diseases.title")}
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                  {t("diseases.subtitle")}
+                </p>
+              </div>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-              {t("diseases.subtitle")}
-            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">

@@ -2,7 +2,8 @@ import type React from "react";
 import { useState } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Clock, ChevronRight, Stethoscope, LogIn, Calendar } from "lucide-react";
+import { ChevronRight, Stethoscope, LogIn, Calendar } from "lucide-react";
+import { SunflowerIcon } from "@/components/ui/SunflowerIcon";
 import { useAuth } from "@/features/auth";
 import { useHistory } from "../hooks";
 import { PercentageVisualization } from "@/components/ui/PercentageVisualization";
@@ -61,15 +62,19 @@ export function HistoryPage(): React.JSX.Element {
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header Glass Card */}
       <div className="sf-glass-card bg-white/85 dark:bg-[#2A3420]/80 backdrop-blur-md border border-stone-200/80 dark:border-white/10 shadow-lg rounded-2xl p-6 sm:p-8">
-        <div className="flex items-center gap-2 mb-1">
-          <Clock size={24} className="text-amber-600 dark:text-amber-400 shrink-0" />
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-            {t("history.title")}
-          </h1>
+        <div className="flex items-center gap-3.5 mb-2">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/15 dark:bg-amber-400/15 border border-amber-500/30 flex items-center justify-center p-2 shrink-0 shadow-xs">
+            <SunflowerIcon name="history" size={32} className="w-full h-full object-contain" alt="" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+              {t("history.title")}
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+              {t("history.subtitle")}
+            </p>
+          </div>
         </div>
-        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-          {t("history.subtitle")}
-        </p>
       </div>
 
       {isLoading ? (
@@ -84,8 +89,8 @@ export function HistoryPage(): React.JSX.Element {
         </div>
       ) : !data || data.items.length === 0 ? (
         <div className="sf-glass-card bg-white/85 dark:bg-[#2A3420]/80 backdrop-blur-md border border-stone-200/80 dark:border-white/10 shadow-lg rounded-2xl p-10 text-center space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 dark:bg-amber-400/10 text-amber-700 dark:text-amber-400 flex items-center justify-center mx-auto text-2xl border border-amber-500/20">
-            📋
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/15 dark:bg-amber-400/15 border border-amber-500/30 flex items-center justify-center mx-auto p-2.5 shadow-xs">
+            <SunflowerIcon name="history" size={44} className="w-full h-full object-contain drop-shadow-xs" alt="" />
           </div>
           <h2 className="text-base font-bold text-gray-900 dark:text-white">
             {t("history.empty_title")}
