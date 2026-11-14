@@ -485,96 +485,66 @@ export function LandingPage(): React.JSX.Element {
       </section>
 
       {/* =========================================================================
-         4. HOW IT WORKS — Elegant 3-step process with connectors
+         4. HOW IT WORKS — Consistent cards, no overlapping connector lines
          ========================================================================= */}
       <section className="space-y-8" aria-labelledby="process-heading">
         <SectionHeading
-          title={
-            <span id="process-heading">
-              {isKhmer ? "របៀបដំណើរការវិនិច្ឆ័យ" : "How the Diagnosis Works"}
-            </span>
-          }
+          title={<span id="process-heading">{isKhmer ? "របៀបដំណើរការវិនិច្ឆ័យ" : "How the Diagnosis Works"}</span>}
+          subtitle={t("landing.how_it_works_subtitle")}
         />
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 relative">
-          {/* Connector lines (desktop only) */}
-          <div
-            className="absolute top-10 left-[calc(33.33%+1rem)] right-[calc(33.33%+1rem)] h-px bg-gradient-to-r from-[#87A774]/30 via-[#87A774]/60 to-[#87A774]/30 hidden md:block pointer-events-none"
-            aria-hidden="true"
-          />
-
-          {/* Step 1 */}
-          <div className="bg-white dark:bg-[#192720] rounded-2xl p-6 sm:p-7 border border-stone-200/70 dark:border-white/[0.08] shadow-xs hover:shadow-md hover:border-[#87A774]/40 dark:hover:border-[#87A774]/30 motion-safe:transition-all space-y-4">
-            <div className="flex items-center gap-3.5">
-              <div className="relative shrink-0">
-                <div className="w-10 h-10 rounded-full bg-[#1B3B2B] dark:bg-[#87A774] text-white dark:text-[#0E1712] font-black text-sm flex items-center justify-center shadow-sm">
-                  1
-                </div>
+        <ol className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 list-none p-0 m-0 items-stretch">
+          {[
+            {
+              number: 1,
+              Icon: Search,
+              title: isKhmer ? "សង្កេតរោគសញ្ញា" : "Observe Symptoms",
+              description: isKhmer
+                ? "ពិនិត្យដំណាំផ្កាឈូករ័ត្នរបស់អ្នក និងកត់សម្គាល់រោគសញ្ញាដែលមើលឃើញ (អុចស្លឹក ដំបៅ ក្រៀមស្វិត)។"
+                : "Inspect your sunflower plant and note visible symptoms — spots, lesions, or wilting.",
+            },
+            {
+              number: 2,
+              Icon: ListChecks,
+              title: isKhmer ? "ជ្រើសរើសរោគសញ្ញា" : "Select Symptoms",
+              description: isKhmer
+                ? "ជ្រើសរើសរោគសញ្ញាដែលត្រូវគ្នាពីបញ្ជីណែនាំតាមផ្នែកដំណាំ (ស្លឹក ដើម ក្បាលផ្កា ឬឫស)។"
+                : "Pick matching symptoms from our guided list by plant part — leaf, stem, flower head, or root.",
+            },
+            {
+              number: 3,
+              Icon: FileText,
+              title: isKhmer ? "ទទួលបានលទ្ធផល" : "Get Your Diagnosis",
+              description: isKhmer
+                ? "ទទួលបានលទ្ធផលរោគវិនិច្ឆ័យជាមួយកម្រិតទំនុកចិត្ត និងការណែនាំគ្រប់គ្រងជាក់ស្តែង។"
+                : "Receive possible diseases with confidence scores and actionable management recommendations.",
+            },
+          ].map(({ number, Icon, title, description }) => (
+            <li
+              key={number}
+              className="relative flex min-h-[218px] flex-col gap-5 rounded-2xl border border-stone-200/80 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#192720] sm:p-7"
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#224D3A] text-base font-bold text-white dark:bg-[#87A774] dark:text-[#0E1712]"
+                  aria-hidden="true"
+                >
+                  {number}
+                </span>
+                <span
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#87A774]/25 bg-[#EDF5EE] text-[#224D3A] dark:bg-[#0F2018] dark:text-[#A7CA98]"
+                  aria-hidden="true"
+                >
+                  <Icon size={21} strokeWidth={1.9} />
+                </span>
+                <div className="ml-auto h-px w-10 bg-[#87A774]/30" aria-hidden="true" />
               </div>
-              <div className="w-9 h-9 rounded-xl bg-[#EDF5EE] dark:bg-[#0F2018] text-[#224D3A] dark:text-[#87A774] flex items-center justify-center border border-[#87A774]/20">
-                <Search size={18} aria-hidden="true" />
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold leading-snug text-[#1B3B2B] dark:text-[#EFF5EF]">{title}</h3>
+                <p className="text-sm leading-7 text-[#4A584E] dark:text-[#B5C9BC]">{description}</p>
               </div>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-base font-bold text-[#1B3B2B] dark:text-[#EFF5EF]">
-                {isKhmer ? "សង្កេតរោគសញ្ញា" : "Observe Symptoms"}
-              </h3>
-              <p className="text-xs sm:text-sm text-[#4A584E] dark:text-[#9BB5A8] leading-relaxed">
-                {isKhmer
-                  ? "ពិនិត្យដំណាំផ្កាឈូករ័ត្នរបស់អ្នក និងកត់សម្គាល់រោគសញ្ញាដែលមើលឃើញ (អុចស្លឹក ដំបៅ ក្រៀមស្វិត)។"
-                  : "Inspect your sunflower plant and note visible symptoms — spots, lesions, or wilting."}
-              </p>
-            </div>
-          </div>
-
-          {/* Step 2 */}
-          <div className="bg-white dark:bg-[#192720] rounded-2xl p-6 sm:p-7 border border-stone-200/70 dark:border-white/[0.08] shadow-xs hover:shadow-md hover:border-[#87A774]/40 dark:hover:border-[#87A774]/30 motion-safe:transition-all space-y-4">
-            <div className="flex items-center gap-3.5">
-              <div className="relative shrink-0">
-                <div className="w-10 h-10 rounded-full bg-[#1B3B2B] dark:bg-[#87A774] text-white dark:text-[#0E1712] font-black text-sm flex items-center justify-center shadow-sm">
-                  2
-                </div>
-              </div>
-              <div className="w-9 h-9 rounded-xl bg-[#EDF5EE] dark:bg-[#0F2018] text-[#224D3A] dark:text-[#87A774] flex items-center justify-center border border-[#87A774]/20">
-                <ListChecks size={18} aria-hidden="true" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-base font-bold text-[#1B3B2B] dark:text-[#EFF5EF]">
-                {isKhmer ? "ជ្រើសរើសរោគសញ្ញា" : "Select Symptoms"}
-              </h3>
-              <p className="text-xs sm:text-sm text-[#4A584E] dark:text-[#9BB5A8] leading-relaxed">
-                {isKhmer
-                  ? "ជ្រើសរើសរោគសញ្ញាដែលត្រូវគ្នាពីបញ្ជីណែនាំតាមផ្នែកដំណាំ (ស្លឹក ដើម ក្បាលផ្កា ឬឫស)។"
-                  : "Pick matching symptoms from our guided list by plant part — leaf, stem, flower head, or root."}
-              </p>
-            </div>
-          </div>
-
-          {/* Step 3 */}
-          <div className="bg-white dark:bg-[#192720] rounded-2xl p-6 sm:p-7 border border-stone-200/70 dark:border-white/[0.08] shadow-xs hover:shadow-md hover:border-[#E4AD45]/40 dark:hover:border-[#E4AD45]/30 motion-safe:transition-all space-y-4">
-            <div className="flex items-center gap-3.5">
-              <div className="relative shrink-0">
-                <div className="w-10 h-10 rounded-full bg-[#C68A1B] dark:bg-[#E4AD45] text-white dark:text-[#1A0E00] font-black text-sm flex items-center justify-center shadow-sm">
-                  3
-                </div>
-              </div>
-              <div className="w-9 h-9 rounded-xl bg-[#FBF4E2] dark:bg-[#1E1500] text-[#9A6B1A] dark:text-[#E4AD45] flex items-center justify-center border border-[#E4AD45]/30">
-                <FileText size={18} aria-hidden="true" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-base font-bold text-[#1B3B2B] dark:text-[#EFF5EF]">
-                {isKhmer ? "ទទួលបានលទ្ធផល" : "Get Your Diagnosis"}
-              </h3>
-              <p className="text-xs sm:text-sm text-[#4A584E] dark:text-[#9BB5A8] leading-relaxed">
-                {isKhmer
-                  ? "ទទួលបានលទ្ធផលរោគវិនិច្ឆ័យជាមួយកម្រិតទំនុកចិត្ត និងការណែនាំគ្រប់គ្រងជាក់ស្តែង។"
-                  : "Receive possible diseases with confidence scores and actionable management recommendations."}
-              </p>
-            </div>
-          </div>
-        </div>
+            </li>
+          ))}
+        </ol>
       </section>
 
       {/* =========================================================================
