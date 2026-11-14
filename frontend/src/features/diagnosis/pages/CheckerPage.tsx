@@ -407,7 +407,14 @@ export function CheckerPage(): React.JSX.Element {
               )}
             </div>
 
-            <div className="space-y-2 p-4 sm:p-5">
+            {/* Only the symptom rows scroll; search, categories, and analysis remain visible. */}
+            <div
+              role="region"
+              aria-label={i18n.language.startsWith("km") ? "បញ្ជីរោគសញ្ញាដែលអាចរមូរបាន" : "Scrollable symptom list"}
+              tabIndex={0}
+              className="max-h-[52vh] space-y-2 overflow-y-auto overscroll-contain px-4 py-4 pr-3 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#87A774] sm:max-h-[480px] sm:px-5 sm:py-5 sm:pr-4 lg:max-h-[520px]"
+              style={{ scrollbarGutter: "stable" }}
+            >
               {searchQuery ? (
                 filteredSymptoms && filteredSymptoms.length > 0 ? (
                   filteredSymptoms.map(({ symptom, categoryLabel }) => (
@@ -431,6 +438,14 @@ export function CheckerPage(): React.JSX.Element {
                 </p>
               )}
             </div>
+            {(searchQuery ? (filteredSymptoms?.length ?? 0) : (activeGroup?.symptoms.length ?? 0)) > 5 && (
+              <p className="flex items-center gap-2 border-t border-[#E2E9DF] px-5 py-2.5 text-xs font-medium text-[#66816C] dark:border-white/10 dark:text-[#BED1C0]">
+                <span aria-hidden="true">↓</span>
+                {i18n.language.startsWith("km")
+                  ? "រមូរក្នុងបញ្ជីនេះ ដើម្បីមើលរោគសញ្ញាបន្ថែម។"
+                  : "Scroll inside this list to see more symptoms."}
+              </p>
+            )}
           </section>
 
           {previewData?.next_best_questions && previewData.next_best_questions.length > 0 && (
