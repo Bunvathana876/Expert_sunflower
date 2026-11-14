@@ -13,11 +13,7 @@ import {
   Leaf,
 } from "lucide-react";
 
-interface AppFooterProps {
-  onOpenAbout?: () => void;
-}
-
-export function AppFooter({ onOpenAbout }: AppFooterProps): React.JSX.Element {
+export function AppFooter(): React.JSX.Element {
   const { t, i18n } = useTranslation();
   const isKhmer = i18n.language === "km";
 
@@ -97,22 +93,12 @@ export function AppFooter({ onOpenAbout }: AppFooterProps): React.JSX.Element {
               {isKhmer ? "ព័ត៌មានប្រព័ន្ធ" : "Platform & Support"}
             </h4>
             <ul className="space-y-2.5">
-              {onOpenAbout && (
-                <li>
-                  <button
-                    type="button"
-                    onClick={onOpenAbout}
-                    className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] flex items-center gap-2 text-xs sm:text-[0.825rem] motion-safe:transition-colors group text-left focus-visible:outline-none focus-visible:underline"
-                  >
-                    <Info
-                      size={13}
-                      className="text-[var(--color-secondary)] shrink-0 group-hover:text-[var(--color-primary)] motion-safe:transition-colors"
-                      aria-hidden="true"
-                    />
-                    <span>{t("nav.about")}</span>
-                  </button>
-                </li>
-              )}
+              <li>
+                <Link to="/about" className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] flex items-center gap-2 text-xs sm:text-[0.825rem] motion-safe:transition-colors group focus-visible:outline-none focus-visible:underline">
+                  <Info size={13} className="text-[var(--color-secondary)] shrink-0" aria-hidden="true" />
+                  <span>{t("nav.about")}</span>
+                </Link>
+              </li>
               <li>
                 <Link
                   to="/feedback"

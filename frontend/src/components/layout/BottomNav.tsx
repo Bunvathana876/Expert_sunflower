@@ -4,11 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Home, Stethoscope, BookOpen, Clock, Info, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/features/auth";
 
-interface BottomNavProps {
-  onOpenAbout?: () => void;
-}
-
-export function BottomNav({ onOpenAbout }: BottomNavProps): React.JSX.Element {
+export function BottomNav(): React.JSX.Element {
   const { t } = useTranslation();
   const { isAuthenticated, hasPermission, user } = useAuth();
   const location = useLocation();
@@ -72,21 +68,16 @@ export function BottomNav({ onOpenAbout }: BottomNavProps): React.JSX.Element {
           );
         })}
 
-        {/* About trigger on mobile */}
-        {onOpenAbout && (
-          <button
-            type="button"
-            onClick={onOpenAbout}
-            title={t("nav.about")}
-            className="flex-1 min-w-0 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)] min-h-[46px] transition-all select-none"
-            aria-label={t("nav.about")}
-          >
-            <Info size={18} strokeWidth={1.9} className="shrink-0" />
-            <span className="block w-full text-[0.62rem] sm:text-[0.66rem] tracking-tight mt-0.5 leading-tight truncate text-center">
-              {t("nav.about")}
-            </span>
-          </button>
-        )}
+        {/* Mobile About link */}
+        <Link
+          to="/about"
+          title={t("nav.about")}
+          aria-current={isActive("/about") ? "page" : undefined}
+          className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl min-h-[46px] transition-all select-none ${isActive("/about") ? "bg-[var(--color-primary)] text-white dark:text-[#0E1712] font-bold shadow-xs" : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]"}`}
+        >
+          <Info size={18} strokeWidth={isActive("/about") ? 2.4 : 1.9} className="shrink-0" aria-hidden="true" />
+          <span className="block w-full text-[0.62rem] sm:text-[0.66rem] tracking-tight mt-0.5 leading-tight truncate text-center">{t("nav.about")}</span>
+        </Link>
       </nav>
     </div>
   );

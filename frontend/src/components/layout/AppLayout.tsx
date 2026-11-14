@@ -1,5 +1,5 @@
 import type React from "react";
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy } from "react";
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -19,10 +19,6 @@ import { BottomNav } from "./BottomNav";
 import { AppFooter } from "./AppFooter";
 import { ThemeBackground } from "./ThemeBackground";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
-
-const LazyAboutModal = lazy(() =>
-  import("./AboutModal").then((m) => ({ default: m.AboutModal })),
-);
 
 const LazyAIChatWidget = lazy(() =>
   import("@/features/ai-assistant").then((m) => ({ default: m.AIChatWidget })),
@@ -57,7 +53,6 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
   const { t, i18n } = useTranslation();
   const { isAuthenticated, logout, user, hasPermission } = useAuth();
   const location = useLocation();
-  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const isKhmer = i18n.language === "km";
 
   const isActive = (path: string) => {
@@ -75,13 +70,6 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
     <div className="sf-layout min-h-screen flex flex-col relative text-[var(--color-text)]">
       {/* Responsive Theme-Aware Botanical Ambient Background */}
       <ThemeBackground />
-
-      {/* About Expert System Modal (lazy-loaded on demand) */}
-      {isAboutOpen && (
-        <Suspense fallback={null}>
-          <LazyAboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
-        </Suspense>
-      )}
 
       {/* AI Chat Widget (deferred off critical path) */}
       <Suspense fallback={null}>
@@ -139,15 +127,15 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
               );
             })}
 
-            {/* About Modal Trigger */}
-            <button
-              type="button"
-              onClick={() => setIsAboutOpen(true)}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)] flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer"
+            {/* About is a dedicated page, not a popup. */}
+            <Link
+              to="/about"
+              aria-current={isActive("/about") ? "page" : undefined}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap ${isActive("/about") ? "bg-[var(--color-primary)] text-white dark:text-[#0E1712] shadow-2xs" : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]"}`}
             >
-              <Info size={15} className="shrink-0" />
+              <Info size={15} className="shrink-0" aria-hidden="true" />
               <span>{t("nav.about")}</span>
-            </button>
+            </Link>
           </nav>
 
           {/* Right Controls: Theme + Language + Auth */}
@@ -200,10 +188,10 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
       </main>
 
       {/* Comprehensive Botanical Footer */}
-      <AppFooter onOpenAbout={() => setIsAboutOpen(true)} />
+      <AppFooter />
 
       {/* Mobile Floating Bottom Dock */}
-      <BottomNav onOpenAbout={() => setIsAboutOpen(true)} />
+      <BottomNav />
     </div>
   );
 }

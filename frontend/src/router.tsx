@@ -8,6 +8,9 @@ import { Skeleton } from "./components/ui/Skeleton";
 const LandingPage = lazy(() =>
   import("./features/landing/LandingPage").then((m) => ({ default: m.LandingPage })),
 );
+const AboutPage = lazy(() =>
+  import("./features/about/AboutPage").then((m) => ({ default: m.AboutPage })),
+);
 const DiseasesPage = lazy(() =>
   import("./features/diseases/pages/DiseasesPage").then((m) => ({ default: m.DiseasesPage })),
 );
@@ -119,6 +122,10 @@ export const router = createBrowserRouter([
       {
         path: "/",
         element: <LandingPage />,
+      },
+      {
+        path: "/about",
+        element: <AboutPage />,
       },
       {
         path: "/diseases",
