@@ -2264,3 +2264,23 @@ textarea.sf-form__textarea {
   content-visibility: auto;
   contain-intrinsic-size: auto 420px;
 }
+
+/* Custom Botanical Scrollbar */
+.sf-custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(135, 167, 116, 0.4) transparent;
+}
+.sf-custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.sf-custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sf-custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(135, 167, 116, 0.35);
+  border-radius: 9999px;
+}
+.sf-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(135, 167, 116, 0.65);
+}
+

@@ -55,6 +55,7 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
   const { isAuthenticated, logout, user, hasPermission } = useAuth();
   const location = useLocation();
   const isKhmer = i18n.language === "km";
+  const isAboutPage = location.pathname === "/about";
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
@@ -79,7 +80,11 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
 
       {/* Modern Botanical Header */}
       <header className="sticky top-0 z-40 bg-[var(--color-bg-card)]/90 dark:bg-[#111C15]/90 backdrop-blur-md border-b border-[var(--color-border)] transition-colors shadow-2xs">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+        <div
+          className={`${
+            isAboutPage ? "max-w-[1260px] px-4 sm:px-8 lg:px-12" : "max-w-6xl px-4 sm:px-6"
+          } mx-auto h-16 flex items-center justify-between gap-3`}
+        >
           {/* Brand */}
           <Link
             to="/"
@@ -184,7 +189,13 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
       <OfflineBanner />
 
       {/* Main Content Viewport */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 pb-28 md:pb-16">
+      <main
+        className={`flex-1 w-full mx-auto ${
+          isAboutPage
+            ? "max-w-[1260px] px-4 sm:px-8 lg:px-12 py-6 sm:py-8 pb-20"
+            : "max-w-6xl px-4 sm:px-6 py-8 pb-28 md:pb-16"
+        }`}
+      >
         {children}
       </main>
 
