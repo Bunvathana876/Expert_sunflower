@@ -9,11 +9,14 @@ from __future__ import annotations
 
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ai.config import ai_config
 from ai.schemas.ai_schemas import (
+    ActionCancelRequest,
+    ActionConfirmRequest,
+    ActionExecutionResponse,
     AIChatRequest,
     AIChatResponse,
     AIDiagnosisRequest,
@@ -28,13 +31,18 @@ from ai.schemas.ai_schemas import (
     SymptomExtractionRequest,
     SymptomExtractionResponse,
 )
+from ai.services.action_confirmation import pending_action_store
+from ai.services.action_executor import action_executor
 from ai.services.admin_chat_service import get_admin_chat_service
 from ai.services.chatbot_service import get_chatbot_service
 from ai.services.disease_assistant import get_disease_assistant
 from ai.services.ollama_service import OllamaError, get_ollama_service
 from ai.services.symptom_extractor import get_symptom_extractor
 from ai.services.vision_service import get_vision_service
+from app.core.config import get_settings
 from app.core.deps import get_current_user, get_db, require_permission
+from app.core.errors import AppError
+from app.core.rate_limit import RateLimitRule, get_client_ip, rate_limiter
 from app.models.auth import User
 from app.repositories.diagnosis import DiagnosisRepository
 from app.schemas.diagnosis import AnswerType, DiagnosisRequest
@@ -134,6 +142,9 @@ async def chat_with_ai(
         response = await chatbot.chat(request)
         return response
     
+    except AppError:
+        raise
+
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -178,6 +189,9 @@ async def extract_symptoms(
         response = await extractor.extract_and_map(request, db)
         return response
     
+    except AppError:
+        raise
+
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -242,7 +256,7 @@ async def ai_assisted_diagnosis(
             extracted.plant_part.extend(image_symptoms.get("plant_part", []))
         
         # Step 2: Map to database symptom IDs
-        mapped_ids, unmapped = await extractor.map_to_database_symptoms(
+        mapped_ids, _unmapped = await extractor.map_to_database_symptoms(
             extracted=extracted,
             db=db,
         )
@@ -250,7 +264,10 @@ async def ai_assisted_diagnosis(
         if not mapped_ids:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Could not identify any known symptoms from your description. Please try describing more specific symptoms.",
+                detail=(
+                    "Could not identify any known symptoms from your description. "
+                    "Please try describing more specific symptoms."
+                ),
             )
         
         # Step 3: Run existing expert system diagnosis
@@ -280,7 +297,9 @@ async def ai_assisted_diagnosis(
         
         return AIDiagnosisResponse(
             extracted_symptoms=extracted,
-            diagnosis_session_id=str(diagnosis_result.session_id) if diagnosis_result.session_id else None,
+            diagnosis_session_id=(
+                str(diagnosis_result.session_id) if diagnosis_result.session_id else None
+            ),
             expert_system_results=diagnosis_result.model_dump(),
             ai_explanation=explanation,
         )
@@ -288,6 +307,9 @@ async def ai_assisted_diagnosis(
     except HTTPException:
         raise
     
+    except AppError:
+        raise
+
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -343,7 +365,8 @@ Confidence: {confidence_val * 100:.0f}%
 
 {"Write in Khmer language." if locale == "km" else "Write in English."}
 
-Be empathetic, clear, and actionable. Explain what the disease is, why it matches, and what to do next.
+Be empathetic, clear, and actionable. Explain what the disease is, why it matches,
+and what to do next.
 Keep it under 150 words.
 """
     
@@ -397,6 +420,9 @@ async def analyze_image(
             detail=str(e),
         ) from e
     
+    except AppError:
+        raise
+
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -421,6 +447,7 @@ async def analyze_image(
 )
 async def admin_chat(
     request: AIChatRequest,
+    http_request: Request,
     current_user: Annotated[User, Depends(require_permission("disease:read"))],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> AIChatResponse:
@@ -446,6 +473,26 @@ async def admin_chat(
     - Update operations: disease:update
     - Delete operations: disease:delete (admin only)
     """
+    settings = get_settings()
+    client_ip = get_client_ip(http_request)
+    await rate_limiter.check_limits(
+        db,
+        [
+            RateLimitRule(
+                scope="ai:admin_chat:user",
+                identifier=f"user:{current_user.id}",
+                max_attempts=settings.RATE_LIMIT_AI_ADMIN_USER_MAX,
+                window_seconds=settings.RATE_LIMIT_AI_ADMIN_WINDOW_SEC,
+            ),
+            RateLimitRule(
+                scope="ai:admin_chat:ip",
+                identifier=client_ip,
+                max_attempts=settings.RATE_LIMIT_AI_ADMIN_IP_MAX,
+                window_seconds=settings.RATE_LIMIT_AI_ADMIN_WINDOW_SEC,
+            ),
+        ],
+    )
+
     if not ai_config.AI_ENABLED:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -461,10 +508,14 @@ async def admin_chat(
         response = await admin_chat_service.handle_admin_chat(
             request=request,
             db=db,
+            current_user=current_user,
             user_role=user_role,
         )
         return response
     
+    except AppError:
+        raise
+
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -476,6 +527,123 @@ async def admin_chat(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Admin chat failed: {e!s}",
         ) from e
+
+
+@router.post(
+    "/admin/actions/confirm",
+    response_model=ActionExecutionResponse,
+    summary="Confirm and execute an AI-proposed administrative action",
+)
+async def confirm_admin_action(
+    request: ActionConfirmRequest,
+    http_request: Request,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> ActionExecutionResponse:
+    """Validate user confirmation token, verify admin permissions, and execute the proposed action.
+
+    This endpoint is phase 2 of the two-phase confirmation workflow. It guarantees:
+    - User ownership and explicit confirmation token validation
+    - Permission checks on the executing administrative user
+    - Expiration (TTL) and replay protection (single-use token)
+    - Full audit log recording
+    """
+    settings = get_settings()
+    client_ip = get_client_ip(http_request)
+    await rate_limiter.check_limits(
+        db,
+        [
+            RateLimitRule(
+                scope="ai:admin_confirm:user",
+                identifier=f"user:{current_user.id}",
+                max_attempts=settings.RATE_LIMIT_AI_CONFIRM_USER_MAX,
+                window_seconds=settings.RATE_LIMIT_AI_CONFIRM_WINDOW_SEC,
+            ),
+            RateLimitRule(
+                scope="ai:admin_confirm:ip",
+                identifier=client_ip,
+                max_attempts=settings.RATE_LIMIT_AI_CONFIRM_IP_MAX,
+                window_seconds=settings.RATE_LIMIT_AI_CONFIRM_WINDOW_SEC,
+            ),
+        ],
+    )
+
+    if not ai_config.AI_ENABLED:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="AI features are currently disabled",
+        )
+
+    # 1. Validate proposal and atomically claim execution under row lock
+    action = await pending_action_store.validate_and_consume(
+        db=db,
+        action_id=request.action_id,
+        confirmation_token=request.confirmation_token,
+        current_user=current_user,
+    )
+
+    # 2. Execute database mutation and audit logging in the same transaction
+    try:
+        message, actions_taken = await action_executor.execute_action(
+            action=action,
+            db=db,
+            current_user=current_user,
+            locale=request.locale,
+        )
+    except Exception as exc:
+        await db.rollback()
+        await pending_action_store.mark_failed(db, action.action_id, str(exc))
+        raise
+
+    return ActionExecutionResponse(
+        success=True,
+        message=message,
+        action_id=action.action_id,
+        action_type=action.action_type,
+        actions_taken=actions_taken,
+    )
+
+
+@router.post(
+    "/admin/actions/cancel",
+    response_model=ActionExecutionResponse,
+    summary="Cancel an AI-proposed administrative action",
+)
+async def cancel_admin_action(
+    request: ActionCancelRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> ActionExecutionResponse:
+    """Cancel a pending AI-proposed administrative action.
+
+    Marks the proposal as cancelled so it cannot be confirmed or executed.
+    """
+    if not ai_config.AI_ENABLED:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="AI features are currently disabled",
+        )
+
+    action = await pending_action_store.cancel_action(
+        db=db,
+        action_id=request.action_id,
+        current_user=current_user,
+        confirmation_token=request.confirmation_token,
+    )
+
+    msg = (
+        f"សកម្មភាព '{action.action_type}' ត្រូវបានបោះបង់ដោយជោគជ័យ។"
+        if request.locale == "km"
+        else f"Action '{action.action_type}' was successfully cancelled."
+    )
+
+    return ActionExecutionResponse(
+        success=True,
+        message=msg,
+        action_id=action.action_id,
+        action_type=action.action_type,
+        actions_taken=[],
+    )
 
 
 # ============================================================================
@@ -508,6 +676,9 @@ async def generate_disease_draft(
         response = await assistant.generate_disease_draft(request)
         return response
     
+    except AppError:
+        raise
+
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -548,6 +719,9 @@ async def check_duplicate_disease(
         response = await assistant.check_duplicate_disease(request, db)
         return response
     
+    except AppError:
+        raise
+
     except OllamaError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

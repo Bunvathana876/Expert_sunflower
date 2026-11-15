@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -19,6 +20,7 @@ class RolePermission(Base):
     """Many-to-many join table connecting roles and permissions."""
 
     __tablename__ = "role_permissions"
+    __table_args__ = (Index("ix_role_permissions_permission_id", "permission_id"),)
 
     role_id: Mapped[int] = mapped_column(
         Integer,
@@ -75,6 +77,7 @@ class User(Base, TimestampMixin):
     """Registered application user account."""
 
     __tablename__ = "users"
+    __table_args__ = (Index("ix_users_role_active", "role_id", "is_active"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
@@ -102,3 +105,36 @@ class User(Base, TimestampMixin):
         if self.role.name == "admin":
             return True
         return any(p.code == code for p in self.role.permissions)
+
+
+class RefreshToken(Base):
+    """Durable refresh-token ledger storing keyed HMAC-SHA256 digests only.
+
+    Plaintext refresh tokens and raw JTIs are never persisted.
+    """
+
+    __tablename__ = "refresh_tokens"
+    __table_args__ = (
+        Index("ix_refresh_tokens_user_active", "user_id", "revoked_at"),
+        Index("ix_refresh_tokens_expires_at", "expires_at"),
+        Index("ix_refresh_tokens_family_id", "family_id"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    family_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    replaced_by_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    user: Mapped[User] = relationship("User", foreign_keys=[user_id], lazy="raise")

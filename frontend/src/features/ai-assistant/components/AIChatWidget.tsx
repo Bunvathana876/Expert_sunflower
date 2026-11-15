@@ -16,16 +16,28 @@ import {
   Sparkles,
   Shield,
   Trash2,
-  Sprout,
   GripVertical,
+  AlertTriangle,
+  CheckCircle2,
 } from 'lucide-react';
-import { chatWithAI, adminChatWithAI, analyzeImage, type AIChatResponse } from '@/api/ai';
+import { SunflowerIcon } from '@/components/ui/SunflowerIcon';
+import {
+  chatWithAI,
+  adminChatWithAI,
+  analyzeImage,
+  confirmAdminAction,
+  cancelAdminAction,
+  type AIChatResponse,
+  type ProposedActionDTO,
+} from '@/api/ai';
 import { useAuth } from '@/features/auth';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  proposedAction?: ProposedActionDTO | undefined;
+  actionStatus?: 'pending' | 'confirmed' | 'cancelled' | 'expired' | undefined;
 }
 
 const QUICK_PROMPTS = [
@@ -56,6 +68,7 @@ export function AIChatWidget(): React.JSX.Element | null {
   const [conversationId, setConversationId] = useState<string | undefined>();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [executingActionId, setExecutingActionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -300,6 +313,8 @@ export function AIChatWidget(): React.JSX.Element | null {
         role: 'assistant',
         content: response.message,
         timestamp: new Date(),
+        proposedAction: response.proposed_action,
+        actionStatus: response.proposed_action ? 'pending' : undefined,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -313,6 +328,84 @@ export function AIChatWidget(): React.JSX.Element | null {
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleConfirmAction = async (msgIndex: number, action: ProposedActionDTO) => {
+    setExecutingActionId(action.action_id);
+    try {
+      const res = await confirmAdminAction({
+        action_id: action.action_id,
+        confirmation_token: action.confirmation_token,
+        locale: i18n.language,
+      });
+
+      setMessages((prev) =>
+        prev.map((msg, i) =>
+          i === msgIndex ? { ...msg, actionStatus: 'confirmed' as const } : msg
+        )
+      );
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: res.message,
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (err: unknown) {
+      console.error('Failed to confirm action:', err);
+      const detail = err instanceof Error ? err.message : String(err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: `❌ ${isKhmer ? 'បរាជ័យក្នុងការអនុវត្ត:' : 'Execution failed:'} ${detail}`,
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setExecutingActionId(null);
+    }
+  };
+
+  const handleCancelAction = async (msgIndex: number, action: ProposedActionDTO) => {
+    setExecutingActionId(action.action_id);
+    try {
+      const res = await cancelAdminAction({
+        action_id: action.action_id,
+        confirmation_token: action.confirmation_token,
+        locale: i18n.language,
+      });
+
+      setMessages((prev) =>
+        prev.map((msg, i) =>
+          i === msgIndex ? { ...msg, actionStatus: 'cancelled' as const } : msg
+        )
+      );
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: res.message,
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (err: unknown) {
+      console.error('Failed to cancel action:', err);
+      const detail = err instanceof Error ? err.message : String(err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: `❌ ${detail}`,
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setExecutingActionId(null);
     }
   };
 
@@ -390,8 +483,8 @@ export function AIChatWidget(): React.JSX.Element | null {
             </div>
 
             {/* Sunflower emblem avatar */}
-            <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs border border-white/30 shrink-0">
-              <span className="text-base select-none">🌻</span>
+            <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs border border-white/30 p-1 shrink-0 overflow-hidden shadow-2xs">
+              <SunflowerIcon name="ai-assistant" size={24} className="w-full h-full object-contain" alt="" />
             </div>
 
             <div className="flex flex-col items-start text-left pointer-events-none">
@@ -447,8 +540,8 @@ export function AIChatWidget(): React.JSX.Element | null {
           <div className="relative bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 text-white px-4.5 py-4 flex items-center justify-between border-b border-amber-400/20 shadow-xs">
             <div className="flex items-center gap-3 min-w-0 flex-1">
               {/* Avatar */}
-              <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/25 shadow-xs shrink-0">
-                <span className="text-xl select-none">🌻</span>
+              <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/25 p-1.5 shadow-xs shrink-0 overflow-hidden">
+                <SunflowerIcon name="ai-assistant" size={28} className="w-full h-full object-contain drop-shadow-xs" alt="" />
                 {/* Live Online Badge */}
                 <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-amber-600" />
               </div>
@@ -502,8 +595,8 @@ export function AIChatWidget(): React.JSX.Element | null {
             {messages.length === 0 && (
               <div className="text-center py-6 px-2 space-y-4">
                 {/* Botanical Icon */}
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs">
-                  <Sprout className="w-7 h-7" />
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/15 to-emerald-500/15 border border-amber-500/25 p-2.5 shadow-xs">
+                  <SunflowerIcon name="ai-assistant" size={44} className="w-full h-full object-contain drop-shadow-xs" alt="" />
                 </div>
 
                 <div className="space-y-1">
@@ -552,8 +645,8 @@ export function AIChatWidget(): React.JSX.Element | null {
                 {/* Assistant botanical badge */}
                 {message.role === 'assistant' && (
                   <div className="mr-2 shrink-0 self-end mb-1">
-                    <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center border border-amber-500/30 text-xs select-none">
-                      🌻
+                    <div className="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center p-0.5 select-none overflow-hidden shadow-2xs">
+                      <SunflowerIcon name="ai-assistant" size={18} className="w-full h-full object-contain" alt="" />
                     </div>
                   </div>
                 )}
@@ -568,6 +661,82 @@ export function AIChatWidget(): React.JSX.Element | null {
                   <p className="text-xs sm:text-[0.82rem] whitespace-pre-wrap break-words leading-relaxed">
                     {message.content}
                   </p>
+
+                  {/* AI Admin Proposed Action Confirmation Card */}
+                  {message.proposedAction && (
+                    <div className="mt-3 pt-2.5 border-t border-amber-200/50 dark:border-white/10 space-y-2">
+                      <div className="flex items-center gap-1.5 text-[0.75rem] font-bold text-amber-700 dark:text-amber-400">
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                        <span>
+                          {isKhmer ? 'សកម្មភាពស្នើឡើង (រង់ចាំការបញ្ជាក់)' : 'Requires Admin Confirmation'}
+                        </span>
+                      </div>
+
+                      {/* Affected records list */}
+                      {message.proposedAction.affected_records.length > 0 && (
+                        <div className="bg-amber-500/10 dark:bg-black/25 rounded-xl p-2 text-[0.72rem] space-y-1 border border-amber-500/20">
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">
+                            {isKhmer ? 'កំណត់ត្រាដែលរងផលប៉ះពាល់:' : 'Affected Records:'}
+                          </span>
+                          <ul className="list-disc list-inside space-y-0.5 text-gray-600 dark:text-gray-400 font-mono text-[0.68rem]">
+                            {message.proposedAction.affected_records.map((rec, rIdx) => (
+                              <li key={rIdx} className="truncate">
+                                {String(rec.name || rec.slug || rec.code || `ID: ${rec.id}`)}
+                                {rec.type ? ` (${rec.type})` : ''}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Action status & control buttons */}
+                      {message.actionStatus === 'confirmed' ? (
+                        <div className="flex items-center gap-1.5 text-[0.75rem] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                          <CheckCircle2 className="w-4 h-4 shrink-0" />
+                          <span>{isKhmer ? 'បានបញ្ជាក់និងអនុវត្តរួចរាល់' : 'Action Confirmed & Executed'}</span>
+                        </div>
+                      ) : message.actionStatus === 'cancelled' ? (
+                        <div className="flex items-center gap-1.5 text-[0.75rem] font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-stone-800 px-2.5 py-1.5 rounded-xl">
+                          <X className="w-4 h-4 shrink-0" />
+                          <span>{isKhmer ? 'បានបោះបង់' : 'Action Cancelled'}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 pt-1">
+                          <button
+                            type="button"
+                            disabled={executingActionId === message.proposedAction.action_id}
+                            onClick={() => {
+                              if (message.proposedAction) {
+                                void handleConfirmAction(index, message.proposedAction);
+                              }
+                            }}
+                            className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-semibold shadow-xs disabled:opacity-50 transition-all cursor-pointer"
+                          >
+                            {executingActionId === message.proposedAction.action_id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            )}
+                            <span>{isKhmer ? 'យល់ព្រមអនុវត្ត' : 'Confirm Action'}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            disabled={executingActionId === message.proposedAction.action_id}
+                            onClick={() => {
+                              if (message.proposedAction) {
+                                void handleCancelAction(index, message.proposedAction);
+                              }
+                            }}
+                            className="px-3 py-1.5 rounded-xl bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 text-gray-700 dark:text-gray-200 text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer"
+                          >
+                            <span>{isKhmer ? 'បោះបង់' : 'Cancel'}</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <span
                     className={`block text-[0.62rem] mt-1 text-right font-mono ${
                       message.role === 'user' ? 'text-amber-100' : 'text-gray-600 dark:text-gray-300'

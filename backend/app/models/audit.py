@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, String, func
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -19,6 +19,11 @@ class AuditLog(Base):
     """Immutable audit trail log for entity modifications and security events."""
 
     __tablename__ = "audit_log"
+    __table_args__ = (
+        Index("ix_audit_log_entity_lookup", "entity_type", "entity_id", "created_at"),
+        Index("ix_audit_log_actor_created", "actor_id", "created_at"),
+        Index("ix_audit_log_created_at", "created_at"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     actor_id: Mapped[int | None] = mapped_column(

@@ -7,77 +7,81 @@ interface SymptomToggleProps {
   symptom: SymptomItem;
   currentAnswer: Answer;
   onAnswer: (symptomId: number, answer: Answer) => void;
+  categoryLabel?: string;
 }
 
 /**
- * Simple binary toggle for symptom observation.
- * User marks symptoms they OBSERVE - not observed symptoms stay unselected.
+ * Highly accessible and tap-friendly symptom selection row.
+ * Comfortably sized (56-68px height) for farmers, field workers, and first-time users.
+ * The entire row acts as a touch target with prominent visual feedback.
  */
 export function SymptomToggle({
   symptom,
   currentAnswer,
   onAnswer,
+  categoryLabel,
 }: SymptomToggleProps): React.JSX.Element {
   const { t } = useTranslation();
-  
-  // Simplified: treat "yes" as observed, everything else as not selected
   const isObserved = currentAnswer === "yes";
+
+  const handleToggle = () => {
+    onAnswer(symptom.id, isObserved ? "unknown" : "yes");
+  };
 
   return (
     <div
-      className={`p-3 sm:p-3.5 rounded-xl transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 ${
+      role="checkbox"
+      aria-checked={isObserved}
+      tabIndex={0}
+      onClick={handleToggle}
+      onKeyDown={(e) => {
+        if (e.key === " " || e.key === "Enter") {
+          e.preventDefault();
+          handleToggle();
+        }
+      }}
+      className={`group min-h-[56px] sm:min-h-[64px] px-4 py-3.5 sm:px-5 sm:py-4 rounded-2xl border-2 transition-all cursor-pointer select-none flex items-center justify-between gap-3 sm:gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#224D3A] dark:focus-visible:ring-[#87A774] ${
         isObserved
-          ? "bg-amber-500/10 dark:bg-amber-950/30 border border-amber-500/30 shadow-sm"
-          : "bg-white/60 dark:bg-stone-900/50 border border-slate-200/80 dark:border-stone-800/80 hover:border-slate-300 dark:hover:border-slate-700"
+          ? "bg-[#EDF5EE] dark:bg-[#14231B] border-[#224D3A] dark:border-[#87A774] text-[#1B3B2B] dark:text-[#EFF5EF] shadow-xs"
+          : "bg-white dark:bg-[#192720] border-stone-200/80 dark:border-white/[0.08] hover:border-[#87A774]/60 hover:bg-stone-50/80 dark:hover:bg-[#1E2E24] text-stone-800 dark:text-stone-200 shadow-2xs"
       }`}
-      role="group"
-      aria-label={symptom.label}
     >
-      <div className="flex items-start gap-2.5 min-w-0 flex-1">
-        <span
-          className={`w-2 h-2 rounded-full mt-1.5 shrink-0 transition-colors ${
+      <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
+        {/* Prominent checkbox-style indicator (large 26-28px box) */}
+        <div
+          className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl border-2 flex items-center justify-center shrink-0 transition-all ${
             isObserved
-              ? "bg-amber-500 shadow-[0_0_8px_rgba(217,119,6,0.5)]"
-              : "bg-slate-300 dark:bg-slate-700"
+              ? "bg-[#224D3A] dark:bg-[#87A774] border-[#224D3A] dark:border-[#87A774] text-white dark:text-[#0E1712] shadow-xs scale-105"
+              : "border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800/80 group-hover:border-[#87A774]"
           }`}
           aria-hidden="true"
-        />
-        <div className="text-sm font-medium text-slate-800 dark:text-slate-100 leading-snug break-words min-w-0 flex-1">
-          {symptom.label}
+        >
+          {isObserved && <Check size={16} strokeWidth={3} className="shrink-0" />}
+        </div>
+
+        {/* Symptom Label and optional search category badge */}
+        <div className="flex flex-col min-w-0 flex-1">
+          {categoryLabel && (
+            <span className="text-[0.65rem] sm:text-[0.7rem] font-bold uppercase tracking-wider text-[#607366] dark:text-[#94A79C] mb-0.5">
+              {categoryLabel}
+            </span>
+          )}
+          <span className="text-sm sm:text-base font-semibold leading-relaxed break-words">
+            {symptom.label}
+          </span>
         </div>
       </div>
 
-      <div
-        className="flex items-center gap-1.5 shrink-0 self-end sm:self-center"
-        role="radiogroup"
-        aria-label={t("checker.answer_label")}
-      >
-        {/* Toggle button - click to mark as observed, click again to unmark */}
-        <button
-          type="button"
-          onClick={() => onAnswer(symptom.id, isObserved ? "unknown" : "yes")}
-          className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all text-center break-words ${
-            isObserved
-              ? "bg-amber-600 text-stone-900 shadow-sm"
-              : "bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-amber-100 dark:hover:bg-amber-950/60 hover:text-amber-700"
-          }`}
-          aria-pressed={isObserved}
-          aria-label={isObserved ? t("checker.mark_clear") : t("checker.mark_observed")}
-          title={isObserved ? t("checker.mark_clear") : t("checker.mark_observed")}
-        >
-          {isObserved ? (
-            <>
-              <Check size={16} strokeWidth={2.5} className="shrink-0" />
-              <span>{t("checker.observed")}</span>
-            </>
-          ) : (
-            <>
-              <span>{t("checker.tap_if_observed")}</span>
-            </>
-          )}
-        </button>
-      </div>
+      {/* Trailing feedback pill */}
+      {isObserved ? (
+        <span className="text-xs font-bold px-2.5 py-1 rounded-xl bg-[#224D3A]/10 dark:bg-[#87A774]/20 text-[#224D3A] dark:text-[#87A774] shrink-0 border border-[#224D3A]/15 dark:border-[#87A774]/30">
+          {t("checker.observed")}
+        </span>
+      ) : (
+        <span className="hidden sm:inline-block text-xs font-medium text-stone-400 group-hover:text-[#224D3A] dark:group-hover:text-[#87A774] shrink-0 transition-colors">
+          {t("checker.tap_if_observed")}
+        </span>
+      )}
     </div>
   );
 }
-

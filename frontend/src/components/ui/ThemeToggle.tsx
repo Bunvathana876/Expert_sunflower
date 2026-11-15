@@ -25,21 +25,14 @@ export function ThemeToggle(): React.JSX.Element {
     <button
       type="button"
       onClick={() => setIsDark((prev) => !prev)}
-      className="sf-btn sf-btn--ghost sf-btn--sm"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "0.4rem 0.6rem",
-        borderRadius: "var(--radius-md)",
-      }}
+      className="inline-flex items-center justify-center p-2 rounded-xl text-xs font-semibold border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text)] hover:border-[var(--color-primary)] hover:bg-[var(--color-bg-subtle)] transition-all duration-150 cursor-pointer shadow-2xs"
       aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
       title={isDark ? "Switch to light theme" : "Switch to dark theme"}
     >
       {isDark ? (
-        <Sun size={18} className="text-amber-400" aria-hidden="true" />
+        <Sun size={15} className="text-[#E4AD45]" aria-hidden="true" />
       ) : (
-        <Moon size={18} className="text-slate-600" aria-hidden="true" />
+        <Moon size={15} className="text-[var(--color-text-secondary)]" aria-hidden="true" />
       )}
     </button>
   );

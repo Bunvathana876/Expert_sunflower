@@ -18,6 +18,45 @@ class AIChatRequest(BaseModel):
     conversation_id: str | None = None
 
 
+class ProposedActionDTO(BaseModel):
+    """Detailed proposed database action awaiting administrative confirmation."""
+
+    action_id: str
+    confirmation_token: str
+    action_type: str
+    summary: str
+    details: dict[str, Any] = Field(default_factory=dict)
+    affected_records: list[dict[str, Any]] = Field(default_factory=list)
+    expires_at: str
+    requires_confirmation: bool = True
+
+
+class ActionConfirmRequest(BaseModel):
+    """Request to confirm and execute a proposed administrative action."""
+
+    action_id: str
+    confirmation_token: str
+    locale: str = Field(default="en", pattern="^(en|km)$")
+
+
+class ActionCancelRequest(BaseModel):
+    """Request to cancel a proposed administrative action."""
+
+    action_id: str
+    confirmation_token: str | None = None
+    locale: str = Field(default="en", pattern="^(en|km)$")
+
+
+class ActionExecutionResponse(BaseModel):
+    """Response returned upon confirming or cancelling an administrative action."""
+
+    success: bool
+    message: str
+    action_id: str
+    action_type: str
+    actions_taken: list[dict[str, Any]] = Field(default_factory=list)
+
+
 class AIChatResponse(BaseModel):
     """AI chat response."""
     
@@ -27,6 +66,7 @@ class AIChatResponse(BaseModel):
     extracted_symptoms: dict[str, Any] | None = None
     actions_taken: list[Any] = Field(default_factory=list)
     metadata: dict[str, Any] | None = None
+    proposed_action: ProposedActionDTO | None = None
 
 
 # ============================================================================

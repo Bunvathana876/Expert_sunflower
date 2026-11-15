@@ -113,6 +113,7 @@ class DiagnosisSelectedSymptom(Base):
     """User response for an individual symptom within a diagnosis session."""
 
     __tablename__ = "diagnosis_selected_symptoms"
+    __table_args__ = (Index("ix_diagnosis_selected_symptoms_symptom_id", "symptom_id"),)
 
     session_id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True),
@@ -149,6 +150,7 @@ class DiagnosisResult(Base):
     """Ranked candidate disease result and supporting evidence for a session."""
 
     __tablename__ = "diagnosis_results"
+    __table_args__ = (Index("ix_diagnosis_results_session_rank", "session_id", "rank"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     session_id: Mapped[uuid.UUID] = mapped_column(

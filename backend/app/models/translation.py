@@ -15,7 +15,10 @@ class Translation(Base):
     """
 
     __tablename__ = "translations"
-    __table_args__ = (Index("ix_translations_lookup", "entity_type", "entity_id", "locale"),)
+    __table_args__ = (
+        Index("ix_translations_lookup", "entity_type", "entity_id", "locale"),
+        Index("ix_translations_type_field_locale", "entity_type", "field", "locale"),
+    )
 
     entity_type: Mapped[str] = mapped_column(String(64), primary_key=True)
     entity_id: Mapped[int] = mapped_column(Integer, primary_key=True)

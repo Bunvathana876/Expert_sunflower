@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { useParams, Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -20,10 +20,16 @@ import { useSessionDetail } from "../hooks";
 import { useDiseaseDetail } from "@/features/diseases/hooks";
 import { PercentageVisualization } from "@/components/ui/PercentageVisualization";
 import { DiseaseDetailModal } from "@/features/diseases/components/DiseaseDetailModal";
-import { DiagnosticReportModal } from "../components/DiagnosticReportModal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { SunflowerIcon } from "@/components/ui/SunflowerIcon";
 import type { DiagnosisResponse, DiagnosisResult } from "@/types/api";
+
+const LazyDiagnosticReportModal = lazy(() =>
+  import("../components/DiagnosticReportModal").then((m) => ({
+    default: m.DiagnosticReportModal,
+  })),
+);
 
 export function ResultPage(): React.JSX.Element {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -101,27 +107,33 @@ export function ResultPage(): React.JSX.Element {
       />
 
       {/* Full Diagnostic PDF Report Preview & Export Modal */}
-      <DiagnosticReportModal
-        isOpen={isReportModalOpen}
-        onClose={() => setIsReportModalOpen(false)}
-        session={session ?? null}
-        results={displayData.results}
-      />
+      {isReportModalOpen && (
+        <Suspense fallback={null}>
+          <LazyDiagnosticReportModal
+            isOpen={isReportModalOpen}
+            onClose={() => setIsReportModalOpen(false)}
+            session={session ?? null}
+            results={displayData.results}
+          />
+        </Suspense>
+      )}
 
       {/* Top Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-2xl" aria-hidden="true">
-              📊
-            </span>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-              {t("result.title")}
-            </h1>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-11 h-11 rounded-xl bg-emerald-500/15 dark:bg-emerald-400/15 border border-emerald-500/30 flex items-center justify-center p-1.5 shrink-0 shadow-xs">
+              <SunflowerIcon name="diagnosis" size={28} className="w-full h-full object-contain" alt="" />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+                {t("result.title")}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                {t("result.subtitle")}
+              </p>
+            </div>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            {t("result.subtitle")}
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">

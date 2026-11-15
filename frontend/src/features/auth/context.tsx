@@ -3,46 +3,39 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
 } from "react";
-import { setOnRefreshNeeded, setTokenGetter } from "@/api/client";
+import { setCsrfToken, setOnRefreshNeeded, setTokenGetter } from "@/api/client";
 import { loginApi, logoutApi, refreshApi, registerApi, updateMeApi } from "./api";
-import { singleFlightRefresh } from "./refresh";
+import { resetSingleFlight, singleFlightRefresh } from "./refresh";
 import type { LoginCredentials, RegisterCredentials, UpdateMeCredentials, User } from "./types";
 
-const USER_STORAGE_KEY = "sunflower_auth_user";
-const TOKEN_STORAGE_KEY = "sunflower_access_token";
+const LEGACY_STORAGE_KEYS = ["sunflower_auth_user", "sunflower_access_token"] as const;
+const AUTH_SYNC_CHANNEL = "sunflower_auth_sync";
 
-function getStoredUser(): User | null {
-  try {
-    const raw = localStorage.getItem(USER_STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as User) : null;
-  } catch {
-    return null;
-  }
+interface AuthSyncMessage {
+  type: "logout" | "login";
 }
 
-function getStoredToken(): string | null {
-  try {
-    return localStorage.getItem(TOKEN_STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function saveStoredAuth(token: string | null, userData: User | null): void {
-  try {
-    if (token && userData) {
-      localStorage.setItem(TOKEN_STORAGE_KEY, token);
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
-    } else {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
-      localStorage.removeItem(USER_STORAGE_KEY);
+/**
+ * Scrub any legacy persistent auth keys so access tokens and user identities
+ * never reside in Web Storage (`localStorage` / `sessionStorage`).
+ */
+function purgeLegacyAuthStorage(): void {
+  for (const key of LEGACY_STORAGE_KEYS) {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      // Ignore storage access errors in restricted environments
     }
-  } catch {
-    // Ignore storage quota or access errors
+    try {
+      sessionStorage.removeItem(key);
+    } catch {
+      // Ignore storage access errors in restricted environments
+    }
   }
 }
 
@@ -67,75 +60,92 @@ export interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(() => getStoredUser());
-  const [accessToken, setAccessToken] = useState<string | null>(() => getStoredToken());
-  const [isLoading, setIsLoading] = useState<boolean>(() => !getStoredUser());
+  const [user, setUser] = useState<User | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Keep a ref to the latest accessToken so setTokenGetter can read it synchronously
-  const tokenRef = useRef<string | null>(accessToken);
+  const tokenRef = useRef<string | null>(null);
   tokenRef.current = accessToken;
 
+  const userRef = useRef<User | null>(null);
+  userRef.current = user;
+
+  // Monotonic epoch incremented on explicit login/register/logout transitions
+  // so stale in-flight refresh responses can never overwrite newer auth state.
+  const authEpochRef = useRef<number>(0);
+  const syncChannelRef = useRef<BroadcastChannel | null>(null);
+
+  const postAuthSync = useCallback((msg: AuthSyncMessage) => {
+    try {
+      syncChannelRef.current?.postMessage(msg);
+    } catch {
+      // Ignore closed/unsupported BroadcastChannel errors
+    }
+  }, []);
+
   const handleAuthSuccess = useCallback((token: string, userData: User) => {
+    purgeLegacyAuthStorage();
     tokenRef.current = token;
+    userRef.current = userData;
     setAccessToken(token);
     setUser(userData);
-    saveStoredAuth(token, userData);
   }, []);
 
   const handleAuthClear = useCallback(() => {
+    purgeLegacyAuthStorage();
     tokenRef.current = null;
+    userRef.current = null;
+    setCsrfToken(null);
     setAccessToken(null);
     setUser(null);
-    saveStoredAuth(null, null);
   }, []);
 
-  const refreshSession = useCallback(async (): Promise<string | null> => {
-    const wasLoggedIn = Boolean(tokenRef.current || getStoredToken() || getStoredUser());
-    return singleFlightRefresh(
-      async () => {
-        const response = await refreshApi();
-        handleAuthSuccess(response.access_token, response.user);
-        return response.access_token;
-      },
-      () => {
-        handleAuthClear();
-        if (wasLoggedIn) {
-          onSessionExpired?.();
-        }
-      },
-    );
-  }, [handleAuthSuccess, handleAuthClear, onSessionExpired]);
+  const runRefresh = useCallback(
+    async (notifyOnFailure: boolean): Promise<string | null> => {
+      const hadActiveSession = Boolean(tokenRef.current || userRef.current);
+      const startEpoch = authEpochRef.current;
 
-  // Register token getter and refresh interceptor with API client
-  useEffect(() => {
+      return singleFlightRefresh(
+        async () => {
+          const response = await refreshApi();
+          if (authEpochRef.current !== startEpoch) {
+            return null;
+          }
+          handleAuthSuccess(response.access_token, response.user);
+          return response.access_token;
+        },
+        () => {
+          if (authEpochRef.current !== startEpoch) {
+            return;
+          }
+          handleAuthClear();
+          if (notifyOnFailure && hadActiveSession) {
+            onSessionExpired?.();
+          }
+        },
+      );
+    },
+    [handleAuthSuccess, handleAuthClear, onSessionExpired],
+  );
+
+  const refreshSession = useCallback(async (): Promise<string | null> => {
+    return runRefresh(true);
+  }, [runRefresh]);
+
+  // Register token getter and 401 refresh interceptor before child effects run
+  useLayoutEffect(() => {
     setTokenGetter(() => tokenRef.current);
     setOnRefreshNeeded(refreshSession);
   }, [refreshSession]);
 
-  // Attempt initial session restoration/validation on mount
+  // Restore session in memory via HttpOnly refresh cookie on initial mount
   useEffect(() => {
     let mounted = true;
+    purgeLegacyAuthStorage();
 
     async function restoreSession() {
-      // If there is no stored auth data in localStorage, user is a guest; don't trigger refresh
-      const hasStoredAuth = Boolean(getStoredToken() || getStoredUser());
-      if (!hasStoredAuth) {
-        if (mounted) {
-          setIsLoading(false);
-        }
-        return;
-      }
-
       try {
-        const response = await refreshApi();
-        if (mounted) {
-          handleAuthSuccess(response.access_token, response.user);
-        }
-      } catch {
-        if (mounted) {
-          // If refresh fails on mount and we have no valid cookie/session, clear stale cache
-          handleAuthClear();
-        }
+        await runRefresh(false);
       } finally {
         if (mounted) {
           setIsLoading(false);
@@ -145,46 +155,76 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
 
     void restoreSession();
 
+    let channel: BroadcastChannel | null = null;
+    if (typeof BroadcastChannel !== "undefined") {
+      try {
+        channel = new BroadcastChannel(AUTH_SYNC_CHANNEL);
+        syncChannelRef.current = channel;
+        channel.onmessage = (event: MessageEvent<AuthSyncMessage>) => {
+          if (!mounted || !event?.data) return;
+          if (event.data.type === "logout") {
+            authEpochRef.current += 1;
+            resetSingleFlight();
+            handleAuthClear();
+          } else if (event.data.type === "login" && !tokenRef.current) {
+            void runRefresh(false);
+          }
+        };
+      } catch {
+        channel = null;
+      }
+    }
+
     return () => {
       mounted = false;
+      syncChannelRef.current = null;
+      try {
+        channel?.close();
+      } catch {
+        // Ignore close errors
+      }
     };
-  }, [handleAuthSuccess, handleAuthClear]);
+  }, [runRefresh, handleAuthClear]);
 
   const login = useCallback(
     async (credentials: LoginCredentials): Promise<void> => {
+      authEpochRef.current += 1;
+      resetSingleFlight();
       const response = await loginApi(credentials);
       handleAuthSuccess(response.access_token, response.user);
+      postAuthSync({ type: "login" });
     },
-    [handleAuthSuccess],
+    [handleAuthSuccess, postAuthSync],
   );
 
   const register = useCallback(
     async (credentials: RegisterCredentials): Promise<void> => {
+      authEpochRef.current += 1;
+      resetSingleFlight();
       const response = await registerApi(credentials);
       handleAuthSuccess(response.access_token, response.user);
+      postAuthSync({ type: "login" });
     },
-    [handleAuthSuccess],
+    [handleAuthSuccess, postAuthSync],
   );
 
-  const updateProfile = useCallback(
-    async (credentials: UpdateMeCredentials): Promise<User> => {
-      const updatedUser = await updateMeApi(credentials);
-      setUser(updatedUser);
-      if (tokenRef.current) {
-        saveStoredAuth(tokenRef.current, updatedUser);
-      }
-      return updatedUser;
-    },
-    [],
-  );
+  const updateProfile = useCallback(async (credentials: UpdateMeCredentials): Promise<User> => {
+    const updatedUser = await updateMeApi(credentials);
+    userRef.current = updatedUser;
+    setUser(updatedUser);
+    return updatedUser;
+  }, []);
 
   const logout = useCallback(async (): Promise<void> => {
+    authEpochRef.current += 1;
+    resetSingleFlight();
     try {
       await logoutApi();
     } finally {
       handleAuthClear();
+      postAuthSync({ type: "logout" });
     }
-  }, [handleAuthClear]);
+  }, [handleAuthClear, postAuthSync]);
 
   const hasPermission = useCallback(
     (code: string): boolean => {
@@ -197,7 +237,7 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
   const value: AuthContextType = {
     user,
     accessToken,
-    isAuthenticated: !!user,
+    isAuthenticated: Boolean(user && accessToken),
     isLoading,
     login,
     register,

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -11,6 +12,7 @@ from app.core.errors import ConflictError, NotFoundError, ValidationFailedError
 from app.models.auth import User
 from app.models.disease import Disease
 from app.models.enums import PathogenType
+from app.models.translation import Translation
 from app.repositories.disease import DiseaseRepository
 from app.repositories.symptom import SymptomRepository
 from app.schemas.content import (
@@ -283,6 +285,14 @@ class DiseaseService:
             diff={"deleted": True, "name": disease.slug},
         )
 
+        # Delete associated polymorphic translations
+        await self.session.execute(
+            delete(Translation).where(
+                Translation.entity_type == "disease",
+                Translation.entity_id == disease.id,
+            )
+        )
+
         # Delete the disease record
         await self.session.delete(disease)
         await self.session.flush()
@@ -296,18 +306,28 @@ class DiseaseService:
         """Atomically replace all symptom weights for a disease in one single transaction.
 
         Validates all symptom IDs exist. Rejects with HTTP 422 naming the bad index
-        if any are unknown.
+        if any are unknown or duplicated.
         """
         disease = await self.repository.get_by_id(disease_id)
         if not disease:
             raise NotFoundError(detail=f"Disease with ID {disease_id} not found")
 
-        # 1. Validate all symptom IDs exist
+        # 1. Validate all symptom IDs exist and check for duplicate IDs in payload
         requested_ids = [item.symptom_id for item in req.symptoms]
         existing_ids = await self.repository.get_symptom_ids(requested_ids)
 
         errors: list[dict[str, Any]] = []
+        seen_ids: set[int] = set()
         for idx, item in enumerate(req.symptoms):
+            if item.symptom_id in seen_ids:
+                errors.append(
+                    {
+                        "field": f"symptoms[{idx}].symptom_id",
+                        "message": f"Duplicate symptom ID {item.symptom_id} in bulk update payload",
+                    }
+                )
+            seen_ids.add(item.symptom_id)
+
             if item.symptom_id not in existing_ids:
                 errors.append(
                     {

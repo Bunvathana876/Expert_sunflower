@@ -16,6 +16,7 @@ import { apiFetch } from "@/api/client";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { ThemeBackground } from "@/components/layout/ThemeBackground";
+import { SunflowerIcon } from "@/components/ui/SunflowerIcon";
 
 interface SystemStats {
   total_diseases: number;
@@ -124,9 +125,9 @@ export function AdminLayout(): React.JSX.Element {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Link to="/admin" className="flex items-center gap-2 sm:gap-2.5 text-decoration-none group min-w-0">
-              <span className="text-2xl transition-transform group-hover:scale-110 shrink-0" aria-hidden="true">
-                🌻
-              </span>
+              <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center p-1 shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
+                <SunflowerIcon name="brand" size={24} className="w-full h-full object-contain" alt="" />
+              </div>
               <div className="flex flex-col min-w-0 flex-1">
                 <span className="font-bold text-sm sm:text-base tracking-tight text-gray-900 dark:text-white leading-tight truncate">
                   {t("admin.workspace_title")}

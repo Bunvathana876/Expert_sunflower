@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import ClassVar
 
 # Load .env file if it exists
 try:
@@ -38,7 +39,7 @@ class AIConfig:
     
     # Image upload configuration
     MAX_IMAGE_SIZE_MB: int = int(os.getenv("MAX_IMAGE_SIZE_MB", "10"))
-    ALLOWED_IMAGE_EXTENSIONS: set[str] = {".jpg", ".jpeg", ".png", ".webp"}
+    ALLOWED_IMAGE_EXTENSIONS: ClassVar[set[str]] = {".jpg", ".jpeg", ".png", ".webp"}
     DISEASE_IMAGES_DIR: str = os.getenv(
         "DISEASE_IMAGES_DIR",
         "uploads/disease_images"
