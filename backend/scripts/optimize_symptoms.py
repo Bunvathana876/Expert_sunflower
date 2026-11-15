@@ -46,12 +46,12 @@ async def analyze_symptom_discrimination(session: AsyncSession) -> dict[int, dic
     for assoc in associations:
         symptom_usage[assoc.symptom_id]['diseases'].add(assoc.disease_id)
     
-    # Get total disease count
+    # Verify disease query connectivity
     total_diseases_result = await session.execute(select(Disease.id))
-    total_diseases = len(total_diseases_result.scalars().all())
+    _ = len(total_diseases_result.scalars().all())
     
     # Calculate discrimination scores
-    for symptom_id, data in symptom_usage.items():
+    for _symptom_id, data in symptom_usage.items():
         disease_count = len(data['diseases'])
         
         # Symptoms that appear in exactly 1 disease are unique (pathognomonic)

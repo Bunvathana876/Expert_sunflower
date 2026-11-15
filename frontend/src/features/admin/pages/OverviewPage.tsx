@@ -1,4 +1,5 @@
 import type React from "react";
+import { Suspense, lazy } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -19,12 +20,12 @@ import { useAnalyticsOverview } from "../hooks";
 import { apiFetch } from "@/api/client";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
-import {
-  OutbreakTrendChart,
-  SymptomDistributionChart,
-  ConfidenceDistributionChart,
-  DiagnosticHealthGauges,
-} from "../components/AdminCharts";
+
+const LazyOverviewChartsSection = lazy(() =>
+  import("../components/OverviewChartsSection").then((m) => ({
+    default: m.OverviewChartsSection,
+  })),
+);
 
 interface SystemStats {
   total_diseases: number;
@@ -292,36 +293,27 @@ export function OverviewPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Diagnostic Health & Quality Gauges */}
-      <section className="sf-glass-card bg-white/85 dark:bg-[#2A3420]/80 backdrop-blur-md p-6 border border-stone-200/80 dark:border-white/10 shadow-lg rounded-2xl">
-        <DiagnosticHealthGauges
+      {/* Async Analytics Charts (isolated Recharts bundle) */}
+      <Suspense
+        fallback={
+          <div className="space-y-6" aria-busy="true">
+            <Skeleton height="10rem" className="rounded-2xl" />
+            <Skeleton height="18rem" className="rounded-2xl" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Skeleton height="16rem" className="rounded-2xl" />
+              <Skeleton height="16rem" className="rounded-2xl" />
+            </div>
+          </div>
+        }
+      >
+        <LazyOverviewChartsSection
           checksTotal={data.checks_total}
+          checksTrend30d={data.checks_trend_30d}
+          topSymptoms={data.top_symptoms}
           noMatchPatterns={data.no_match_patterns}
-          pendingFeedback={data.pending_feedback_count}
-          topSymptomsCount={data.top_symptoms.length}
+          pendingFeedbackCount={data.pending_feedback_count}
         />
-      </section>
-
-      {/* Outbreak & 30-Day Activity Area Chart */}
-      <section className="sf-glass-card bg-white/85 dark:bg-[#2A3420]/80 backdrop-blur-md p-6 border border-stone-200/80 dark:border-white/10 shadow-lg rounded-2xl">
-        <OutbreakTrendChart data={data.checks_trend_30d} />
-      </section>
-
-      {/* Two Column Section: Top Symptoms Distribution & Diagnostic Confidence Bands */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Symptom Distribution Chart */}
-        <section className="sf-glass-card bg-white/85 dark:bg-[#2A3420]/80 backdrop-blur-md p-6 border border-stone-200/80 dark:border-white/10 shadow-lg rounded-2xl">
-          <SymptomDistributionChart topSymptoms={data.top_symptoms} />
-        </section>
-
-        {/* Confidence Rating Distribution */}
-        <section className="sf-glass-card bg-white/85 dark:bg-[#2A3420]/80 backdrop-blur-md p-6 border border-stone-200/80 dark:border-white/10 shadow-lg rounded-2xl">
-          <ConfidenceDistributionChart
-            checksTotal={data.checks_total}
-            noMatchPatterns={data.no_match_patterns}
-          />
-        </section>
-      </div>
+      </Suspense>
 
       {/* Unmatched Symptom Patterns for Agronomist Research */}
       <section className="sf-glass-card bg-white/85 dark:bg-[#2A3420]/80 backdrop-blur-md p-6 space-y-4 border border-stone-200/80 dark:border-white/10 shadow-lg rounded-2xl">

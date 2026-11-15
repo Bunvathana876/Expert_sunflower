@@ -1,7 +1,7 @@
 {
   "app": {
-    "title": "Sunflower Diagnosis",
-    "tagline": "Identify sunflower crop diseases from observed symptoms."
+    "title": "Sunflower Studio",
+    "tagline": "Modern agricultural disease diagnosis and crop health platform."
   },
   "nav": {
     "home": "Home",

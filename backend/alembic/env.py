@@ -14,10 +14,8 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 
+import app.models  # noqa: F401
 from alembic import context
-
-# Import Base so target_metadata includes all model tables.
-# Models are imported transitively when they register against Base.
 from app.db.base import Base
 
 # ---------------------------------------------------------------------------

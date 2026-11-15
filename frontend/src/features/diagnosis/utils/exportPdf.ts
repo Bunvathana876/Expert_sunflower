@@ -1,6 +1,3 @@
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-
 export interface ShareReportOptions {
   title: string;
   text: string;
@@ -11,11 +8,18 @@ export interface ShareReportOptions {
 
 /**
  * Converts a designated HTML element into a high-resolution A4 PDF document.
+ * Dynamically loads `jspdf` and `html2canvas` on demand so viewing diagnosis
+ * results never pays the ~600 kB PDF library download/parse cost upfront.
  */
 export async function generatePdfFromElement(
   element: HTMLElement,
   fileName: string = "Sunflower_Diagnostic_Report.pdf",
 ): Promise<Blob> {
+  const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+    import("jspdf"),
+    import("html2canvas"),
+  ]);
+
   // Capture high-DPI canvas
   const canvas = await html2canvas(element, {
     scale: 2, // 2x resolution for crisp text & charts

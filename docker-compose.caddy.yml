@@ -1,0 +1,42 @@
+# Optional Caddy HTTPS Reverse Proxy Overlay for Expert_sunflower
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml -f docker-compose.caddy.yml config -q
+#   docker compose -f docker-compose.prod.yml -f docker-compose.caddy.yml up -d
+#
+# Provides:
+#   - Automatic ACME / Let's Encrypt TLS issuance and renewal
+#   - Automatic HTTP (port 80) to HTTPS (port 443) redirection
+#   - Complete network isolation: PostgreSQL has zero public exposure
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      ACME_EMAIL: ${ACME_EMAIL:-internal}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - edge-net
+    depends_on:
+      web:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:80/health/live || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  caddy_data:
+  caddy_config:

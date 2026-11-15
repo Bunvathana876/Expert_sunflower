@@ -166,11 +166,7 @@ class ChatbotService:
         ]
         
         message_lower = message.lower()
-        for keyword in symptom_keywords:
-            if keyword in message_lower:
-                return True
-        
-        return False
+        return any(keyword in message_lower for keyword in symptom_keywords)
     
     def clear_conversation(self, conversation_id: str) -> None:
         """Clear a conversation history.
