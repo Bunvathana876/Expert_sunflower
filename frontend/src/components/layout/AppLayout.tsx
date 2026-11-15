@@ -53,6 +53,7 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
   const { t, i18n } = useTranslation();
   const { isAuthenticated, logout, user, hasPermission } = useAuth();
   const location = useLocation();
+  const isAboutPage = location.pathname === "/about";
   const isKhmer = i18n.language === "km";
 
   const isActive = (path: string) => {
@@ -67,9 +68,9 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
   });
 
   return (
-    <div className="sf-layout min-h-screen flex flex-col relative text-[var(--color-text)]">
+    <div className={`sf-layout min-h-screen flex flex-col relative text-[var(--color-text)] ${isAboutPage ? "bg-[#FAF9F4] dark:bg-[#0E1712]" : ""}`}>
       {/* Responsive Theme-Aware Botanical Ambient Background */}
-      <ThemeBackground />
+      {!isAboutPage && <ThemeBackground />}
 
       {/* AI Chat Widget (deferred off critical path) */}
       <Suspense fallback={null}>
