@@ -44,10 +44,10 @@ class Settings(BaseSettings):
     MEDIA_PUBLIC_URL: str = "http://localhost:8000/media"
     MEDIA_MAX_BYTES: int = 5_242_880  # 5 MB
 
-    # ---- Seed admin (no default for password — required for seed script) ----
+    # ---- Seed admin (ADMIN_PASSWORD defaults to empty; required when running seed script) ----
     ADMIN_EMAIL: str = "admin@example.com"
     ADMIN_USERNAME: str = "admin"
-    ADMIN_PASSWORD: str  # no default — required
+    ADMIN_PASSWORD: str = ""
 
     # ---- Frontend (Vite) ----
     VITE_API_BASE_URL: str = "http://localhost:8000/api/v1"

@@ -29,6 +29,7 @@ frontend/.env.*
 # Media & local data
 backend/media/
 backups/
+docs/design-packs/
 *.sqlite
 *.db
 *.dump*

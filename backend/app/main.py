@@ -181,6 +181,26 @@ def create_app() -> FastAPI:
             content=payload,
         )
 
+    # --- API v1 health aliases ---
+    @application.get("/api/v1/health", tags=["ops"])
+    async def api_v1_health(
+        db: Annotated[AsyncSession, Depends(get_db)],
+    ) -> dict[str, str]:
+        """Health summary probe mounted at /api/v1/health."""
+        return await health(db)
+
+    @application.get("/api/v1/health/live", tags=["ops"])
+    async def api_v1_health_live() -> dict[str, str]:
+        """Liveness probe mounted at /api/v1/health/live."""
+        return await health_live()
+
+    @application.get("/api/v1/health/ready", tags=["ops"], response_model=None)
+    async def api_v1_health_ready(
+        db: Annotated[AsyncSession, Depends(get_db)],
+    ) -> JSONResponse:
+        """Readiness probe mounted at /api/v1/health/ready."""
+        return await health_ready(db)
+
     # --- Operational metrics probe ---
     @application.get("/health/metrics", tags=["ops"])
     async def health_metrics(

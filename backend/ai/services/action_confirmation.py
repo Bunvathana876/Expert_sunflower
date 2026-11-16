@@ -16,7 +16,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import structlog
-from sqlalchemy import delete, select, update
+from sqlalchemy import CursorResult, delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ai.schemas.ai_schemas import ProposedActionDTO
@@ -303,7 +303,8 @@ class PendingActionStore:
             .values(status="executed", executed_at=now)
             .execution_options(synchronize_session=False)
         )
-        if claim_res.rowcount != 1:
+        claimed = claim_res.rowcount if isinstance(claim_res, CursorResult) else 0
+        if claimed != 1:
             raise BadRequestError(detail="This action has already been executed.")
 
         row.status = "executed"
@@ -442,7 +443,7 @@ class PendingActionStore:
             .execution_options(synchronize_session=False)
         )
         await db.commit()
-        return int(del_res.rowcount or 0)
+        return int(del_res.rowcount or 0) if isinstance(del_res, CursorResult) else 0
 
     def clear(self) -> None:
         """No-op retained for backward fixture compatibility (state lives in DB)."""

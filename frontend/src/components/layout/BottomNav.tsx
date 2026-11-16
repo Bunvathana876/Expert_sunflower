@@ -1,7 +1,15 @@
 import type React from "react";
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Home, Stethoscope, BookOpen, Clock, Info, LayoutDashboard } from "lucide-react";
+import {
+  Home,
+  Stethoscope,
+  BookOpen,
+  Clock,
+  Info,
+  LayoutDashboard,
+  NotebookPen,
+} from "lucide-react";
 import { useAuth } from "@/features/auth";
 
 export function BottomNav(): React.JSX.Element {
@@ -18,6 +26,7 @@ export function BottomNav(): React.JSX.Element {
     { to: "/", labelKey: "nav.home", icon: Home },
     { to: "/check", labelKey: "nav.check", icon: Stethoscope },
     { to: "/diseases", labelKey: "nav.diseases", icon: BookOpen },
+    { to: "/journal", labelKey: "nav.journal", icon: NotebookPen },
     { to: "/history", labelKey: "nav.history", icon: Clock, requireAuth: true },
     {
       to: "/admin",
@@ -54,6 +63,7 @@ export function BottomNav(): React.JSX.Element {
               key={item.to}
               to={item.to}
               title={label}
+              aria-current={active ? "page" : undefined}
               className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all min-h-[46px] select-none ${
                 active
                   ? "bg-[var(--color-primary)] text-white dark:bg-[var(--color-primary)] dark:text-[#0E1712] font-bold shadow-xs"
@@ -75,8 +85,15 @@ export function BottomNav(): React.JSX.Element {
           aria-current={isActive("/about") ? "page" : undefined}
           className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl min-h-[46px] transition-all select-none ${isActive("/about") ? "bg-[var(--color-primary)] text-white dark:text-[#0E1712] font-bold shadow-xs" : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]"}`}
         >
-          <Info size={18} strokeWidth={isActive("/about") ? 2.4 : 1.9} className="shrink-0" aria-hidden="true" />
-          <span className="block w-full text-[0.62rem] sm:text-[0.66rem] tracking-tight mt-0.5 leading-tight truncate text-center">{t("nav.about")}</span>
+          <Info
+            size={18}
+            strokeWidth={isActive("/about") ? 2.4 : 1.9}
+            className="shrink-0"
+            aria-hidden="true"
+          />
+          <span className="block w-full text-[0.62rem] sm:text-[0.66rem] tracking-tight mt-0.5 leading-tight truncate text-center">
+            {t("nav.about")}
+          </span>
         </Link>
       </nav>
     </div>

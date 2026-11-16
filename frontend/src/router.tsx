@@ -5,6 +5,9 @@ import { ThemeBackground } from "./components/layout/ThemeBackground";
 import { Skeleton } from "./components/ui/Skeleton";
 
 // Public / Grower pages
+const JournalPage = lazy(() =>
+  import("./features/journal/JournalPage").then((m) => ({ default: m.JournalPage })),
+);
 const LandingPage = lazy(() =>
   import("./features/landing/LandingPage").then((m) => ({ default: m.LandingPage })),
 );
@@ -122,6 +125,10 @@ export const router = createBrowserRouter([
       {
         path: "/",
         element: <LandingPage />,
+      },
+      {
+        path: "/journal",
+        element: <JournalPage />,
       },
       {
         path: "/about",

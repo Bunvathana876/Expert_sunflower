@@ -14,7 +14,7 @@ import structlog
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError, PyJWTError
-from sqlalchemy import delete, or_, select, update
+from sqlalchemy import CursorResult, delete, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -205,7 +205,7 @@ class RefreshTokenStore:
             .values(revoked_at=ts)
             .execution_options(synchronize_session=False)
         )
-        return int(res.rowcount or 0)
+        return int(res.rowcount or 0) if isinstance(res, CursorResult) else 0
 
     async def rotate_token(
         self,
@@ -300,7 +300,8 @@ class RefreshTokenStore:
             .values(revoked_at=commit_ts, replaced_by_hash=new_hash)
             .execution_options(synchronize_session=False)
         )
-        if upd_res.rowcount != 1:
+        updated = upd_res.rowcount if isinstance(upd_res, CursorResult) else 0
+        if updated != 1:
             raise UnauthorizedError(detail="Refresh token has been revoked or is invalid")
 
         row.revoked_at = commit_ts
@@ -334,7 +335,7 @@ class RefreshTokenStore:
             .execution_options(synchronize_session=False)
         )
         await db.commit()
-        return bool(res.rowcount)
+        return bool(res.rowcount) if isinstance(res, CursorResult) else False
 
     async def revoke_all_for_user(self, db: AsyncSession, user_id: int) -> int:
         """Revoke all active refresh tokens belonging to `user_id`."""
@@ -349,7 +350,7 @@ class RefreshTokenStore:
             .execution_options(synchronize_session=False)
         )
         await db.flush()
-        return int(res.rowcount or 0)
+        return int(res.rowcount or 0) if isinstance(res, CursorResult) else 0
 
     async def cleanup_expired(
         self,
@@ -371,7 +372,7 @@ class RefreshTokenStore:
             .execution_options(synchronize_session=False)
         )
         await db.commit()
-        return int(res.rowcount or 0)
+        return int(res.rowcount or 0) if isinstance(res, CursorResult) else 0
 
 
 token_store = RefreshTokenStore()

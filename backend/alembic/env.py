@@ -40,10 +40,24 @@ def _get_url() -> str:
         from app.core.config import get_settings
 
         url = get_settings().ALEMBIC_DATABASE_URL
+
+    if not url:
+        # Fall back to deriving sync psycopg URL from DATABASE_URL
+        from app.core.config import get_settings
+
+        db_url = get_settings().DATABASE_URL
+        if db_url:
+            from sqlalchemy.engine import make_url
+
+            if db_url.startswith("postgres://"):
+                db_url = "postgresql://" + db_url[len("postgres://") :]
+            u = make_url(db_url)
+            url = u.set(drivername="postgresql+psycopg").render_as_string(hide_password=False)
+
     if not url:
         raise RuntimeError(
-            "ALEMBIC_DATABASE_URL is not set. "
-            "Copy .env.example to .env and fill in the database credentials."
+            "Neither ALEMBIC_DATABASE_URL nor DATABASE_URL is set. "
+            "Please provide a database connection string in your environment."
         )
     return url
 

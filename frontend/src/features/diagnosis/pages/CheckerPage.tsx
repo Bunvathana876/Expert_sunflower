@@ -1,6 +1,6 @@
 import type React from "react";
 import { useReducer, useEffect, useRef, useState, useMemo } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   Search,
@@ -35,6 +35,8 @@ import type { Answer, DiagnosisResponse, SymptomItem } from "@/types/api";
 export function CheckerPage(): React.JSX.Element {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedCategory = searchParams.get("category");
 
   const { data: groupedSymptoms, isLoading, isError, refetch } = useSymptomsGrouped();
   const submitMutation = useSubmitDiagnosis();
@@ -53,12 +55,14 @@ export function CheckerPage(): React.JSX.Element {
   // Automatically select the first category once symptoms are loaded
   useEffect(() => {
     if (groupedSymptoms && groupedSymptoms.length > 0 && state.activeCategoryId === null) {
-      const firstGroup = groupedSymptoms[0];
+      const firstGroup =
+        groupedSymptoms.find((group) => group.category.code === requestedCategory) ??
+        groupedSymptoms[0];
       if (firstGroup) {
         dispatch({ type: "SELECT_CATEGORY", categoryId: firstGroup.category.id });
       }
     }
-  }, [groupedSymptoms, state.activeCategoryId]);
+  }, [groupedSymptoms, state.activeCategoryId, requestedCategory]);
 
   const categories = useMemo(
     () => (groupedSymptoms ? groupedSymptoms.map((g) => g.category) : []),
@@ -295,9 +299,7 @@ export function CheckerPage(): React.JSX.Element {
           <div className="flex items-start gap-3">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-bold text-sm sm:text-base">
-                {t("offline.saved_offline_title")}
-              </h3>
+              <h3 className="font-bold text-sm sm:text-base">{t("offline.saved_offline_title")}</h3>
               <p className="text-xs sm:text-sm mt-0.5 text-emerald-800 dark:text-emerald-300">
                 {t("offline.saved_offline_desc")}
               </p>
@@ -326,7 +328,12 @@ export function CheckerPage(): React.JSX.Element {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center p-2 shrink-0 shadow-xs">
-              <SunflowerIcon name="diagnosis" size={24} className="w-full h-full object-contain" alt="" />
+              <SunflowerIcon
+                name="diagnosis"
+                size={24}
+                className="w-full h-full object-contain"
+                alt=""
+              />
             </div>
             <div>
               <h1
@@ -335,9 +342,7 @@ export function CheckerPage(): React.JSX.Element {
               >
                 {t("checker.title")}
               </h1>
-              <p className="text-xs sm:text-sm text-[#D3E4D7] mt-0.5">
-                {t("checker.subtitle")}
-              </p>
+              <p className="text-xs sm:text-sm text-[#D3E4D7] mt-0.5">{t("checker.subtitle")}</p>
             </div>
           </div>
 
@@ -478,10 +483,18 @@ export function CheckerPage(): React.JSX.Element {
                 >
                   <div className="flex items-center gap-2">
                     <Sparkles size={14} className="text-[#E4AD45]" />
-                    <span>{t("checker.frequent_observations_toggle", { count: quickPickSymptoms.length })}</span>
+                    <span>
+                      {t("checker.frequent_observations_toggle", {
+                        count: quickPickSymptoms.length,
+                      })}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1 text-[0.7rem] text-stone-400 dark:text-stone-500 font-normal">
-                    <span>{isFrequentOpen ? t("checker.collapse_frequent") : t("checker.expand_frequent")}</span>
+                    <span>
+                      {isFrequentOpen
+                        ? t("checker.collapse_frequent")
+                        : t("checker.expand_frequent")}
+                    </span>
                     {isFrequentOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                   </div>
                 </button>
@@ -516,7 +529,11 @@ export function CheckerPage(): React.JSX.Element {
             {/* Scrollable Symptom List */}
             <div
               role="region"
-              aria-label={searchQuery ? t("common.search") : (activeGroup?.category.label ?? t("checker.observed_symptoms"))}
+              aria-label={
+                searchQuery
+                  ? t("common.search")
+                  : (activeGroup?.category.label ?? t("checker.observed_symptoms"))
+              }
               tabIndex={0}
               className="max-h-[460px] sm:max-h-[500px] lg:max-h-[540px] overflow-y-auto overscroll-contain pr-1 sm:pr-1.5 space-y-2.5 sf-custom-scrollbar focus:outline-none focus-visible:ring-1 focus-visible:ring-[#224D3A]/30 rounded-2xl"
             >
@@ -746,7 +763,9 @@ export function CheckerPage(): React.JSX.Element {
           <div className="flex items-center gap-2.5 min-w-0 pl-1">
             <span
               className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                answeredCount > 0 ? "bg-[#224D3A] dark:bg-[#87A774] animate-pulse" : "bg-stone-300 dark:bg-stone-600"
+                answeredCount > 0
+                  ? "bg-[#224D3A] dark:bg-[#87A774] animate-pulse"
+                  : "bg-stone-300 dark:bg-stone-600"
               }`}
               aria-hidden="true"
             />

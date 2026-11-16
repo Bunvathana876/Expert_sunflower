@@ -35,7 +35,7 @@ from typing import Protocol
 
 import structlog
 from fastapi import Request, status
-from sqlalchemy import delete, func, select, text
+from sqlalchemy import CursorResult, delete, func, select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -332,7 +332,7 @@ class DatabaseRateLimiter:
             .execution_options(synchronize_session=False)
         )
         await db.commit()
-        return int(res.rowcount or 0)
+        return int(res.rowcount or 0) if isinstance(res, CursorResult) else 0
 
 
 login_rate_limiter = InMemoryRateLimiter()

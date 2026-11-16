@@ -11,6 +11,7 @@ import {
   LogOut,
   LogIn,
   LayoutDashboard,
+  NotebookPen,
 } from "lucide-react";
 import { useAuth } from "@/features/auth";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
@@ -37,6 +38,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/", labelKey: "nav.home", icon: Home },
   { to: "/check", labelKey: "nav.check", icon: Stethoscope },
   { to: "/diseases", labelKey: "nav.diseases", icon: BookOpen },
+  { to: "/journal", labelKey: "nav.journal", icon: NotebookPen },
   { to: "/history", labelKey: "nav.history", icon: Clock, requireAuth: true },
   {
     to: "/admin",
@@ -70,6 +72,9 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
 
   return (
     <div className="sf-layout min-h-screen flex flex-col relative text-[var(--color-text)]">
+      <a className="studio-skip-link" href="#main-content">
+        {isKhmer ? "រំលងទៅមាតិកា" : "Skip to content"}
+      </a>
       {/* Responsive Theme-Aware Botanical Ambient Background */}
       <ThemeBackground />
 
@@ -91,14 +96,22 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
             className="flex items-center gap-2.5 text-decoration-none shrink min-w-0 group"
           >
             <div className="w-9 h-9 rounded-xl bg-[var(--color-primary-subtle)] border border-[var(--color-secondary)]/30 flex items-center justify-center p-1 shrink-0 group-hover:scale-105 transition-transform overflow-hidden shadow-2xs">
-              <SunflowerIcon name="brand" size={28} className="w-full h-full object-contain" alt="" />
+              <SunflowerIcon
+                name="brand"
+                size={28}
+                className="w-full h-full object-contain"
+                alt=""
+              />
             </div>
             <div className="flex flex-col min-w-0">
               <span className="font-extrabold text-sm sm:text-base tracking-tight text-[var(--color-primary)] dark:text-[var(--color-text)] leading-tight truncate">
                 Sunflower Studio
               </span>
               <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-secondary)]" aria-hidden="true" />
+                <span
+                  className="w-1.5 h-1.5 rounded-full bg-[var(--color-secondary)]"
+                  aria-hidden="true"
+                />
                 <span className="text-[0.62rem] sm:text-[0.66rem] font-bold text-[var(--color-text-muted)] tracking-wider uppercase font-mono truncate">
                   {isKhmer ? "វេទិការោគវិនិច្ឆ័យកសិកម្ម" : "Agricultural Diagnostics"}
                 </span>
@@ -121,6 +134,7 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
                 <Link
                   key={item.to}
                   to={item.to}
+                  aria-current={active ? "page" : undefined}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap ${
                     active
                       ? "bg-[var(--color-primary)] text-white dark:bg-[var(--color-primary)] dark:text-[#0E1712] font-bold shadow-2xs"
@@ -190,6 +204,8 @@ export function AppLayout({ children }: { children: React.ReactNode }): React.JS
 
       {/* Main Content Viewport */}
       <main
+        id="main-content"
+        tabIndex={-1}
         className={`flex-1 w-full mx-auto ${
           isAboutPage
             ? "max-w-[1260px] px-4 sm:px-8 lg:px-12 py-6 sm:py-8 pb-20"

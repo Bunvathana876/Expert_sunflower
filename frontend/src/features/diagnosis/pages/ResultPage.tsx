@@ -15,6 +15,7 @@ import {
   XCircle,
   Download,
   Share2,
+  NotebookPen,
 } from "lucide-react";
 import { useSessionDetail } from "../hooks";
 import { useDiseaseDetail } from "@/features/diseases/hooks";
@@ -92,8 +93,7 @@ export function ResultPage(): React.JSX.Element {
 
   const isMatched = displayData.outcome === "matched" && displayData.results.length > 0;
   const topResult = isMatched ? displayData.results[0] : null;
-  const evaluatedSymptomsCount = (session?.symptom_count ?? displayData.results.length > 0) ? 8 : 0;
-  const totalAnalyzedDiseases = 26; // Complete database disease catalog count
+  const evaluatedSymptomsCount = session?.symptom_count ?? "—";
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -123,7 +123,12 @@ export function ResultPage(): React.JSX.Element {
         <div>
           <div className="flex items-center gap-3 mb-1">
             <div className="w-11 h-11 rounded-xl bg-emerald-500/15 dark:bg-emerald-400/15 border border-emerald-500/30 flex items-center justify-center p-1.5 shrink-0 shadow-xs">
-              <SunflowerIcon name="diagnosis" size={28} className="w-full h-full object-contain" alt="" />
+              <SunflowerIcon
+                name="diagnosis"
+                size={28}
+                className="w-full h-full object-contain"
+                alt=""
+              />
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
@@ -137,6 +142,15 @@ export function ResultPage(): React.JSX.Element {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          {topResult && (
+            <Link
+              className="sf-btn sf-btn--secondary sf-btn--sm"
+              to={`/journal?observation=${encodeURIComponent(t("journal.result_note", { disease: topResult.disease.name, confidence: Math.round(topResult.confidence * 100) }))}`}
+            >
+              <NotebookPen size={15} />
+              {t("journal.add_result")}
+            </Link>
+          )}
           {/* Export PDF Button */}
           {isMatched && (
             <button
@@ -172,7 +186,10 @@ export function ResultPage(): React.JSX.Element {
             <span>{t("diseases.print")}</span>
           </button>
 
-          <Link to="/check" className="sf-btn sf-btn--secondary sf-btn--sm flex items-center gap-1.5">
+          <Link
+            to="/check"
+            className="sf-btn sf-btn--secondary sf-btn--sm flex items-center gap-1.5"
+          >
             <RotateCcw size={15} />
             <span>{t("result.start_new")}</span>
           </Link>
@@ -193,10 +210,10 @@ export function ResultPage(): React.JSX.Element {
 
           <div className="sf-glass-card p-3.5 space-y-1">
             <div className="text-[0.7rem] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              {t("result.stat_analyzed")}
+              {t("result.stat_candidates")}
             </div>
             <div className="text-xl font-bold text-slate-900 dark:text-slate-100">
-              {totalAnalyzedDiseases}
+              {displayData.results.length}
             </div>
           </div>
 

@@ -1,34 +1,70 @@
 # Sunflower Expert System 🌻
 
-An AI-powered bilingual (English/Khmer) expert system for diagnosing sunflower diseases with intelligent symptom analysis, multimodal photo analysis, offline-first PWA capabilities, side-by-side disease comparison, downloadable PDF reports, real-time Recharts visual analytics, and agronomist tooling.
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-19-61DAFB.svg?logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-3178C6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%20%7C%2017-4169E1.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Supabase](https://img.shields.io/badge/Supabase-Supported-3ECF8E.svg?logo=supabase&logoColor=white)](https://supabase.com)
+[![PWA Ready](https://img.shields.io/badge/PWA-Offline_First-5A0FC8.svg?logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+An intelligent, bilingual (**English & Khmer ភាសាខ្មែរ**) agricultural expert system designed for diagnosing sunflower crop diseases. Features multi-step anatomical symptom analysis, multimodal AI photo inspection, offline-first PWA field capabilities, side-by-side disease comparison, downloadable branded PDF reports, real-time Recharts visual analytics, and comprehensive agronomist disease catalog management.
+
+---
+
+## 📑 Table of Contents
+
+- [✨ Features](#-features)
+  - [👨‍🌾 For Growers & Field Officers](#-for-growers--field-officers)
+  - [🔬 For Agronomists & Researchers](#-for-agronomists--researchers)
+  - [🛡️ For Administrators & DevOps](#️-for-administrators--devops)
+- [🏗️ Architecture & Technology Stack](#️-architecture--technology-stack)
+- [📋 Prerequisites](#-prerequisites)
+- [🚀 Quick Start](#-quick-start)
+  - [Option A: Docker Compose (All-in-One Local Stack)](#option-a-docker-compose-all-in-one-local-stack)
+  - [Option B: Supabase Cloud Database (Zero Local DB)](#option-b-supabase-cloud-database-zero-local-db)
+  - [Option C: Local Host Development (Native)](#option-c-local-host-development-native)
+- [🗄️ Database Migrations & Data Seeding](#️-database-migrations--data-seeding)
+- [🔑 Default Seed Accounts](#-default-seed-accounts)
+- [☁️ Cloud Deployment Guide](#️-cloud-deployment-guide)
+- [⚙️ Environment Variables Reference](#️-environment-variables-reference)
+- [🧪 Testing & Quality Assurance](#-testing--quality-assurance)
+- [📁 Repository Structure](#-repository-structure)
+- [📚 System Documentation](#-system-documentation)
+- [📄 License](#-license)
 
 ---
 
 ## ✨ Features
 
 ### 👨‍🌾 For Growers & Field Officers
-- 🔍 **Interactive Symptom Checker (`/checker`)**: Multi-step diagnostic wizard categorized by plant anatomy (leaves, stems, flower heads, roots, whole plant).
-- 📶 **Offline-First Progressive Web App (PWA)**: Full offline support with Service Worker caching and IndexedDB queue with auto-sync when field internet connectivity is restored.
-- 📄 **Downloadable & Shareable PDF Diagnostic Report (`/result`)**: Export clean branded diagnostic scorecards as PDF or share via Web Share API.
-- 🔬 **Side-by-Side Disease Comparison Tool (`/diseases/compare`)**: Compare 2–3 diseases side-by-side to distinguish lookalike symptoms (e.g. Downy Mildew vs Powdery Mildew) and check fungicide compatibility.
-- 💬 **Botanical AI Crop Advisor**: Conversational AI assistant with plant photo upload and interactive quick-prompt questions.
-- 🌐 **Bilingual English & Khmer (ភាសាខ្មែរ)**: Complete localized agronomic terminology and bilingual disease knowledge base.
-- 👤 **Grower Account & Diagnosis History**: Track past crop evaluations, confidence scores, and field diagnoses over time.
+- 🌿 **Sunflower Studio UI Theme**: Clean, responsive aesthetic featuring forest-green and sunflower-gold palettes, mobile-optimized navigation, and direct plant-part diagnosis shortcuts.
+- 🔍 **Interactive Diagnostic Wizard (`/checker`)**: Multi-step symptom selector organized by plant anatomy (leaves, stems, flower heads, roots, and whole plant) with instant candidate disease scoring.
+- 📓 **Field Journal (`/journal`)**: Log field observations with severity ratings, follow-up scheduling, search/filter controls, and CSV data export.
+- 📶 **Offline-First Progressive Web App (PWA)**: Complete offline support powered by Service Workers and an IndexedDB queue with automated sync when network connectivity is restored.
+- 📄 **Downloadable & Shareable PDF Diagnostic Report (`/result`)**: Export clean branded diagnostic scorecards as high-resolution PDFs (`jspdf` + `html2canvas`) or share directly via the native Web Share API.
+- 🔬 **Side-by-Side Disease Comparison Tool (`/diseases/compare`)**: Compare 2–3 diseases simultaneously to distinguish lookalike symptoms (e.g. Downy Mildew vs Powdery Mildew) and verify chemical/fungicide compatibility.
+- 💬 **Botanical AI Crop Advisor**: Multimodal conversational assistant supporting crop photo uploads, contextual diagnosis questions, and agricultural recommendations.
+- 🌐 **Full Bilingual Support (English & Khmer ភាសាខ្មែរ)**: Localized agronomic terminology, symptom definitions, disease descriptions, and management protocols.
+- 👤 **Grower Account & Diagnosis History**: Track historical crop evaluations, confidence scores, and field diagnoses over time.
 
 ### 🔬 For Agronomists & Researchers
-- 🦠 **Disease Knowledge Base**: Create, edit, and publish disease definitions, pathogens, cause descriptions, and treatments.
-- 🧬 **Diagnostic Weight & Ruleset Configuration**: Fine-tune pathognomonic symptoms, required indicators, and Bayesian penalty weights.
+- 🦠 **Master Catalog (20 Diseases & 62 Clinical Symptoms)**: Comprehensive coverage across fungal, bacterial, oomycete, viral, and parasitic sunflower pathogens.
+- 🧬 **Calibrated Rule Engine (`2026.09.1`)**: Bayesian weighted evidence scoring with pathognomonic symptom triggers, required indicators, and Bayesian penalty weights.
+- ✍️ **Disease & Symptom Knowledge Editor**: Full CRUD interface for editing diseases, symptoms, anatomical categories, and bilingual translations.
 - 📊 **Visual Analytics Dashboard (`/admin`)**: Interactive charts powered by **Recharts**:
-  - **Disease Outbreak Trend**: 30-day activity Area Chart with 7d/14d/30d filters.
+  - **Disease Outbreak Trend**: 30-day activity Area Chart with 7d / 14d / 30d time horizons.
   - **Symptom Distribution**: Donut and ranked Horizontal Bar observation frequency charts.
   - **Diagnostic Confidence Distribution**: Statistical distribution across certainty tiers (High, Moderate, Low, Inconclusive).
-  - **Quality & Accuracy Metric Gauges**: Match rate, feedback resolution, and active symptom coverage scorecards.
-- 📬 **Grower Feedback Queue**: Review unclassified symptom patterns and crop feedback reports directly from farmers.
+  - **Quality & Accuracy Scorecards**: Match rate, feedback resolution, and active symptom coverage gauges.
+- 📬 **Grower Feedback Queue**: Review unclassified field symptom reports and farmer submissions.
 
-### 🛡️ For System Administrators
-- 👥 **Role-Based Access Control (RBAC)**: Customizable permission matrix for `grower`, `agronomist`, and `admin`.
-- 🗄️ **pgAdmin 4 Web Console**: Embedded database management tool at `http://localhost:5050`.
-- 🔑 **Enterprise Security**: Argon2id password hashing, JWT access tokens, HttpOnly refresh token rotation, and robust CORS controls.
+### 🛡️ For Administrators & DevOps
+- 👥 **Role-Based Access Control (RBAC)**: 3 core roles (`grower`, `agronomist`, `admin`), 19 atomic permissions, and 40 role-permission mappings.
+- ☁️ **Cloud Database & Managed Pooler Support**: Native support for **Supabase PostgreSQL 17** (and transaction poolers like PgBouncer) with automatic URL normalization, SSLContext configuration, and prepared statement handling.
+- 🗄️ **pgAdmin 4 Web Console**: Embedded database management tool at `http://localhost:5050` when using Docker Compose.
+- 🔒 **Enterprise-Grade Security**: Argon2id password hashing, JWT access tokens, HttpOnly refresh token rotation family, PostgreSQL advisory-lock rate limiting, CSRF tokens, and structured audit logs.
 
 ---
 
@@ -36,218 +72,365 @@ An AI-powered bilingual (English/Khmer) expert system for diagnosing sunflower d
 
 ```mermaid
 graph TD
-    A[React 19 Frontend + Vite 6 + Tailwind CSS 4] -->|REST API + HttpOnly Cookies| B[FastAPI Python 3.12 Backend]
-    B -->|Asyncpg SQLAlchemy 2.0 / Alembic| C[(PostgreSQL 16 Database)]
-    D[pgAdmin 4 Web Interface] -->|Port 5432| C
-    A -->|Service Worker + IndexedDB| E[Offline PWA Storage & Auto-Sync]
-    A -->|Recharts| F[Interactive Visual Analytics]
+    subgraph Client["Frontend Client (Port 5174)"]
+        UI["React 19 + TypeScript + Vite 6"]
+        PWA["PWA Service Worker + IndexedDB Offline Storage"]
+        Charts["Recharts Visual Analytics"]
+        PDF["PDF Exporter (jsPDF + html2canvas)"]
+    end
+
+    subgraph Server["Backend API (Port 8000)"]
+        API["FastAPI (Python 3.12)"]
+        Engine["Agronomic Diagnosis Engine (Ruleset 2026.09.1)"]
+        Auth["Argon2id + JWT + Token Families"]
+        ORM["SQLAlchemy 2.0 Async (Asyncpg / Psycopg)"]
+        Migrate["Alembic Migrations (0001 -> 0004)"]
+    end
+
+    subgraph Storage["Database & Cloud"]
+        LocalDB[("Local PostgreSQL 16 (Port 5434)")]
+        CloudDB[("Supabase PostgreSQL 17 (Transaction Pooler)")]
+        pgAdmin["pgAdmin 4 Web Interface (Port 5050)"]
+    end
+
+    subgraph AI["Optional AI Layer"]
+        Ollama["Local Ollama / Botanical Vision & Text LLM"]
+    end
+
+    UI -->|REST API + HttpOnly Cookies| API
+    PWA -.->|Background Sync| API
+    API --> ORM
+    ORM -->|Dev / Local| LocalDB
+    ORM -->|Staging / Production| CloudDB
+    pgAdmin -->|Port 5432| LocalDB
+    API -.->|Multimodal Analysis| Ollama
 ```
 
-- **Frontend**: React 19, TypeScript (Strict), Vite 6, Tailwind CSS 4, TanStack Query v5, Recharts, `vite-plugin-pwa`, `jspdf`, `html2canvas`, `react-router` v7, `react-i18next`.
-- **Backend**: FastAPI (Python 3.12), SQLAlchemy 2.0 (Asyncpg / Psycopg), Alembic, Pydantic v2, Argon2id, JWT.
-- **Database**: PostgreSQL 16 Alpine + pgAdmin 4.
+### Technology Breakdown
+
+| Layer | Technologies |
+|---|---|
+| **Frontend** | React 19, TypeScript (Strict), Vite 6, Tailwind CSS 4, TanStack Query v5, Recharts, `vite-plugin-pwa`, `jspdf`, `html2canvas`, `react-router` v7, `react-i18next` |
+| **Backend** | FastAPI, Python 3.12+, SQLAlchemy 2.0 (Asyncpg & Psycopg 3), Alembic, Pydantic v2, Argon2id, PyJWT, Structlog |
+| **Database** | PostgreSQL 16 (Local Docker) / PostgreSQL 17 (Supabase Cloud with PgBouncer Pooler) |
+| **Infrastructure** | Docker, Docker Compose, Nginx, Render Blueprint (`render.yaml`), Vercel SPA (`vercel.json`) |
 
 ---
 
 ## 📋 Prerequisites
 
-| Requirement | Minimum Version | Recommended | Notes |
-|-------------|-----------------|-------------|-------|
+| Tool | Minimum Version | Recommended | Purpose |
+|---|---|---|---|
 | **Git** | `2.x+` | Latest | Version control |
-| **Docker & Docker Compose** | `24+` | Docker Desktop | Recommended for easiest setup |
-| **Node.js** | `20.x+` | `20.x` or `22.x LTS` | If running frontend locally |
-| **Python** | `3.12+` | `3.12.x` | If running backend locally |
-| **PostgreSQL** | `14+` | `16.x` | If running database without Docker |
+| **Docker & Compose** | `24+` | Docker Desktop | Easiest containerized setup |
+| **Node.js** | `20.x+` | `20.x` or `22.x LTS` | Frontend development & build |
+| **Python** | `3.12+` | `3.12.x` | Backend runtime & scripting |
+| **PostgreSQL** | `14+` | `16.x` / Supabase 17 | Database engine |
 
 ---
 
-## 🚀 Quick Start with Docker (Recommended)
+## 🚀 Quick Start
 
-Docker runs the PostgreSQL database, pgAdmin 4, the FastAPI backend, and the React frontend in synchronized containers.
+### Option A: Docker Compose (All-in-One Local Stack)
 
-### 1. Clone the Repository
+Runs PostgreSQL 16, pgAdmin 4, FastAPI backend, and React frontend in synchronized containers:
+
 ```bash
+# 1. Clone repository
 git clone https://github.com/Bunvathana876/Expert_sunflower.git
 cd Expert_sunflower-deploy
-```
 
-### 2. Configure Environment Variables
-Copy `.env.example` to `.env`:
-- **macOS / Linux**:
-  ```bash
-  cp .env.example .env
-  ```
-- **Windows (PowerShell)**:
-  ```powershell
-  Copy-Item .env.example .env
-  ```
+# 2. Setup environment file
+cp .env.example .env
 
-### 3. Start the Containers
-```bash
+# 3. Start all services
 docker compose up -d --build
-```
 
-### 4. Apply Migrations & Seed Sample Data
-In your terminal, run:
-```bash
-# 1. Run database schema migrations
+# 4. Run migrations and seed data
 docker compose exec api alembic upgrade head
-
-# 2. Seed roles, permissions, categories, and admin account
 docker compose exec api python -m scripts.seed
-
-# 3. Import 5 standard sunflower diseases and 20 symptoms
-docker compose exec api python -m scripts.import_sample_diseases
+docker compose exec api python -m scripts.import_master_20_diseases
+docker compose exec api python -m scripts.create_users
 ```
 
-### 5. Access Your Applications
+> [!TIP]
+> **Makefile Shortcuts**: You can also run `make up`, `make migrate`, and `make seed-all` if `make` is installed.
 
-| Service | URL | Default Credentials |
-|---|---|---|
-| 🌐 **Grower Web App** | [http://localhost:5174](http://localhost:5174) | Free registration or seed accounts |
-| 🛡️ **Admin Dashboard** | [http://localhost:5174/admin](http://localhost:5174/admin) | `admin@example.com` / `leetaka!1234568` |
-| 📄 **API Swagger Docs** | [http://localhost:8000/docs](http://localhost:8000/docs) | N/A |
-| 🗄️ **pgAdmin 4 Console** | [http://localhost:5050](http://localhost:5050) | `admin@sunflower.local` / `AdminPassword123!` |
-
----
-
-## 🗄️ Connecting pgAdmin 4 to the Database
-
-1. Open **[http://localhost:5050](http://localhost:5050)** in your browser.
-2. Log in with:
-   - **Email**: `admin@sunflower.local`
-   - **Password**: `AdminPassword123!`
-3. **Register Server**:
-   - Right-click **Servers** ➡️ **Register** ➡️ **Server...**
-   - **General Tab**: Name = `Sunflower Local DB`
-   - **Connection Tab**:
-     - **Host name / address**: `db` *(Internal Docker network host)*
-     - **Port**: `5432`
-     - **Maintenance database**: `sunflower_db`
-     - **Username**: `sunflower_admin`
-     - **Password**: `SuperSecurePassword123!`
-   - Click **Save**.
+#### Access URLs (Docker)
+- 🌐 **Grower Web App**: [http://localhost:5174](http://localhost:5174)
+- 🛡️ **Admin Dashboard**: [http://localhost:5174/admin](http://localhost:5174/admin)
+- 📄 **API Swagger Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- 🗄️ **pgAdmin 4 Console**: [http://localhost:5050](http://localhost:5050) (`admin@sunflower.local` / `AdminPassword123!`)
 
 ---
 
-## 🌐 Sharing Database with Teammates (via Tailscale VPN)
+### Option B: Supabase Cloud Database (Zero Local DB)
 
-1. Both you and your teammate install **[Tailscale](https://tailscale.com/)** and log in.
-2. Copy your **Tailscale IP** (e.g. `100.85.120.45`).
-3. Keep your Docker database running (`docker compose up -d`).
-4. Your teammate updates their `.env` file to replace `localhost` with your Tailscale IP:
+You can connect directly to a managed Supabase PostgreSQL 17 instance without running a local database container:
+
+1. **Configure `.env`**:
+   Set `DATABASE_URL` and `ALEMBIC_DATABASE_URL` to your Supabase connection string:
    ```dotenv
-   DATABASE_URL=postgresql+asyncpg://sunflower_admin:SuperSecurePassword123!@YOUR_TAILSCALE_IP:5433/sunflower_db
+   DATABASE_URL=postgresql+asyncpg://postgres.your-project:your-password@aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres?sslmode=require
+   ALEMBIC_DATABASE_URL=postgresql+psycopg://postgres.your-project:your-password@aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres?sslmode=require
    ```
-5. Your teammate can now query your live database directly over the secure Tailscale VPN!
+2. **Apply Migrations & Seed Supabase**:
+   ```bash
+   cd backend
+   alembic upgrade head
+   python -m scripts.seed
+   python -m scripts.import_master_20_diseases
+   python -m scripts.create_users
+   ```
+3. **Start Frontend & Backend**:
+   Run FastAPI on port 8000 and Vite on port 5174 (see Option C below).
 
 ---
 
-## 💾 Saving Your Database Data to GitHub
+### Option C: Local Host Development (Native)
 
-Database records in Docker volumes (`pgdata`) are not automatically tracked by Git. Whenever you add new diseases or symptoms in the website and want to commit them to GitHub:
-
-### Step 1: Export Data to a SQL Seed File
-```bash
-docker exec expert_sunflower-deploy-db-1 pg_dump -U sunflower_admin -d sunflower_db --data-only --inserts > backend/database_seed.sql
-```
-
-### Step 2: Commit & Push to GitHub
-```bash
-git add backend/database_seed.sql
-git commit -m "feat: update disease and symptom seed data"
-git push origin main
-```
-
-### Step 3: Restore on Any New Computer
-```bash
-docker exec -i expert_sunflower-deploy-db-1 psql -U sunflower_admin -d sunflower_db < backend/database_seed.sql
-```
-
----
-
-## 💻 Local Development Without Docker
-
-If you prefer running frontend and backend directly on your host machine:
-
-### 🍏 macOS Setup
+#### 1. Backend Setup (FastAPI)
 
 ```bash
-# 1. Start local PostgreSQL
-brew services start postgresql@16
-
-# 2. Setup backend
 cd backend
+
+# Create and activate virtual environment
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate       # On Windows: .venv\Scripts\Activate.ps1
+
+# Install package in editable mode with development dependencies
+pip install --upgrade pip
 pip install -e .
+
+# Run migrations and seed database
 alembic upgrade head
 python -m scripts.seed
-python -m scripts.import_sample_diseases
-uvicorn app.main:app --reload --port 8000
+python -m scripts.import_master_20_diseases
+python -m scripts.create_users
 
-# 3. Setup frontend (in a second terminal)
+# Start development API server
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+#### 2. Frontend Setup (React 19 + Vite 6)
+
+In a separate terminal:
+
+```bash
 cd frontend
+
+# Install dependencies
 npm install
+
+# Start Vite dev server
 npm run dev
 ```
 
-### 🪟 Windows Setup (PowerShell)
+The application will be accessible at [http://localhost:5174](http://localhost:5174).
 
-```powershell
-# 1. Setup backend
-cd backend
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install -e .
+---
+
+## 🗄️ Database Migrations & Data Seeding
+
+The application uses **Alembic** for schema migrations and specialized Python scripts for idempotent seeding:
+
+```bash
+# 1. Apply all schema revisions (0001 -> 0004)
 alembic upgrade head
-python -m scripts.seed
-python -m scripts.import_sample_diseases
-uvicorn app.main:app --reload --port 8000
 
-# 2. Setup frontend (in a second terminal)
-cd frontend
-npm install
-npm run dev
+# 2. Seed RBAC roles, permissions, symptom categories, ruleset, and admin user
+python -m scripts.seed
+
+# 3. Seed Master Catalog (20 sunflower diseases, 62 symptoms, 80 rules, 300 translations)
+python -m scripts.import_master_20_diseases
+
+# 4. Create sample agronomist and grower accounts
+python -m scripts.create_users
 ```
+
+### Script Inventory
+- `scripts.seed`: Idempotently seeds 3 roles, 19 permissions, 40 role_permissions, 8 anatomical categories, ruleset `2026.09.1`, and admin account.
+- `scripts.import_master_20_diseases`: Executes `backend/scripts/seed_20_diseases_and_symptoms.sql` to populate 20 diseases, 62 symptoms, and English/Khmer translations.
+- `scripts.create_users`: Creates standard `expert` and `grower` test accounts.
+- `scripts.cleanup_expired`: Periodic job to clean up expired refresh tokens and rate-limit audit records.
+- `scripts.reset_admin_password`: CLI tool to reset admin password securely.
 
 ---
 
 ## 🔑 Default Seed Accounts
 
-| Role | Email / Username | Password | Capabilities |
-|------|---|---|---|
-| **Administrator** | `admin@example.com` (`admin`) | `leetaka!1234568` | Full access, user & role editor, analytics |
-| **Agronomist** | `expert@example.com` | `expert123456` | Knowledge base, symptom weights, feedback queue |
-| **Grower** | `vathana` (`vathanabun934@gmail.com`) | Registered password | Field diagnosis, PDF export, history |
+After running the seed scripts, the following default accounts are available:
+
+| Role | Username / Identifier | Email | Password | Access Capabilities |
+|---|---|---|---|---|
+| **Administrator** | `admin` | `admin@example.com` | `leetaka!1234568` *(or `.env` value)* | Full system access, RBAC management, analytics, audit log |
+| **Agronomist** | `expert` | `expert@example.com` | `expert123` | Knowledge base editing, symptom weight calibration, feedback queue |
+| **Grower** | `grower` | `grower@example.com` | `grower123` | Plant health diagnosis, field journal, PDF reports, personal history |
+
+> [!NOTE]
+> Growers can also freely register new accounts through the registration page at `/register`.
 
 ---
 
-## 🧪 Testing & Verification
+## ☁️ Cloud Deployment Guide
 
-### Backend Pytest Suite
-```bash
-cd backend
-pytest -v
+The repository is pre-configured for modern cloud hosting platforms:
+
+```
+          ┌──────────────────────────────────────────┐
+          │               Vercel                     │
+          │  React 19 PWA Frontend (SPA + SW)        │
+          │  Proxy /api/v1 -> Render                 │
+          └─────────────────────┬────────────────────┘
+                                │ HTTPS REST
+                                ▼
+          ┌──────────────────────────────────────────┐
+          │               Render                     │
+          │  FastAPI Backend (Docker Container)      │
+          │  Auto-scaling, Dynamic $PORT Binding     │
+          └─────────────────────┬────────────────────┘
+                                │ SSL / TLS (Pooler)
+                                ▼
+          ┌──────────────────────────────────────────┐
+          │              Supabase                    │
+          │  Managed PostgreSQL 17 Cloud             │
+          │  Transaction Pooler (PgBouncer)          │
+          └──────────────────────────────────────────┘
 ```
 
-### Frontend Typecheck, Tests & Build
+- **Backend (Render)**:
+  - 1-Click deployment via [`render.yaml`](render.yaml).
+  - Health checks: `/health/live` (process alive) and `/health/ready` (database up & Alembic revision `0004` confirmed).
+  - Auto-handling of dynamic `$PORT` environment variable.
+- **Frontend (Vercel)**:
+  - Configured via [`frontend/vercel.json`](frontend/vercel.json) with SPA fallback routes and `/api/v1` reverse-proxy to Render.
+- **Database (Supabase)**:
+  - Automatic `statement_cache_size=0` and custom TLS SSLContext handling in [`backend/app/db/session.py`](backend/app/db/session.py).
+
+📖 For complete deployment instructions, see the **[Backend Deployment Guide](docs/BACKEND_DEPLOYMENT_GUIDE.md)**.
+
+---
+
+## ⚙️ Environment Variables Reference
+
+Create a `.env` file in the project root:
+
+| Variable | Description | Default / Example |
+|---|---|---|
+| `DATABASE_URL` | Async PostgreSQL connection string | `postgresql+asyncpg://user:pass@host:5432/dbname` |
+| `ALEMBIC_DATABASE_URL` | Sync PostgreSQL connection string for Alembic | `postgresql+psycopg://user:pass@host:5432/dbname` |
+| `JWT_SECRET` | 32+ character cryptographic key | `openssl rand -hex 32` |
+| `JWT_ALG` | JWT signing algorithm | `HS256` |
+| `ACCESS_TTL_MIN` | Access token lifespan (minutes) | `15` |
+| `REFRESH_TTL_DAYS` | Refresh token lifespan (days) | `30` |
+| `ENV` | Environment name (`development` / `production`) | `development` |
+| `LOG_LEVEL` | Log verbosity (`DEBUG`, `INFO`, `WARNING`) | `INFO` |
+| `CORS_ORIGINS` | Allowed CORS origins (comma-separated) | `http://localhost:5174,http://localhost:5173` |
+| `ADMIN_EMAIL` | Initial admin account email | `admin@example.com` |
+| `ADMIN_USERNAME` | Initial admin account username | `admin` |
+| `ADMIN_PASSWORD` | Initial admin account password | `leetaka!1234568` |
+| `MEDIA_BACKEND` | Storage backend for crop photos (`local` / `s3`) | `local` |
+| `VITE_API_BASE_URL` | Frontend API client base URL | `http://localhost:8000/api/v1` |
+
+---
+
+## 🧪 Testing & Quality Assurance
+
+### Backend Tests (Pytest)
+
+The backend features a comprehensive suite covering unit tests, RBAC authorization, token families, and deployment resilience:
+
+```bash
+cd backend
+
+# Run all unit tests
+pytest tests/unit
+
+# Run full test suite with verbose output
+pytest -v
+
+# Run database URL normalization & deployment tests
+pytest tests/unit/test_deployment_db.py
+```
+
+### Frontend Tests & Validation (Vitest & Vite)
+
 ```bash
 cd frontend
 
 # Run unit and component test suites with Vitest
 npm test -- --run
 
-# TypeScript validation
+# TypeScript strict type checking
 npm run typecheck
 
-# Production and PWA service worker build
+# Production build and PWA service worker generation
 npm run build
 ```
 
 ---
 
+## 📁 Repository Structure
+
+```
+Expert_sunflower-deploy/
+├── backend/                       # FastAPI REST API & Agronomic Engine
+│   ├── ai/                        # Botanical LLM & Vision diagnostics services
+│   ├── alembic/                   # Database migrations (revisions 0001 -> 0004)
+│   ├── app/                       # Core FastAPI application
+│   │   ├── api/v1/routes/         # API endpoint routers (auth, diagnosis, diseases, etc.)
+│   │   ├── core/                  # Security, JWT, config, rate limiting & dependencies
+│   │   ├── db/                    # SQLAlchemy async session & pooler normalizer
+│   │   ├── models/                # SQLAlchemy ORM relational models
+│   │   ├── repositories/          # Data access layer repositories
+│   │   ├── schemas/               # Pydantic v2 validation schemas
+│   │   └── services/              # Agronomic diagnosis engine & business logic
+│   ├── scripts/                   # Database seeding, user creation & maintenance scripts
+│   ├── tests/                     # Unit, integration, security & deployment test suites
+│   ├── Dockerfile                 # Multi-stage production container
+│   └── requirements.txt           # Python dependency specification
+│
+├── frontend/                      # React 19 + TypeScript + Vite 6 PWA
+│   ├── src/
+│   │   ├── api/                   # Typed API clients & Axios/Fetch integrations
+│   │   ├── components/            # Reusable UI widgets & layout navigation
+│   │   ├── features/              # Feature modules (diagnosis, journal, admin, diseases)
+│   │   ├── locales/               # Bilingual i18n dictionaries (en.json, km.json)
+│   │   └── styles/                # Tailwind CSS 4 & Studio theme tokens
+│   ├── public/                    # PWA icons, manifest, and static assets
+│   ├── Dockerfile                 # Multi-stage Nginx production container
+│   └── vercel.json                # Vercel deployment & proxy configuration
+│
+├── docs/                          # Comprehensive System Documentation
+│   ├── ai/                        # AI admin, permissions & integration guides
+│   ├── guides/                    # Setup, onboarding, checklists & quick references
+│   ├── BACKEND_DEPLOYMENT_GUIDE.md# Production deployment guide (Render, Supabase)
+│   ├── ARCHITECTURE.md            # Technical system architecture
+│   └── DECISIONS.md               # Architecture decision records (ADRs)
+│
+├── scripts/                       # Database backup, verification & CI utilities
+├── docker-compose.yml             # Local multi-service development topology
+├── docker-compose.prod.yml        # Hardened non-root production topology
+├── render.yaml                    # 1-Click Render Blueprint specification
+└── Makefile                       # Developer shortcuts (make up, make seed-all)
+```
+
+---
+
+## 📚 System Documentation
+
+Explore the following documents in [`docs/`](docs/) for in-depth technical references:
+
+- **[Backend Deployment Guide](docs/BACKEND_DEPLOYMENT_GUIDE.md)**: Production deployment instructions for Render, Supabase, and Vercel.
+- **[System Architecture](docs/ARCHITECTURE.md)**: Core architectural concepts, RBAC matrix, and security model.
+- **[Supabase Migration Report](docs/SUPABASE_MIGRATION_EXECUTION_REPORT.md)**: Detailed report of Supabase migration and data validation.
+- **[Developer Setup Instructions](docs/guides/SETUP_INSTRUCTIONS.md)**: Step-by-step developer onboarding guide.
+- **[Quick Reference Guide](docs/guides/QUICK_REFERENCE.md)**: Common CLI commands, endpoints, and developer workflows.
+- **[AI Integration & Advisor Guide](docs/ai/AI_INTEGRATION.md)**: Botanical crop advisor and Ollama integration details.
+- **[Operations & Backup Guide](docs/OPERATIONS_AND_BACKUP.md)**: Automated backup, verification, and disaster recovery.
+
+---
+
 ## 📄 License
 
-Distributed under the MIT License. Built for agricultural health research and sunflower farming communities.
+Distributed under the **MIT License**. Built for agricultural health research and sunflower farming communities.

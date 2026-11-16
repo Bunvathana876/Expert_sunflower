@@ -57,6 +57,25 @@ describe("CheckerPage UX and Interaction", () => {
   });
 
   // 1. Selecting a symptom
+  it("opens the plant category requested by a homepage shortcut", () => {
+    render(
+      <MemoryRouter initialEntries={["/check?category=stem"]}>
+        <CheckerPage />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole("checkbox", { name: /Stem canker lesion/i })).toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: /Brown leaf spots/i })).not.toBeInTheDocument();
+  });
+
+  it("falls back to the first category when a shortcut is unknown", () => {
+    render(
+      <MemoryRouter initialEntries={["/check?category=unknown"]}>
+        <CheckerPage />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole("checkbox", { name: /Brown leaf spots/i })).toBeInTheDocument();
+  });
+
   it("selects a symptom when row is clicked and gives visual feedback", () => {
     render(
       <MemoryRouter>

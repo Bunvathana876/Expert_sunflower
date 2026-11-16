@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import and_, delete, func, or_, select, update
+from sqlalchemy import CursorResult, and_, delete, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.ai_action import PendingAIAction
@@ -39,7 +39,7 @@ class MaintenanceRepository:
             .values(status="expired")
             .execution_options(synchronize_session=False)
         )
-        return int(res.rowcount or 0)
+        return int(res.rowcount or 0) if isinstance(res, CursorResult) else 0
 
     async def count_prunable_ai_actions(
         self,
@@ -71,7 +71,7 @@ class MaintenanceRepository:
             )
             .execution_options(synchronize_session=False)
         )
-        return int(res.rowcount or 0)
+        return int(res.rowcount or 0) if isinstance(res, CursorResult) else 0
 
     async def count_prunable_refresh_tokens(
         self,
@@ -119,7 +119,7 @@ class MaintenanceRepository:
             )
             .execution_options(synchronize_session=False)
         )
-        return int(res.rowcount or 0)
+        return int(res.rowcount or 0) if isinstance(res, CursorResult) else 0
 
     async def count_prunable_rate_limit_events(
         self,
@@ -147,4 +147,4 @@ class MaintenanceRepository:
             )
             .execution_options(synchronize_session=False)
         )
-        return int(res.rowcount or 0)
+        return int(res.rowcount or 0) if isinstance(res, CursorResult) else 0
