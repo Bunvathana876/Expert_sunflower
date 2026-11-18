@@ -1,13 +1,17 @@
 # Sunflower Expert System 🌻
 
+[![CI](https://github.com/Bunvathana876/Expert_sunflower/actions/workflows/ci.yml/badge.svg)](https://github.com/Bunvathana876/Expert_sunflower/actions/workflows/ci.yml)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Python](https://img.shields.io/badge/Python-3.12+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org)
 [![React](https://img.shields.io/badge/React-19-61DAFB.svg?logo=react&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-3178C6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF.svg?logo=vite&logoColor=white)](https://vite.dev)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%20%7C%2017-4169E1.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![Supabase](https://img.shields.io/badge/Supabase-Supported-3ECF8E.svg?logo=supabase&logoColor=white)](https://supabase.com)
+[![Docker](https://img.shields.io/badge/Docker-Supported-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com)
 [![PWA Ready](https://img.shields.io/badge/PWA-Offline_First-5A0FC8.svg?logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 An intelligent, bilingual (**English & Khmer ភាសាខ្មែរ**) agricultural expert system designed for diagnosing sunflower crop diseases. Features multi-step anatomical symptom analysis, multimodal AI photo inspection, offline-first PWA field capabilities, side-by-side disease comparison, downloadable branded PDF reports, real-time Recharts visual analytics, and comprehensive agronomist disease catalog management.
 
@@ -31,6 +35,7 @@ An intelligent, bilingual (**English & Khmer ភាសាខ្មែរ**) agri
 - [⚙️ Environment Variables Reference](#️-environment-variables-reference)
 - [🧪 Testing & Quality Assurance](#-testing--quality-assurance)
 - [📁 Repository Structure](#-repository-structure)
+- [🌿 Git Workflow & Push Instructions](#-git-workflow--push-instructions)
 - [📚 System Documentation](#-system-documentation)
 - [📄 License](#-license)
 
@@ -65,6 +70,7 @@ An intelligent, bilingual (**English & Khmer ភាសាខ្មែរ**) agri
 - ☁️ **Cloud Database & Managed Pooler Support**: Native support for **Supabase PostgreSQL 17** (and transaction poolers like PgBouncer) with automatic URL normalization, SSLContext configuration, and prepared statement handling.
 - 🗄️ **pgAdmin 4 Web Console**: Embedded database management tool at `http://localhost:5050` when using Docker Compose.
 - 🔒 **Enterprise-Grade Security**: Argon2id password hashing, JWT access tokens, HttpOnly refresh token rotation family, PostgreSQL advisory-lock rate limiting, CSRF tokens, and structured audit logs.
+- 🚦 **Automated CI/CD Pipeline**: Multi-job GitHub Actions workflow executing backend linting (Ruff), database migration round-trips, pytest test suites, frontend type checks, Vitest unit tests, Playwright E2E browser tests, vulnerability audits, and Docker production builds.
 
 ---
 
@@ -83,7 +89,7 @@ graph TD
         API["FastAPI (Python 3.12)"]
         Engine["Agronomic Diagnosis Engine (Ruleset 2026.09.1)"]
         Auth["Argon2id + JWT + Token Families"]
-        ORM["SQLAlchemy 2.0 Async (Asyncpg / Psycopg)"]
+        ORM["SQLAlchemy 2.0 Async (Asyncpg / Psycopg 3)"]
         Migrate["Alembic Migrations (0001 -> 0004)"]
     end
 
@@ -113,7 +119,7 @@ graph TD
 | **Frontend** | React 19, TypeScript (Strict), Vite 6, Tailwind CSS 4, TanStack Query v5, Recharts, `vite-plugin-pwa`, `jspdf`, `html2canvas`, `react-router` v7, `react-i18next` |
 | **Backend** | FastAPI, Python 3.12+, SQLAlchemy 2.0 (Asyncpg & Psycopg 3), Alembic, Pydantic v2, Argon2id, PyJWT, Structlog |
 | **Database** | PostgreSQL 16 (Local Docker) / PostgreSQL 17 (Supabase Cloud with PgBouncer Pooler) |
-| **Infrastructure** | Docker, Docker Compose, Nginx, Render Blueprint (`render.yaml`), Vercel SPA (`vercel.json`) |
+| **Infrastructure** | Docker, Docker Compose, Nginx, Caddy (TLS), Render Blueprint (`render.yaml`), Vercel SPA (`vercel.json`), GitHub Actions |
 
 ---
 
@@ -122,7 +128,7 @@ graph TD
 | Tool | Minimum Version | Recommended | Purpose |
 |---|---|---|---|
 | **Git** | `2.x+` | Latest | Version control |
-| **Docker & Compose** | `24+` | Docker Desktop | Easiest containerized setup |
+| **Docker & Compose** | `24+` | Docker Desktop | Containerized local development & database |
 | **Node.js** | `20.x+` | `20.x` or `22.x LTS` | Frontend development & build |
 | **Python** | `3.12+` | `3.12.x` | Backend runtime & scripting |
 | **PostgreSQL** | `14+` | `16.x` / Supabase 17 | Database engine |
@@ -169,7 +175,7 @@ docker compose exec api python -m scripts.create_users
 You can connect directly to a managed Supabase PostgreSQL 17 instance without running a local database container:
 
 1. **Configure `.env`**:
-   Set `DATABASE_URL` and `ALEMBIC_DATABASE_URL` to your Supabase connection string:
+   Set `DATABASE_URL` and `ALEMBIC_DATABASE_URL` to your Supabase connection strings:
    ```dotenv
    DATABASE_URL=postgresql+asyncpg://postgres.your-project:your-password@aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres?sslmode=require
    ALEMBIC_DATABASE_URL=postgresql+psycopg://postgres.your-project:your-password@aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres?sslmode=require
@@ -200,7 +206,7 @@ source .venv/bin/activate       # On Windows: .venv\Scripts\Activate.ps1
 
 # Install package in editable mode with development dependencies
 pip install --upgrade pip
-pip install -e .
+pip install -e ".[dev]"
 
 # Run migrations and seed database
 alembic upgrade head
@@ -317,8 +323,8 @@ Create a `.env` file in the project root:
 
 | Variable | Description | Default / Example |
 |---|---|---|
-| `DATABASE_URL` | Async PostgreSQL connection string | `postgresql+asyncpg://user:pass@host:5432/dbname` |
-| `ALEMBIC_DATABASE_URL` | Sync PostgreSQL connection string for Alembic | `postgresql+psycopg://user:pass@host:5432/dbname` |
+| `DATABASE_URL` | Async PostgreSQL connection string | `postgresql+asyncpg://sunflower:sunflower_dev_password@db:5432/sunflower` |
+| `ALEMBIC_DATABASE_URL` | Sync PostgreSQL connection string for Alembic | `postgresql+psycopg://sunflower:sunflower_dev_password@db:5432/sunflower` |
 | `JWT_SECRET` | 32+ character cryptographic key | `openssl rand -hex 32` |
 | `JWT_ALG` | JWT signing algorithm | `HS256` |
 | `ACCESS_TTL_MIN` | Access token lifespan (minutes) | `15` |
@@ -336,36 +342,47 @@ Create a `.env` file in the project root:
 
 ## 🧪 Testing & Quality Assurance
 
-### Backend Tests (Pytest)
-
-The backend features a comprehensive suite covering unit tests, RBAC authorization, token families, and deployment resilience:
+### Backend Quality Suite (Ruff, Mypy & Pytest)
 
 ```bash
 cd backend
 
-# Run all unit tests
+# Code formatting & static lint checks
+ruff check .
+
+# Type checking
+mypy app
+
+# Run unit tests
 pytest tests/unit
 
 # Run full test suite with verbose output
 pytest -v
-
-# Run database URL normalization & deployment tests
-pytest tests/unit/test_deployment_db.py
 ```
 
-### Frontend Tests & Validation (Vitest & Vite)
+### Frontend Quality Suite (ESLint, TypeScript & Vitest)
 
 ```bash
 cd frontend
 
-# Run unit and component test suites with Vitest
-npm test -- --run
+# ESLint code style check
+npm run lint
 
 # TypeScript strict type checking
 npm run typecheck
 
+# Vitest unit and component tests
+npm test -- --run
+
 # Production build and PWA service worker generation
 npm run build
+```
+
+### Browser E2E Lifecycle Testing (Playwright)
+
+```bash
+cd frontend
+npm run test:e2e
 ```
 
 ---
@@ -374,6 +391,8 @@ npm run build
 
 ```
 Expert_sunflower-deploy/
+├── .github/                       # GitHub Actions CI/CD workflows
+│   └── workflows/ci.yml           # Automated multi-job test & build pipeline
 ├── backend/                       # FastAPI REST API & Agronomic Engine
 │   ├── ai/                        # Botanical LLM & Vision diagnostics services
 │   ├── alembic/                   # Database migrations (revisions 0001 -> 0004)
@@ -388,6 +407,7 @@ Expert_sunflower-deploy/
 │   ├── scripts/                   # Database seeding, user creation & maintenance scripts
 │   ├── tests/                     # Unit, integration, security & deployment test suites
 │   ├── Dockerfile                 # Multi-stage production container
+│   ├── pyproject.toml             # Python build metadata & tool configurations
 │   └── requirements.txt           # Python dependency specification
 │
 ├── frontend/                      # React 19 + TypeScript + Vite 6 PWA
@@ -399,21 +419,78 @@ Expert_sunflower-deploy/
 │   │   └── styles/                # Tailwind CSS 4 & Studio theme tokens
 │   ├── public/                    # PWA icons, manifest, and static assets
 │   ├── Dockerfile                 # Multi-stage Nginx production container
+│   ├── package.json               # Frontend dependencies & scripts
+│   ├── tsconfig.json              # TypeScript strict configuration
+│   ├── vite.config.ts             # Vite 6 + PWA configuration
 │   └── vercel.json                # Vercel deployment & proxy configuration
 │
+├── caddy/                         # Caddy reverse proxy configuration
+│   └── Caddyfile                  # TLS reverse proxy & security headers
 ├── docs/                          # Comprehensive System Documentation
 │   ├── ai/                        # AI admin, permissions & integration guides
 │   ├── guides/                    # Setup, onboarding, checklists & quick references
 │   ├── BACKEND_DEPLOYMENT_GUIDE.md# Production deployment guide (Render, Supabase)
 │   ├── ARCHITECTURE.md            # Technical system architecture
-│   └── DECISIONS.md               # Architecture decision records (ADRs)
+│   ├── DECISIONS.md               # Architecture decision records (ADRs)
+│   └── SUPABASE_MIGRATION_EXECUTION_REPORT.md # Supabase migration validation report
 │
 ├── scripts/                       # Database backup, verification & CI utilities
 ├── docker-compose.yml             # Local multi-service development topology
 ├── docker-compose.prod.yml        # Hardened non-root production topology
+├── docker-compose.caddy.yml       # Caddy TLS production reverse proxy
 ├── render.yaml                    # 1-Click Render Blueprint specification
-└── Makefile                       # Developer shortcuts (make up, make seed-all)
+├── Makefile                       # Developer shortcuts (make up, make seed-all)
+├── .env.example                   # Local development environment template
+├── .env.prod.example              # Production environment template
+└── .gitignore                     # Git ignore rules for Python, Node, DB & secrets
 ```
+
+---
+
+## 🌿 Git Workflow & Push Instructions
+
+Follow these steps before pushing your code to GitHub:
+
+### 1. Verify Git Status & Ignored Files
+```bash
+# Verify no untracked secrets (.env) or build artifacts are present
+git status
+
+# Review ignored files to ensure secrets are shielded
+git status --ignored
+```
+
+### 2. Run Local Quality Verification
+```bash
+# Backend checks
+cd backend
+ruff check .
+pytest tests/unit
+cd ..
+
+# Frontend checks
+cd frontend
+npm run lint
+npm run typecheck
+npm test -- --run
+npm run build
+cd ..
+```
+
+### 3. Stage, Commit & Push
+```bash
+# Stage your modified files
+git add .gitignore backend/.gitignore frontend/.gitignore .env.example README.md
+
+# Commit with a clear, conventional commit message
+git commit -m "docs: update README and harden gitignore for GitHub push"
+
+# Push to your remote repository
+git push origin <your-branch-name>
+```
+
+> [!TIP]
+> For a full pre-flight checklist, refer to the **[Pre-Push Checklist](docs/guides/PRE_PUSH_CHECKLIST.md)** and **[Ready to Push Guide](docs/guides/READY_TO_PUSH.md)**.
 
 ---
 
@@ -423,6 +500,8 @@ Explore the following documents in [`docs/`](docs/) for in-depth technical refer
 
 - **[Backend Deployment Guide](docs/BACKEND_DEPLOYMENT_GUIDE.md)**: Production deployment instructions for Render, Supabase, and Vercel.
 - **[System Architecture](docs/ARCHITECTURE.md)**: Core architectural concepts, RBAC matrix, and security model.
+- **[Pre-Push Checklist](docs/guides/PRE_PUSH_CHECKLIST.md)**: Pre-flight checks before pushing to GitHub.
+- **[Ready to Push Guide](docs/guides/READY_TO_PUSH.md)**: Step-by-step push and repository setup instructions.
 - **[Supabase Migration Report](docs/SUPABASE_MIGRATION_EXECUTION_REPORT.md)**: Detailed report of Supabase migration and data validation.
 - **[Developer Setup Instructions](docs/guides/SETUP_INSTRUCTIONS.md)**: Step-by-step developer onboarding guide.
 - **[Quick Reference Guide](docs/guides/QUICK_REFERENCE.md)**: Common CLI commands, endpoints, and developer workflows.
@@ -433,4 +512,4 @@ Explore the following documents in [`docs/`](docs/) for in-depth technical refer
 
 ## 📄 License
 
-Distributed under the **MIT License**. Built for agricultural health research and sunflower farming communities.
+Distributed under the [MIT License](https://opensource.org/licenses/MIT). Built for agricultural health research and sunflower farming communities.

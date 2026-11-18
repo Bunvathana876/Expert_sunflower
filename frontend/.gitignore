@@ -1,2 +1,16 @@
+node_modules/
+dist/
+dist-ssr/
+.vite/
 .vercel
+.turbo/
+.eslintcache
+.env
+.env.*
 .env*.local
+!.env.example
+coverage/
+playwright-report/
+test-results/
+*.log
+.DS_Store
